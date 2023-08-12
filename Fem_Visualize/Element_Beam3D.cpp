@@ -107,63 +107,34 @@ void Element_Beam3D::Get_ke(MatrixXd& ke)
 			ke(i, j) = ke(j, i);
 		}
 	}
-	//Vector3d e1, e2, e3;
 
-	//e1(0) = dx / L;
-	//e1(1) = dy / L;
-	//e1(2) = dz / L;
+	double lx = (dx) / L;
+	double mx = (dy) / L;
+	double nx = (dz) / L;
 
-	//e2 = m_g.cross(e1);
-	//e2.normalize();
-	//e3 = e1.cross(e2);
-	//e3.normalize();
+	double d = sqrt(lx * lx + mx * mx);
 
-	//if (e1 == m_g)
-	//{
-	//	e2(1) = 1;
-	//	e3(2) = 1;
-	//}
+	double ly = -mx / d;
+	double my = lx / d;
+	double ny = 0.;
 
-	//2、坐标变换，得到整体坐标系的单元刚度矩阵
-	Vector3d local;
-	local << dx, dy, dz;
+	double lz = -lx * nx / d;
+	double mz = -mx * nx / d;
+	double nz = d;
 
-	Vector3d x0;
-	x0 << 1, 0, 0;
-	Vector3d y0;
-	y0 << 0, 1, 0;
-	Vector3d z0;
-	z0 << 0, 0, 1;
+	MatrixXd T(3, 3);
+	T << lx, mx, nx,
+		ly, my, ny,
+		lz, mz, nz;
 
-	double theta = acos(local.dot(x0) / local.norm());
-
-	Vector3d fai;
-	fai = x0.cross(local);
-	fai.normalize();
-
-	Matrix3d fai_mat;
-	fai_mat << 0, -fai(2), fai(1),
-		fai(2), 0, -fai(0),
-		-fai(1), fai(0), 0;
-
-	Matrix3d I;
-	I.setIdentity();
-
-	Matrix3d T1;
-	T1 = I + fai_mat * sin(theta) + fai_mat * fai_mat * (1 - cos(theta));
-
-	Matrix3d M;
-	M = T1.transpose();
-
-	MatrixXd R(12, 12);
-	R.setZero();
-
-	R.block<3, 3>(0, 0) = M;
-	R.block<3, 3>(3, 3) = M;
-	R.block<3, 3>(6, 6) = M;
-	R.block<3, 3>(9, 9) = M;
+	Matrix<double, 12, 12> R = Matrix<double, 12, 12>::Zero();
+	R.block<3, 3>(0, 0) = T;
+	R.block<3, 3>(3, 3) = T;
+	R.block<3, 3>(6, 6) = T;
+	R.block<3, 3>(9, 9) = T;
 
 	m_T = R;
+	m_Lamda = T;
 	ke = R.transpose() * ke * R;
 }
 

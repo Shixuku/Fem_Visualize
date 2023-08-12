@@ -9,6 +9,7 @@ public:
 	std::vector<int> m_idNode;//单元的节点号
 	int m_idSection;          //截面号
 	MatrixXd m_T;             // 转换矩阵
+	MatrixXd m_Lamda;         // 变换矩阵
 
 	virtual int Get_DOF_Node() = 0;//每个节点的自由度个数
 	void Set_NodeDOF();            //设置该单元的节点的自由度个数

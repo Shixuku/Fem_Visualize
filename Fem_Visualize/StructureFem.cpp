@@ -343,34 +343,53 @@ void StructureFem::Equivalent_Force()
 		double dy = startNode->m_y - endNode->m_y;
 		double dz = startNode->m_z - endNode->m_z;
 		double L = std::sqrt(dx * dx + dy * dy + dz * dz);
-		double sinAlpha = - (dy / L);
-		double cosAlpha = std::sqrt(1 - sinAlpha * sinAlpha);
+
 		double q = -9.8 * 7800 * pSectionBeam->m_Area;
+
+		VectorXd qVector(3);
+		qVector.setZero();
+		qVector(1) = q;
+
+		qVector = pElement->m_Lamda * qVector;
+		cout << "qVector" << "\n";
+		cout << qVector << "\n";
+
 
 		VectorXd x1(6);
 		VectorXd x2(6);
 		x1.setZero();
 		x2.setZero();
-		x1(1) = 1.0 / 2.0 * q * L * cosAlpha;
-		x1(5) = 1.0 / 12.0 * q * L * L * cosAlpha;
+
+		x1(1) = 1.0 / 2.0 * qVector(1) * L;
+		x1(5) = 1.0 / 12.0 * qVector(1) * L * L;
 		x2(1) = x1(1);
 		x2(5) = -x1(5);
-		if (sinAlpha != 0)
-		{
-			x1(0) = 0.5 * q * L * sinAlpha;
-			x2(0) = 0.5 * q * L * sinAlpha;
-		}
+
+		x1(0) = 0.5 * qVector(0) * L;
+		x2(0) = 0.5 * qVector(0) * L;
+
+		x1(2) = 1.0 / 2.0 * qVector(2) * L;
+		x1(4) = -1.0 / 12.0 * qVector(2) * L * L;
+		x2(2) = x1(2);
+		x2(4) = -x1(4);
 
 		VectorXd equialentForce(12);
 		cout << "element index" << pElement->m_id << endl;
 		equialentForce << x1, x2;  // 组合等效外力矩阵
+
+		cout << equialentForce << endl;
 		cout << "\n";
 		equialentForce = pElement->m_T.transpose() * equialentForce;
-		if (L > 6)
-		{
-			cout << equialentForce << endl;
-		}
-		
+
+		//double temp = equialentForce(4);
+		//equialentForce(4) = equialentForce(3);
+		//equialentForce(3) = temp;
+
+		//temp = equialentForce(10);
+		//equialentForce(10) = equialentForce(9);
+		//equialentForce(9) = temp;
+
+		cout << equialentForce << endl;
 
 		for (int i = 0; i < 6; i++)
 		{
