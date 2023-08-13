@@ -16,7 +16,6 @@ void ForceNode::Assemble_F1_F2(VectorXd& F1, VectorXd& F2)
 	if (it < nFixed )
 	{
 		F1[it] += m_value;
-		cout << "Force id: " << m_id << "  " << "value: " << m_value << "  dof:" << m_ixyz << "  ID:" << m_idNode << endl;
 	}
 	else
 	{

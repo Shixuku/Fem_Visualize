@@ -45,18 +45,11 @@ void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::li
 	MatrixXd ke;
 	Get_ke(ke);
 
-	//for (int i = 0 ; i < 12; i++)
-	//{
-	//	std::cout << ke.block(i, 0, i, 11) << std::endl;
-	//}
-	//std::cout << "#############################" << std::endl;
 
 	int nFixed = Get_Structure()->m_nFixed;
 	int nNode = m_idNode.size();
 	int nDOF_Node = Get_DOF_Node();
 	int nDOF_Element = nNode * nDOF_Node;
-	
-	/*std::cout << ke << "\n" << "\n";*/
 
 
 	std::vector<int> EI;//单元的全部节点的整体自由度编号
