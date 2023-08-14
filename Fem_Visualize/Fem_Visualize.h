@@ -10,6 +10,7 @@
 #include <vtkScalarBarActor.h>
 #include "StructureFem.h"
 #include "ui_Fem_Visualize.h"
+#include "ReactionForceWindow.h"
 
 class Fem_Visualize : public QWidget
 {
@@ -30,13 +31,13 @@ public:
 	void CreateRecSection(double length, double width, double stratPoint[3], double endPoint[3]);
 
 	/* 显示隐藏截面*/
-	void isShowSection();
+	void onIsShowSection();
 
 	/* 显示位移*/
-	void ShowDisplacement();
+	void onShowDisplacement();
 
 	/* 显示轴力 */
-	void ShowAxialForces();
+	void onShowAxialForces();
 
 	/* 获取自由度处的位移值 */
 	double GetDofValue(int dofIndex);
@@ -45,6 +46,11 @@ public:
 	double GetDistance(double x1, double y1, double z1, double x2, double y2, double z2);
 
 	bool showFlag = 0;
+
+private slots:
+
+	/* 根据选择的不同Radio显示对应的支座反力FXYZ */
+	void onSendForceType();
 
 private:
     Ui::Fem_VisualizeClass ui;
@@ -60,4 +66,16 @@ private:
 	vtkNew<vtkAppendPolyData> appendFilter;
 
 	StructureFem* m_structure = new StructureFem();
+	ReactionForceWindow* reactionForce = new ReactionForceWindow();
+
+	enum ForceType {
+		FX,
+		FY,
+		FZ,
+		FXYZ,
+		MX,
+		MY,
+		MZ,
+		MXYZ,
+	};
 };

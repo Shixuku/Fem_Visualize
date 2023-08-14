@@ -91,6 +91,7 @@
   <ItemGroup>
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
+    <ClCompile Include="ReactionForceWindow.cpp" />
     <ClCompile Include="Section_Base.cpp" />
     <ClCompile Include="Section_Beam3D.cpp" />
     <ClCompile Include="Section_Truss.cpp" />
@@ -108,6 +109,7 @@
     <ClCompile Include="Fem_Visualize.cpp" />
     <ClCompile Include="ForceNode.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="ReactionForceWindow.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h" />
@@ -118,6 +120,7 @@
     <ClInclude Include="ForceNode.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="NodeFem.h" />
+    <QtMoc Include="ReactionForceWindow.h" />
     <ClInclude Include="Section_Base.h" />
     <ClInclude Include="Section_Beam3D.h" />
     <ClInclude Include="Section_Truss.h" />

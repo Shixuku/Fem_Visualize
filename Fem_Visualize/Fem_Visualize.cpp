@@ -5,6 +5,7 @@
 #include <QVTKOpenGLNativeWidget.h>
 #include <QPushButton>
 #include <QAction>
+#include <QDebug>
 #include <vtkLookupTable.h>
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>
@@ -34,9 +35,11 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	m_structure = m_structure;
 	SetRenderWindow();
 
-	connect(ui.pushButton_2, &QPushButton::clicked, this, &Fem_Visualize::isShowSection);
-	connect(ui.pushButton, &QPushButton::clicked, this, &Fem_Visualize::ShowDisplacement);
-	connect(ui.pushButton_3, &QPushButton::clicked, this, &Fem_Visualize::ShowAxialForces);
+	connect(ui.pushButton_2, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
+	connect(ui.pushButton, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement);
+	connect(ui.pushButton_3, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
+	connect(reactionForce, &ReactionForceWindow::signalSendForceType, 
+		this, &Fem_Visualize::onSendForceType);
 	
 	//VisualizeWindow* window = new VisualizeWindow(ss);
 	//ShowDisplacement();
@@ -183,7 +186,8 @@ void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint
 	vtkMath::Normalize(targetVector);
 
 	// 计算旋转轴和旋转角度
-	// 两个向量的点积等于一个向量在另一个向量方向上的投影长度与另一个向量本身长度的乘积，反映了一个向量在另一个向量方向上的分量大小。
+	// 两个向量的点积等于一个向量在另一个向量方向上的投影长度与另一个向量本身长度的乘积，
+	// 反映了一个向量在另一个向量方向上的分量大小。
 	// 除以两个向量的长度即可得到两个向量的夹角
 	double rotationAxis[3];
 	vtkMath::Cross(sourceVector, targetVector, rotationAxis);
@@ -278,7 +282,7 @@ void Fem_Visualize::CreateRecSection(double length, double width, double startPo
 	appendFilter->AddInputConnection(extrusion->GetOutputPort());
 }
 
-void Fem_Visualize::isShowSection()
+void Fem_Visualize::onIsShowSection()
 {
 	if (showFlag == 0)
 	{
@@ -299,8 +303,10 @@ void Fem_Visualize::isShowSection()
 	}
 }
 
-void Fem_Visualize::ShowDisplacement()
+void Fem_Visualize::onShowDisplacement()
 {
+	reactionForce->show();
+
 	vtkNew<vtkPoints> newPoints;
 	newPoints->DeepCopy(points);
 	vtkNew<vtkDoubleArray> dis;
@@ -378,7 +384,7 @@ void Fem_Visualize::ShowDisplacement()
 	ui.widget->GetRenderWindow()->Render();
 }
 
-void Fem_Visualize::ShowAxialForces()
+void Fem_Visualize::onShowAxialForces()
 {
 	renderer->RemoveAllViewProps();
 	vtkNew<vtkDoubleArray> forcesArray;
@@ -471,4 +477,37 @@ double Fem_Visualize::GetDistance(double x1, double y1, double z1, double x2, do
 
 	return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
-	
+
+
+void Fem_Visualize::onSendForceType()
+{
+	switch (reactionForce->forceType)
+	{
+	case FX:
+		qDebug() << "X";
+		break;
+	case FY:
+		// Call function for FY
+		break;
+	case FZ:
+		// Call function for FZ
+		break;
+	case FXYZ:
+		// Call function for FXYZ
+		break;
+	case MX:
+		// Call function for MX
+		break;
+	case MY:
+		// Call function for MY
+		break;
+	case MZ:
+		// Call function for MZ
+		break;
+	case MXYZ:
+		// Call function for MXYZ
+		break;
+	default:
+		break;
+	}
+}

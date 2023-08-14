@@ -16,6 +16,7 @@
 #include <vtkLinearExtrusionFilter.h>
 #include <vtkLine.h>
 #include <vtkVertexGlyphFilter.h>
+#include "ReactionForceWindow.h"
 #include <map>
 
 #include "NodeFem.h"
@@ -56,7 +57,8 @@ private:
 	vtkNew<vtkPoints> points;
 	vtkNew<vtkAppendPolyData> appendFilter;
 
-	
+	ReactionForceWindow* reactionForce = new ReactionForceWindow();
 	StructureFem m_structure;
+	
 };
 

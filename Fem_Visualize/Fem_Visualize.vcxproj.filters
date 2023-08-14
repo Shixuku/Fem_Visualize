@@ -82,6 +82,9 @@
     <ClCompile Include="VisualizeWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ReactionForceWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -114,14 +117,24 @@
     <ClInclude Include="Section_Beam3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Section_Truss.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StructureFem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VisualizeWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Section_Truss.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ReactionForceWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="ReactionForceWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>
