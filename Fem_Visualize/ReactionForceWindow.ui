@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReactionForceWindowClass</class>
+ <widget class="QDialog" name="ReactionForceWindowClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>518</width>
+    <height>387</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ReactionForceWindow</string>
+  </property>
+  <widget class="QRadioButton" name="radioButtonFX">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>60</y>
+     <width>61</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>FX</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonFY">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>60</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>FY</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonFZ">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>60</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>FZ</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonFXYZ">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>60</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>FXYZ</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonMX">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>100</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MY</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonMY">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>100</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MXYZ</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonMZ">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>100</y>
+     <width>61</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MX</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonMXYZ">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>100</y>
+     <width>71</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MZ</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonSure">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>320</y>
+     <width>81</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>适用</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonClose">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>320</y>
+     <width>81</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>关闭</string>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
