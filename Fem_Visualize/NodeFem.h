@@ -6,6 +6,9 @@ public:
 	double m_x, m_y, m_z;
 	std::vector<int> m_DOF;   //各自由度的编号
 
+	std::vector<double> m_ReactionForce;  // 节点处的支座反力
+	bool boundaryFlag = false;
+
 	NodeFem();
 	~NodeFem();
 };

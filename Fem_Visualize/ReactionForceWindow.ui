@@ -65,7 +65,7 @@
     <string>FXYZ</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButtonMX">
+  <widget class="QRadioButton" name="radioButtonMY">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -78,7 +78,7 @@
     <string>MY</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButtonMY">
+  <widget class="QRadioButton" name="radioButtonMXYZ">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -91,7 +91,7 @@
     <string>MXYZ</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButtonMZ">
+  <widget class="QRadioButton" name="radioButtonMX">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -104,7 +104,7 @@
     <string>MX</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButtonMXYZ">
+  <widget class="QRadioButton" name="radioButtonMZ">
    <property name="geometry">
     <rect>
      <x>240</x>

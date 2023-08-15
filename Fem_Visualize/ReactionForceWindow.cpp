@@ -54,5 +54,4 @@ void ReactionForceWindow::onSendTypeSignal()
 	}
 
 	emit signalSendForceType();
-	this->close();
 }

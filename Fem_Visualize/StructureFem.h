@@ -10,6 +10,7 @@ class Section_Base;
 
 #include <map>
 #include <list>
+#include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "Dependant.h"
@@ -29,6 +30,8 @@ public:
 	std::map<int, Material*> m_Material;
 	std::map<int, Section_Base*> m_Section;
 	std::map<int, Dependant*> m_Dependant;
+
+	std::vector<NodeFem*> m_ReationForce;
 
 	VectorXd m_x1, m_x2;
 

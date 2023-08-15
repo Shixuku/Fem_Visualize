@@ -213,6 +213,8 @@ void StructureFem::Input_data(const char* filename)
 		fin >> pBoundary->m_ixyz >> pBoundary->m_value;
 		pBoundary->Disp();
 		m_Boundary.insert({ pBoundary->m_id ,pBoundary });
+		NodeFem* pNode = Find_Node(pBoundary->m_idNode);
+		pNode->boundaryFlag = true;
 	}
 	std::cout << "\n";
 
@@ -374,22 +376,9 @@ void StructureFem::Equivalent_Force()
 		x2(4) = -x1(4);
 
 		VectorXd equialentForce(12);
-		cout << "element index" << pElement->m_id << endl;
 		equialentForce << x1, x2;  // 组合等效外力矩阵
 
-		cout << equialentForce << endl;
-		cout << "\n";
 		equialentForce = pElement->m_T.transpose() * equialentForce;
-
-		//double temp = equialentForce(4);
-		//equialentForce(4) = equialentForce(3);
-		//equialentForce(3) = temp;
-
-		//temp = equialentForce(10);
-		//equialentForce(10) = equialentForce(9);
-		//equialentForce(9) = temp;
-
-		cout << equialentForce << endl;
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -466,6 +455,23 @@ void StructureFem::Analyse()
 	VectorXd x2 = solver.solve(F2 - K21 * x1);
 	VectorXd R1 = K11 * x1 + K21.transpose() * x2 - F1;
 	
+	// 将支座反力赋值给对应的点约束处
+	for (auto &a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		NodeFem* NodeFem = Find_Node(pBoundary->m_idNode);
+		NodeFem->m_ReactionForce[pBoundary->m_ixyz] = R1(pBoundary->m_id - 1);
+	}
+
+	for (auto& a : m_Nodes)
+	{
+		if (a.second->boundaryFlag)
+		{
+			m_ReationForce.push_back(a.second);
+			std::cout << a.second->m_id << std::endl;
+		}
+	}
+
 	m_x1 = x1;
 	m_x2 = x2;
 

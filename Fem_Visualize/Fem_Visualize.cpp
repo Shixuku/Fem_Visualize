@@ -11,9 +11,12 @@
 #include <vtkRendererCollection.h>
 #include <vtkTextProperty.h>
 #include <vtkRenderer.h>
+#include "Boundary.h"
 #include "VisualizeWindow.h"
 #include "Element_Beam3D.h"
 #include "Section_Beam3D.h"
+
+using namespace std;
 
 Fem_Visualize::Fem_Visualize(QWidget *parent)
     : QWidget(parent)
@@ -30,7 +33,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_data("../data6.txt");
+	m_structure->Input_data("../data5.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();
@@ -484,30 +487,68 @@ void Fem_Visualize::onSendForceType()
 	switch (reactionForce->forceType)
 	{
 	case FX:
-		qDebug() << "X";
+		for (auto &a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "FX: " << a->m_ReactionForce[0] << std::endl;
+			cout << "\n\n";
+		}
 		break;
 	case FY:
-		// Call function for FY
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "FY: " << a->m_ReactionForce[1] << std::endl;
+		}
 		break;
 	case FZ:
-		// Call function for FZ
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "FZ: " << a->m_ReactionForce[2] << std::endl;
+		}
 		break;
 	case FXYZ:
-		// Call function for FXYZ
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "FX: " << a->m_ReactionForce[0] << std::endl;
+			std::cout << "FY: " << a->m_ReactionForce[1] << std::endl;
+			std::cout << "FZ: " << a->m_ReactionForce[2] << std::endl;
+		}
 		break;
 	case MX:
-		// Call function for MX
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "MX: " << a->m_ReactionForce[3] << std::endl;
+		}
 		break;
 	case MY:
-		// Call function for MY
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "MY: " << a->m_ReactionForce[4] << std::endl;
+		}
 		break;
 	case MZ:
-		// Call function for MZ
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "MZ: " << a->m_ReactionForce[5] << std::endl;
+		}
 		break;
 	case MXYZ:
-		// Call function for MXYZ
+		for (auto& a : m_structure->m_ReationForce)
+		{
+			std::cout << "Node: " << a->m_id << std::endl;
+			std::cout << "MX: " << a->m_ReactionForce[3] << std::endl;
+			std::cout << "MY: " << a->m_ReactionForce[4] << std::endl;
+			std::cout << "MZ: " << a->m_ReactionForce[5] << std::endl;
+		}
 		break;
 	default:
 		break;
 	}
+	std::cout << "\n\n";
 }
