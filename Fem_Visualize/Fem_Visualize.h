@@ -8,6 +8,7 @@
 #include <vtkRenderWindow.h>
 #include <vtkAppendPolyData.h>
 #include <vtkScalarBarActor.h>
+#include <vtkStringArray.h>
 #include "StructureFem.h"
 #include "ui_Fem_Visualize.h"
 #include "ReactionForceWindow.h"
@@ -45,6 +46,9 @@ public:
 	/* 计算两点之间的距离 */
 	double GetDistance(double x1, double y1, double z1, double x2, double y2, double z2);
 
+	/* 创建坐标处的Label */
+	void GeneraterPointLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor);
+
 	bool showFlag = 0;
 
 private slots:
@@ -58,12 +62,15 @@ private:
 	vtkNew<vtkRenderer> renderer;
 	vtkNew<vtkActor> lineActor;
 	vtkNew<vtkActor> sectionActor;
+	vtkSmartPointer<vtkActor2D> pointLabelActor = vtkSmartPointer<vtkActor2D>::New();
+	vtkSmartPointer<vtkActor2D> elementLableActor = vtkSmartPointer<vtkActor2D>::New();
 
 	vtkNew<vtkScalarBarActor> scalarBar;
 	// An interactor
 	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
 	vtkNew<vtkPoints> points;
 	vtkNew<vtkAppendPolyData> appendFilter;
+
 
 	StructureFem* m_structure = new StructureFem();
 	ReactionForceWindow* reactionForce = new ReactionForceWindow();

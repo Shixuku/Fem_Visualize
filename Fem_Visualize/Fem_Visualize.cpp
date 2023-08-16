@@ -10,6 +10,12 @@
 #include <vtkRenderWindow.h>
 #include <vtkRendererCollection.h>
 #include <vtkTextProperty.h>
+#include <vtkPointData.h>
+#include <vtkLabelHierarchy.h>
+#include <vtkPointSetToLabelHierarchy.h>
+#include <vtkLabelPlacementMapper.h>
+#include <vtkFreeTypeLabelRenderStrategy.h>
+#include <vtkPolyData.h>
 #include <vtkRenderer.h>
 #include "Boundary.h"
 #include "VisualizeWindow.h"
@@ -56,13 +62,17 @@ void Fem_Visualize::SetRenderWindow()
 {
 	InitNode(m_structure->m_Nodes);
 	InitElement();
+
+	ui.widget->GetRenderWindow()->AddRenderer(renderer);
+	ui.widget->GetRenderWindow()->Render();
 }
 
 void Fem_Visualize::InitNode(std::map<int, NodeFem*> nodes)
 {
+	vtkNew<vtkPoints> pts;
+	vtkNew<vtkStringArray> Label;
 	double point[3];
 
-	std::cout << "window" << std::endl;
 	for (auto node : nodes)
 	{
 		NodeFem* fem = node.second;
@@ -70,7 +80,12 @@ void Fem_Visualize::InitNode(std::map<int, NodeFem*> nodes)
 		point[1] = fem->m_y;
 		point[2] = fem->m_z;
 		points->InsertPoint(fem->m_id - 1, point);
+		point[1] += 0.1; 
+		pts->InsertNextPoint(point);
+		Label->InsertNextValue(std::to_string(fem->m_id));
 	}
+	Label->SetName("Labels");
+
 	vtkNew<vtkPolyData> polydata;
 	polydata->SetPoints(points);
 
@@ -86,14 +101,17 @@ void Fem_Visualize::InitNode(std::map<int, NodeFem*> nodes)
 	actor->GetProperty()->SetPointSize(4);
 	actor->GetProperty()->SetColor(0, 0, 0);
 
+	//GeneraterPointLable(pts, Label, pointLabelActor);
+
 	renderer->AddActor(actor);
-	ui.widget->GetRenderWindow()->AddRenderer(renderer);
-	ui.widget->GetRenderWindow()->Render();
+	//renderer->AddActor(pointLabelActor);
 }
 
 void Fem_Visualize::InitElement()
 {
 	vtkNew <vtkCellArray> cellArray;
+	vtkNew<vtkPoints> pts;
+	vtkNew<vtkStringArray> label;
 	for (auto element : m_structure->m_Element)
 	{
 		vtkNew<vtkLine> line;
@@ -103,6 +121,7 @@ void Fem_Visualize::InitElement()
 	}
 	double startPoint[3];
 	double endPoint[3];
+	double middlePoint[3];
 	int startNodeIndex;
 	int endNodeIndex;
 
@@ -122,8 +141,19 @@ void Fem_Visualize::InitElement()
 		endPoint[1] = endNode->m_y;
 		endPoint[2] = endNode->m_z;
 
+		middlePoint[0] = (startPoint[0] + endPoint[0]) / 2;
+		middlePoint[1] = (startPoint[1] + endPoint[1]) / 2 + 0.1;
+		middlePoint[2] = (startPoint[2] + endPoint[2]) / 2;
+
+		pts->InsertNextPoint(middlePoint);
+		label->InsertNextValue(std::to_string(element.second->m_id));
+
 		CreateRecSection(0.2, 0.1, startPoint, endPoint);
 	}
+
+	label->SetName("Labels");
+	GeneraterPointLable(pts, label, elementLableActor);
+	cout << "array sizes:" << label->GetSize() << std::endl;
 
 	vtkNew<vtkPolyData> polyData;
 	polyData->SetPoints(points);
@@ -154,25 +184,17 @@ void Fem_Visualize::InitElement()
 	scalarBar->SetNumberOfLabels(10);
 	scalarBar->SetTextPositionToPrecedeScalarBar();
 
-	// Get the property for the scalar bar labels
-	vtkTextProperty* labelTextProperty = scalarBar->GetLabelTextProperty();
-	labelTextProperty->SetFontSize(5); // Set the font size for the scalar bar labels
-
 	lineActor->SetMapper(lineMapper);
 	lineActor->GetProperty()->SetLineWidth(3);
 	lineActor->GetProperty()->SetColor(0, 0, 1);
 
 	sectionActor->SetMapper(mapper);
-	//actor->GetProperty()->EdgeVisibilityOn();
 
 	sectionActor->GetProperty()->SetLineWidth(2);
 
-	//renderer->RemoveAllViewProps();
-
 	renderer->AddActor(sectionActor);
-	//renderer->AddActor(lineActor);
 	renderer->AddActor(scalarBar);
-	ui.widget->GetRenderWindow()->Render();
+	renderer->AddActor(elementLableActor);
 }
 
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)
@@ -481,6 +503,35 @@ double Fem_Visualize::GetDistance(double x1, double y1, double z1, double x2, do
 	return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+
+void Fem_Visualize::GeneraterPointLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor)
+{
+	vtkNew<vtkLabelHierarchy> polyData;
+	polyData->SetPoints(pts);
+	polyData->GetPointData()->AddArray(label);
+
+	vtkNew<vtkTextProperty> TextProperty;
+	TextProperty->SetFontSize(15);
+	TextProperty->SetColor(0, 0, 0);
+	TextProperty->SetBold(true);
+	TextProperty->SetFontFamilyToArial();
+
+	vtkNew<vtkPointSetToLabelHierarchy> Hie;
+	Hie->SetInputData(polyData);
+	Hie->SetMaximumDepth(20);
+	Hie->SetLabelArrayName("Labels");
+	Hie->SetTextProperty(TextProperty);
+
+	vtkNew<vtkLabelPlacementMapper> MapperLabel;
+	MapperLabel->SetInputConnection(Hie->GetOutputPort());
+	vtkNew<vtkFreeTypeLabelRenderStrategy> strategy_tmp;
+	MapperLabel->SetRenderStrategy(strategy_tmp);
+	MapperLabel->SetShapeToNone();
+	MapperLabel->UseDepthBufferOn();
+	MapperLabel->SetStyleToOutline();
+
+	actor->SetMapper(MapperLabel);
+}
 
 void Fem_Visualize::onSendForceType()
 {
