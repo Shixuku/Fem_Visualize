@@ -12,6 +12,7 @@
 #include "StructureFem.h"
 #include "ui_Fem_Visualize.h"
 #include "ReactionForceWindow.h"
+#include "DisplacementWindow.h"
 
 class Fem_Visualize : public QWidget
 {
@@ -40,6 +41,9 @@ public:
 	/* 显示轴力 */
 	void onShowAxialForces();
 
+	/* 显示支座反力 */
+	void onShowReactionForces();
+
 	/* 获取自由度处的位移值 */
 	double GetDofValue(int dofIndex);
 
@@ -47,7 +51,9 @@ public:
 	double GetDistance(double x1, double y1, double z1, double x2, double y2, double z2);
 
 	/* 创建坐标处的Label */
-	void GeneraterPointLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor);
+	void GeneraterLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor);
+
+	/* 获取单元轴力*/
 
 	bool showFlag = 0;
 
@@ -55,6 +61,9 @@ private slots:
 
 	/* 根据选择的不同Radio显示对应的支座反力FXYZ */
 	void onSendForceType();
+
+	/* 根据选择的不同Radio显示对应的位移*/
+	void onSendDispType();
 
 private:
     Ui::Fem_VisualizeClass ui;
@@ -74,6 +83,7 @@ private:
 
 	StructureFem* m_structure = new StructureFem();
 	ReactionForceWindow* reactionForce = new ReactionForceWindow();
+	DisplacementWindow* displacement = new DisplacementWindow();
 
 	enum ForceType {
 		FX,
@@ -84,5 +94,15 @@ private:
 		MY,
 		MZ,
 		MXYZ,
+	};
+
+	enum DispType {
+		DX,
+		DY,
+		DZ,
+		DXY,
+		DYZ,
+		DXZ,
+		DXYZ,
 	};
 };

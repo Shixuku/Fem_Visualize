@@ -89,6 +89,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
     <ClCompile Include="ReactionForceWindow.cpp" />
@@ -98,6 +99,7 @@
     <ClCompile Include="StructureFem.cpp" />
     <ClCompile Include="VisualizeWindow.cpp" />
     <QtRcc Include="Fem_Visualize.qrc" />
+    <QtUic Include="DisplacementWindow.ui" />
     <QtUic Include="Fem_Visualize.ui" />
     <QtMoc Include="Fem_Visualize.h" />
     <ClCompile Include="Boundary.cpp" />
@@ -114,6 +116,7 @@
   <ItemGroup>
     <ClInclude Include="Boundary.h" />
     <ClInclude Include="Dependant.h" />
+    <QtMoc Include="DisplacementWindow.h" />
     <ClInclude Include="Element_Base.h" />
     <ClInclude Include="Element_Beam3D.h" />
     <ClInclude Include="EntityBase.h" />

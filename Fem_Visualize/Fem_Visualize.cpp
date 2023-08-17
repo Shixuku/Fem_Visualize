@@ -44,11 +44,16 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	m_structure = m_structure;
 	SetRenderWindow();
 
-	connect(ui.pushButton_2, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
-	connect(ui.pushButton, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement);
-	connect(ui.pushButton_3, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
+	connect(ui.pushButtonShow, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
+	connect(ui.pushButtonDis, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement);
+	connect(ui.pushButtonForce, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
+	connect(ui.pushButtonRea, &QPushButton::clicked, this, &Fem_Visualize::onShowReactionForces);
+
 	connect(reactionForce, &ReactionForceWindow::signalSendForceType, 
 		this, &Fem_Visualize::onSendForceType);
+
+	connect(displacement, &DisplacementWindow::signalSendForceType,
+		this, &Fem_Visualize::onSendDispType);
 	
 	//VisualizeWindow* window = new VisualizeWindow(ss);
 	//ShowDisplacement();
@@ -152,7 +157,7 @@ void Fem_Visualize::InitElement()
 	}
 
 	label->SetName("Labels");
-	GeneraterPointLable(pts, label, elementLableActor);
+	GeneraterLable(pts, label, elementLableActor);
 	cout << "array sizes:" << label->GetSize() << std::endl;
 
 	vtkNew<vtkPolyData> polyData;
@@ -330,7 +335,7 @@ void Fem_Visualize::onIsShowSection()
 
 void Fem_Visualize::onShowDisplacement()
 {
-	reactionForce->show();
+	displacement->show();
 
 	vtkNew<vtkPoints> newPoints;
 	newPoints->DeepCopy(points);
@@ -430,9 +435,17 @@ void Fem_Visualize::onShowAxialForces()
 		startDofIndex = startNode->m_DOF[0];
 		endDoftIndex = endNode->m_DOF[0];
 
-		double deltaL = GetDofValue(startDofIndex) - GetDofValue(endDoftIndex);
+		double deltaX = GetDofValue(startNode->m_DOF[0]) - GetDofValue(endNode->m_DOF[0]);
+		double deltaY = GetDofValue(startNode->m_DOF[1]) - GetDofValue(endNode->m_DOF[1]);
+		double deltaZ = GetDofValue(startNode->m_DOF[2]) - GetDofValue(endNode->m_DOF[2]);
 
-		double L = GetDistance(startNode->m_x, startNode->m_y, startNode->m_z, endNode->m_x, endNode->m_y, endNode->m_z);
+		double deltaL = std::sqrt(deltaX * deltaX + deltaY * deltaY * deltaZ * deltaZ);
+
+		std::cout << "element:" << element.second->m_id << std::endl;
+
+
+		double L = GetDistance(startNode->m_x, startNode->m_y, startNode->m_z, 
+						       endNode->m_x, endNode->m_y, endNode->m_z);
 
 		Section_Base* pSection = m_structure->Find_Section(element.second->m_idSection);
 		Section_Beam3D* pSectionBeam = dynamic_cast<Section_Beam3D*>(pSection);
@@ -440,7 +453,7 @@ void Fem_Visualize::onShowAxialForces()
 		// F = ¡÷L / L * E * A;
 		double axialForce = deltaL / L * pSectionBeam->Get_E() * pSectionBeam->m_Area;
 
-
+		std::cout << "axialForce:" << axialForce << std::endl;
 		forcesArray->InsertNextValue(axialForce);
 
 		if (axialForce > maxForce) maxForce = axialForce;
@@ -476,6 +489,11 @@ void Fem_Visualize::onShowAxialForces()
 	ui.widget->GetRenderWindow()->Render();
 }
 
+void Fem_Visualize::onShowReactionForces()
+{
+	reactionForce->show();
+}
+
 double Fem_Visualize::GetDofValue(int dofIndex)
 {
 	double displacement;
@@ -504,7 +522,7 @@ double Fem_Visualize::GetDistance(double x1, double y1, double z1, double x2, do
 }
 
 
-void Fem_Visualize::GeneraterPointLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor)
+void Fem_Visualize::GeneraterLable(vtkPoints* pts, vtkStringArray* label, vtkSmartPointer<vtkActor2D> actor)
 {
 	vtkNew<vtkLabelHierarchy> polyData;
 	polyData->SetPoints(pts);
@@ -542,7 +560,6 @@ void Fem_Visualize::onSendForceType()
 		{
 			std::cout << "Node: " << a->m_id << std::endl;
 			std::cout << "FX: " << a->m_ReactionForce[0] << std::endl;
-			cout << "\n\n";
 		}
 		break;
 	case FY:
@@ -596,6 +613,70 @@ void Fem_Visualize::onSendForceType()
 			std::cout << "MX: " << a->m_ReactionForce[3] << std::endl;
 			std::cout << "MY: " << a->m_ReactionForce[4] << std::endl;
 			std::cout << "MZ: " << a->m_ReactionForce[5] << std::endl;
+		}
+		break;
+	default:
+		break;
+	}
+	std::cout << "\n\n";
+}
+
+void Fem_Visualize::onSendDispType()
+{
+	switch (displacement->dispType)
+	{
+	case DX:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DX: " << GetDofValue(a.second->m_DOF[0]) << std::endl;
+		}
+		break;
+	case DY:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DY: " << GetDofValue(a.second->m_DOF[1]) << std::endl;
+		}
+		break;
+	case DZ:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DZ: " << GetDofValue(a.second->m_DOF[2]) << std::endl;
+		}
+		break;
+	case DXY:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DX: " << GetDofValue(a.second->m_DOF[0]) << std::endl;
+			std::cout << "DY: " << GetDofValue(a.second->m_DOF[1]) << std::endl;
+		}
+		break;
+	case DYZ:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DY: " << GetDofValue(a.second->m_DOF[1]) << std::endl;
+			std::cout << "DZ: " << GetDofValue(a.second->m_DOF[2]) << std::endl;
+		}
+		break;
+	case DXZ:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DX: " << GetDofValue(a.second->m_DOF[0]) << std::endl;
+			std::cout << "DZ: " << GetDofValue(a.second->m_DOF[2]) << std::endl;
+		}
+		break;
+	case DXYZ:
+		for (auto& a : m_structure->m_Nodes)
+		{
+			std::cout << "Node: " << a.second->m_id << std::endl;
+			std::cout << "DX: " << GetDofValue(a.second->m_DOF[0]) << std::endl;
+			std::cout << "DY: " << GetDofValue(a.second->m_DOF[1]) << std::endl;
+			std::cout << "DZ: " << GetDofValue(a.second->m_DOF[2]) << std::endl;
 		}
 		break;
 	default:

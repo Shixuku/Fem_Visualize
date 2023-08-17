@@ -85,6 +85,12 @@
     <ClCompile Include="ReactionForceWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< Updated upstream
+=======
+    <ClCompile Include="DisplacementWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -131,10 +137,22 @@
     <QtUic Include="ReactionForceWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+<<<<<<< Updated upstream
+=======
+    <QtUic Include="DisplacementWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReactionForceWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+<<<<<<< Updated upstream
+=======
+    <QtMoc Include="DisplacementWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+>>>>>>> Stashed changes
   </ItemGroup>
 </Project>
