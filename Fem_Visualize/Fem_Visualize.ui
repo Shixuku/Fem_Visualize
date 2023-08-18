@@ -16,7 +16,7 @@
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4">
    <item>
     <widget class="QWidget" name="widget_2" native="true">
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pushButtonDis">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -29,7 +29,7 @@
        <string>变形</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="pushButtonShow">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -42,7 +42,7 @@
        <string>消隐</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_3">
+     <widget class="QPushButton" name="pushButtonForce">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -53,6 +53,19 @@
       </property>
       <property name="text">
        <string>轴力</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonRea">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>190</y>
+        <width>161</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>反力</string>
       </property>
      </widget>
     </widget>

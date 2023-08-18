@@ -85,6 +85,9 @@
     <ClCompile Include="ReactionForceWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DisplacementWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -131,9 +134,15 @@
     <QtUic Include="ReactionForceWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="DisplacementWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReactionForceWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="DisplacementWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
