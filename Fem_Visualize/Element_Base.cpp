@@ -84,6 +84,19 @@ void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::li
 	}
 }
 
+void Element_Base::calculate_volume()
+{
+	StructureFem* pSt = Get_Structure();
+	NodeFem* pNode0 = pSt->Find_Node(m_idNode[0]);
+	NodeFem* pNode1 = pSt->Find_Node(m_idNode[1]);
+
+	double dx = pNode1->m_x - pNode0->m_x;
+	double dy = pNode1->m_y - pNode0->m_y;
+	double dz = pNode1->m_z - pNode0->m_z;
+
+	m_volume = sqrt(dx * dx + dy * dy + dz * dz);
+}
+
 void Element_Base::calculate_Ke()
 {
 	m_Ke = m_T.transpose() * m_ke * m_T;

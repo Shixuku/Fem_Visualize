@@ -31,16 +31,23 @@ public:
 
 	virtual void Input_Data(std::ifstream& fin);
 
+	// 计算整体刚度矩阵 Ke = T.t * ke * T
 	void calculate_Ke();
 
+	// 计算整体质量矩阵 Me = T.t * me * T
 	void calculate_Me();
 
 	void Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::list<Tri>& K22);
 
+	// 计算单元刚度矩阵
 	virtual void calculate_ke() = 0;
 
+	// 计算单元质量矩阵
 	virtual void calculate_me() = 0;
 
+	// 计算转换矩阵 从整体到单元
 	virtual void calculate_T() = 0;
+
+	virtual void calculate_volume();
 };
 
