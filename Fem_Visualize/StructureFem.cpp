@@ -310,8 +310,12 @@ void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 	for (auto& a : m_Element)
 	{
 		Element_Base* pElement = a.second;
-		pElement->Assemble_ke(list_K11, list_K21, list_K22);
-		
+		pElement->calculate_T();
+		pElement->calculate_ke();
+		pElement->calculate_me();
+		pElement->calculate_Ke();
+		pElement->calculate_Me();
+		pElement->Assemble_ke(list_K11, list_K21, list_K22);	
 	}
 
 	/*std::cout << "\nlist_K21:\n";
@@ -352,7 +356,7 @@ void StructureFem::Equivalent_Force()
 		qVector.setZero();
 		qVector(1) = q;
 
-		qVector = pElement->m_Lamda * qVector;
+		qVector = pElement->m_Lambda * qVector;
 		cout << "qVector" << "\n";
 		cout << qVector << "\n";
 
@@ -377,6 +381,11 @@ void StructureFem::Equivalent_Force()
 
 		VectorXd equialentForce(12);
 		equialentForce << x1, x2;  // 组合等效外力矩阵
+
+		std::cout << "\n\n" << std::endl;
+		cout << equialentForce << std::endl;
+
+		a.second->m_Force = equialentForce;
 
 		equialentForce = pElement->m_T.transpose() * equialentForce;
 
@@ -454,7 +463,10 @@ void StructureFem::Analyse()
 	
 	VectorXd x2 = solver.solve(F2 - K21 * x1);
 	VectorXd R1 = K11 * x1 + K21.transpose() * x2 - F1;
-	
+
+
+	VectorXd R2 = K11 * x1 + K21.transpose() * x2;
+
 	// 将支座反力赋值给对应的点约束处
 	for (auto &a : m_Boundary)
 	{
@@ -468,7 +480,6 @@ void StructureFem::Analyse()
 		if (a.second->boundaryFlag)
 		{
 			m_ReationForce.push_back(a.second);
-			std::cout << a.second->m_id << std::endl;
 		}
 	}
 
@@ -483,22 +494,44 @@ void StructureFem::Analyse()
 	for (auto& a : m_Nodes)
 	{
 		NodeFem* pNode = a.second;
+		double dis = 0;
+		int i = 0;
 		std::cout << "\n";
 		std::cout << "node" << pNode->m_id  << ":\n";
 		for (auto& dof : pNode->m_DOF)
 		{
 			if (dof < m_nFixed)
 			{
+				dis = x1[dof];
 				std::cout << x1[dof] << " ";
 			}
 			else
 			{
+				dis = x2[dof - m_nFixed];
 				std::cout << x2[dof - m_nFixed] << " ";
 			}
+			pNode->m_Displacement[i] = dis;
+			i++;
 			std::cout << "\n";
 		}
 	}
 
+	for (auto& a : m_Element)
+	{
+		NodeFem* startNode = Find_Node(a.second->m_idNode[0]);
+		NodeFem* endNode = Find_Node(a.second->m_idNode[1]);
+
+		Eigen::VectorXd combinedDisp(12);
+		// 单元两个节点的位移
+		combinedDisp << startNode->m_Displacement, endNode->m_Displacement;
+		// 通过节点位移计算单元力
+		Eigen::VectorXd Force(12);
+		// 将整体坐标系下的位移转换到单元坐标下
+		combinedDisp = a.second->m_T * combinedDisp;
+
+		// ke * u - Feq 为梁单元两端内力
+		Force = a.second->m_ke * combinedDisp - a.second->m_Force;
+	}
 }
 
 StructureFem::~StructureFem()

@@ -45,3 +45,18 @@ void Element_Truss3D::Get_ke(MatrixXd& ke)
 	ke.setZero();
 	ke = B.transpose() * B * (E * A / L);
 }
+
+void Element_Truss3D::calculate_ke()
+{
+
+}
+
+void Element_Truss3D::calculate_me()
+{
+
+}
+
+void Element_Truss3D::calculate_T()
+{
+
+}

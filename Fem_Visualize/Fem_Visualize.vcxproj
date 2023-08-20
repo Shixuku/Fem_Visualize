@@ -119,6 +119,7 @@
     <QtMoc Include="DisplacementWindow.h" />
     <ClInclude Include="Element_Base.h" />
     <ClInclude Include="Element_Beam3D.h" />
+    <ClInclude Include="Element_Truss3D.h" />
     <ClInclude Include="EntityBase.h" />
     <ClInclude Include="ForceNode.h" />
     <ClInclude Include="Material.h" />

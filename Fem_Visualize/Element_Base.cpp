@@ -42,10 +42,6 @@ void Element_Base::Input_Data(std::ifstream& fin)
 
 void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::list<Tri>& K22)
 {
-	MatrixXd ke;
-	Get_ke(ke);
-
-
 	int nFixed = Get_Structure()->m_nFixed;
 	int nNode = m_idNode.size();
 	int nDOF_Node = Get_DOF_Node();
@@ -71,7 +67,7 @@ void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::li
 		for (int j = 0; j < nDOF_Element; ++j)
 		{//对列循环
 			int jj = EI[j];//列自由度的整体自由度编号
-			double kij = ke(i, j);
+			double kij = m_Ke(i, j);
 			if (ii < nFixed && jj < nFixed)
 			{
 				K11.push_back(Tri(ii, jj, kij));
@@ -86,4 +82,14 @@ void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::li
 			}
 		}
 	}
+}
+
+void Element_Base::calculate_Ke()
+{
+	m_Ke = m_T.transpose() * m_ke * m_T;
+}
+
+void Element_Base::calculate_Me()
+{
+	m_Me = m_T.transpose() * m_me * m_T;
 }

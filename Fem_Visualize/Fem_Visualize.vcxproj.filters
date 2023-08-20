@@ -129,6 +129,9 @@
     <ClInclude Include="Section_Truss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Element_Truss3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReactionForceWindow.ui">

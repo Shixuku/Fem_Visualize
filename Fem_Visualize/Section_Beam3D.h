@@ -3,6 +3,7 @@
 class Section_Beam3D : public Section_Truss
 {
 public:
+    double m_Ix;
     double m_Iz;
     double m_Iy;
 
