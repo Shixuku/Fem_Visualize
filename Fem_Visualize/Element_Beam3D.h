@@ -14,7 +14,6 @@ public:
 	void Disp();
 	void Get_ke(MatrixXd& ke) override;
 
-private:
 	void calculate_ke()override;
 	void calculate_me()override;
 	void calculate_T()override;
