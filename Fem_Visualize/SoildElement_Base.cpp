@@ -2,8 +2,6 @@
 
 void SoildElement_Base::calculate_Ke()
 {
-	calculate_D();
-	calculate_B();
 	m_Ke = m_t * m_volume * m_B.transpose() * m_D * m_B;
 }
 

@@ -9,8 +9,6 @@ Element_Beam3D::Element_Beam3D()
 	m_e1.resize(3);
 	m_e2.resize(3);
 	m_e3.resize(3);
-
-	calculate_volume();
 }
 
 void Element_Beam3D::Input_Data(std::ifstream& fin)
