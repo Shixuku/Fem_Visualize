@@ -1,6 +1,6 @@
 #pragma once
-#include "Element_Base.h"
-class Element_Beam3D : public Element_Base
+#include "LinkElement_Base.h"
+class Element_Beam3D : public LinkElement_Base
 {
 public:
 	Element_Beam3D();

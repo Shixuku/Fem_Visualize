@@ -1,6 +1,6 @@
 #pragma once
 #include "EntityBase.h"
-#include"Element_Base.h"
+#include"LinkElement_Base.h"
 
 class Dependant : public EntityBase
 {//主从信息

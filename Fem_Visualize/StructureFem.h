@@ -24,7 +24,7 @@ class StructureFem
 {
 public:
 	std::map<int, NodeFem*> m_Nodes;
-	std::map<int, Element_Base*> m_Element;
+	std::map<int, LinkElement_Base*> m_Element;
 	std::map<int, Boundary*> m_Boundary;
 	std::map<int, ForceNode*> m_ForceNode;
 	std::map<int, Material*> m_Material;
@@ -41,7 +41,7 @@ public:
 	NodeFem* Find_Node(int idNode);            //找节点
 	Material* Find_Material(int idMaterial);   //找材料
 	Section_Base* Find_Section(int idSection); //找截面
-	Element_Base* Find_Element(int idElement); //找单元
+	LinkElement_Base* Find_Element(int idElement); //找单元
 
 	void Input_data(const char* filename);
 

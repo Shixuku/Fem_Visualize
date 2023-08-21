@@ -48,7 +48,7 @@ Section_Base* StructureFem::Find_Section(int idSection)
 	return nullptr;
 }
 
-Element_Base* StructureFem::Find_Element(int idElement)
+LinkElement_Base* StructureFem::Find_Element(int idElement)
 {//找单元
 	auto iFind = m_Element.find(idElement);
 	if (iFind != m_Element.end())
@@ -192,7 +192,7 @@ void StructureFem::Input_data(const char* filename)
 	{
 		int idElement, idSection;
 		fin >> idElement >> idSection;
-		Element_Base* pElement = Find_Element(idElement);
+		LinkElement_Base* pElement = Find_Element(idElement);
 		pElement->m_idSection = idSection;
 	}
 	std::cout << "Assign_Sections:\n";
@@ -241,7 +241,7 @@ void StructureFem::Init_DOFs()
 {//分配节点自由度
 	for (auto& a : m_Element)
 	{//设置每个节点的自由度个数
-		Element_Base* pElement = a.second;
+		LinkElement_Base* pElement = a.second;
 		pElement->Set_NodeDOF();
 	}
 	for (auto& a : m_Nodes)
@@ -309,7 +309,7 @@ void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 
 	for (auto& a : m_Element)
 	{
-		Element_Base* pElement = a.second;
+		LinkElement_Base* pElement = a.second;
 		pElement->calculate_T();
 		pElement->calculate_ke();
 		pElement->calculate_me();
@@ -339,7 +339,7 @@ void StructureFem::Equivalent_Force()
 {
 	for (auto a : m_Element)
 	{
-		Element_Base* pElement = a.second;
+		LinkElement_Base* pElement = a.second;
 		Section_Base* pSection = Find_Section(pElement->m_idSection);
 		Section_Beam3D* pSectionBeam = dynamic_cast<Section_Beam3D*>(pSection);
 
