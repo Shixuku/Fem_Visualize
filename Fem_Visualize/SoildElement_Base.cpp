@@ -1,8 +1,8 @@
 #include "SoildElement_Base.h"
 
-void SoildElement_Base::calculate_Ke()
+void SoildElement_Base::Disp()
 {
-	m_Ke = m_t * m_volume * m_B.transpose() * m_D * m_B;
+
 }
 
 SoildElement_Base::SoildElement_Base()

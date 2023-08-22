@@ -1,8 +1,16 @@
 #include "SoildElement_Tri2DS.h"
 #include "StructureFem.h"
+#include "Material.h"
+#include "SoildSection_Base.h"
 
-void SoildElement_Tri2DS::calculate_D(double E, double nu)
+void SoildElement_Tri2DS::calculate_D()
 {
+	StructureFem* pst = Get_Structure();
+	Section_Base* pSection = pst->Find_Section(m_idSection);
+
+	double E, nu;
+	pSection->Get_Ev(E, nu);
+
 	m_D.resize(3, 3);
 	double a = E / (1 - nu * nu);
 	m_D << 1,    nu,    0.,
@@ -25,7 +33,7 @@ void SoildElement_Tri2DS::calculate_B()
 	double gama1 = node2->m_x - node0->m_x;
 	double gama2 = node0->m_x - node1->m_x;
 
-	calculate_volume();
+	m_B.resize(3, 6);
 
 	m_B << belta0, 0,       belta1, 0,       belta2, 0,
 		   0,      gama0,   0,      gama1,   0,      gama2,
@@ -51,8 +59,61 @@ void SoildElement_Tri2DS::calculate_volume()
 	m_volume = A;
 }
 
+void SoildElement_Tri2DS::calculate_all()
+{
+	calculate_volume();
+	calculate_B();
+	calculate_D();
+	calculate_ke();
+}
+
+void SoildElement_Tri2DS::calculate_ke()
+{
+	StructureFem* pst = Get_Structure();
+
+	Section_Base* pSection = pst->Find_Section(m_idSection);
+	SoildSection_Base* pSectionTir = dynamic_cast<SoildSection_Base*>(pSection);
+
+	m_ke = pSectionTir->m_t * m_volume * m_B.transpose() * m_D * m_B;
+
+	cout << "D" << endl;
+	cout << m_D << endl;
+	cout << "\nB" << endl;
+	cout << m_B << endl;
+	cout << "\nKe" << endl;
+	cout << m_ke << endl;
+}
+
+void SoildElement_Tri2DS::Disp()
+{
+	std::cout << m_id << " " << m_idMaterial << " ";
+	int nNode = m_idNode.size();
+	for (int i = 0; i < nNode; i++)
+	{
+		std::cout << m_idNode[i] << " ";
+	}
+
+	std::cout << "\n";
+}
+
+void SoildElement_Tri2DS::Input_Data(std::ifstream& fin)
+{
+
+	fin >> m_id;
+	fin >> m_idSection;
+	for (auto& a : m_idNode)
+	{
+		fin >> a;
+	}
+}
+
 int SoildElement_Tri2DS::Get_DOF_Node()
 {
 	m_dof = 2;
 	return 2;
+}
+
+SoildElement_Tri2DS::SoildElement_Tri2DS()
+{
+	m_idNode.resize(3);
 }

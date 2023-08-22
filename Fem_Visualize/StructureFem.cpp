@@ -3,11 +3,13 @@
 #include "Element_Truss3D.h"
 #include "Element_Beam3D.h"
 #include "Element_Base.h"
+#include "SoildElement_Tri2DS.h"
 #include "Boundary.h"
 #include "ForceNode.h"
 #include "Material.h"
 #include "Section_Truss.h"
 #include "Section_Beam3D.h"
+#include "SoildSection_Base.h"
 #include "Dependant.h"
 
 #include <fstream>
@@ -118,6 +120,21 @@ void StructureFem::Input_data(const char* filename)
 		m_Elements.insert({ pElement->m_id ,pElement });
 	}
 
+	// 读二维平面单元
+	int nTriangle2D = 0;
+	fin >> nTriangle2D;
+	if (nTriangle2D > 0)
+	{
+		std::cout << "SoildElement_Tri2DS:\n";
+	}
+	for (int i = 0; i < nTriangle2D; i++)
+	{
+		SoildElement_Tri2DS* pElement = new SoildElement_Tri2DS;
+		pElement->Input_Data(fin);
+		pElement->Disp();
+		m_Elements.insert({ pElement->m_id ,pElement });
+	}
+
 	//读主从关系信息
 	int nDependant = 0;
 	fin >> nDependant;
@@ -181,6 +198,23 @@ void StructureFem::Input_data(const char* filename)
 		Section_Beam3D* pSection = new Section_Beam3D;
 		fin >> pSection->m_id >> pSection->m_idMaterial;
 		fin >> pSection->m_Area >> pSection->m_Iz >> pSection->m_Iy;
+		pSection->Disp();
+		m_Section.insert({ pSection->m_id ,pSection });
+	}
+	std::cout << "\n";
+
+	//读三角截面
+	int nSectio_Tri = 0;
+	fin >> nSectio_Tri;
+	if (nSectio_Tri > 0)
+	{
+		std::cout << "Sectio_Triangle:\n";
+	}
+	for (int i = 0; i < nSectio_Tri; ++i)
+	{
+		SoildSection_Base* pSection = new SoildSection_Base;
+		fin >> pSection->m_id >> pSection->m_idMaterial;
+		fin >> pSection->m_t;
 		pSection->Disp();
 		m_Section.insert({ pSection->m_id ,pSection });
 	}
