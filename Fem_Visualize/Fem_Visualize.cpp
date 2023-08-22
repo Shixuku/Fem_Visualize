@@ -39,7 +39,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_data("../data5.txt");
+	m_structure->Input_data("../data6.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();
@@ -117,7 +117,7 @@ void Fem_Visualize::InitElement()
 	vtkNew <vtkCellArray> cellArray;
 	vtkNew<vtkPoints> pts;
 	vtkNew<vtkStringArray> label;
-	for (auto element : m_structure->m_Element)
+	for (auto element : m_structure->m_Elements)
 	{
 		vtkNew<vtkLine> line;
 		line->GetPointIds()->SetId(0, element.second->m_idNode.at(0) - 1);
@@ -130,7 +130,7 @@ void Fem_Visualize::InitElement()
 	int startNodeIndex;
 	int endNodeIndex;
 
-	for (auto element : m_structure->m_Element)
+	for (auto element : m_structure->m_Elements)
 	{
 		startNodeIndex = element.second->m_idNode.at(0);
 		endNodeIndex = element.second->m_idNode.at(1);
@@ -385,7 +385,7 @@ void Fem_Visualize::onShowDisplacement()
 	}
 
 	vtkNew <vtkCellArray> cellArray;
-	for (auto element : m_structure->m_Element)
+	for (auto element : m_structure->m_Elements)
 	{
 		vtkNew<vtkLine> line;
 		line->GetPointIds()->SetId(0, element.second->m_idNode.at(0) - 1);
@@ -426,7 +426,7 @@ void Fem_Visualize::onShowAxialForces()
 	double displacement;
 
 	vtkNew <vtkCellArray> cellArray;
-	for (auto element : m_structure->m_Element)
+	for (auto element : m_structure->m_Elements)
 	{
 		vtkNew<vtkLine> line;
 		NodeFem* startNode = m_structure->Find_Node(element.second->m_idNode.at(0));

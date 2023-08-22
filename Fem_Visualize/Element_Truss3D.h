@@ -6,7 +6,6 @@ public:
 	Element_Truss3D();
 
 	virtual int Get_DOF_Node() override { return 3; }
-	void Get_ke(MatrixXd& ke) override;
 
 	void calculate_ke()override;
 	void calculate_me()override;

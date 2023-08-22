@@ -11,15 +11,16 @@ Element_Truss3D::Element_Truss3D()
 	m_idNode.resize(2);
 }
 
-void Element_Truss3D::Get_ke(MatrixXd& ke)
+void Element_Truss3D::calculate_ke()
 {
+	Eigen::MatrixXd ke;
 	NodeFem* pNode0 = Get_Structure()->Find_Node(m_idNode[0]);
 	NodeFem* pNode1 = Get_Structure()->Find_Node(m_idNode[1]);
 	double dx = pNode1->m_x - pNode0->m_x;
 	double dy = pNode1->m_y - pNode0->m_y;
 	double dz = pNode1->m_z - pNode0->m_z;
 
-	double L = sqrt(dx * dx + dy * dy+dz*dz);
+	double L = sqrt(dx * dx + dy * dy + dz * dz);
 	double lx = dx / L;
 	double ly = dy / L;
 	double lz = dz / L;
@@ -40,15 +41,10 @@ void Element_Truss3D::Get_ke(MatrixXd& ke)
 	B(0, 3) = lx;
 	B(0, 4) = ly;
 	B(0, 5) = lz;
-	
+
 	ke.resize(6, 6);
 	ke.setZero();
 	ke = B.transpose() * B * (E * A / L);
-}
-
-void Element_Truss3D::calculate_ke()
-{
-
 }
 
 void Element_Truss3D::calculate_me()

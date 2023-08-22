@@ -2,6 +2,7 @@
 #include "NodeFem.h"
 #include "Element_Truss3D.h"
 #include "Element_Beam3D.h"
+#include "Element_Base.h"
 #include "Boundary.h"
 #include "ForceNode.h"
 #include "Material.h"
@@ -47,11 +48,10 @@ Section_Base* StructureFem::Find_Section(int idSection)
 	exit(1);
 	return nullptr;
 }
-
-LinkElement_Base* StructureFem::Find_Element(int idElement)
+Element_Base* StructureFem::Find_Element(int idElement)
 {//找单元
-	auto iFind = m_Element.find(idElement);
-	if (iFind != m_Element.end())
+	auto iFind = m_Elements.find(idElement);
+	if (iFind != m_Elements.end())
 	{//找到了
 		return iFind->second;
 	}
@@ -99,7 +99,7 @@ void StructureFem::Input_data(const char* filename)
 		Element_Truss3D* pTruss = new Element_Truss3D;
 		pTruss->Input_Data(fin);
 		pTruss->Disp();
-		m_Element.insert({ pTruss->m_id ,pTruss });
+		m_Elements.insert({ pTruss->m_id ,pTruss });
 	}
 	std::cout << "\n";
 
@@ -115,7 +115,7 @@ void StructureFem::Input_data(const char* filename)
 		Element_Beam3D* pElement = new Element_Beam3D;
 		pElement->Input_Data(fin);
 		pElement->Disp();
-		m_Element.insert({ pElement->m_id ,pElement });
+		m_Elements.insert({ pElement->m_id ,pElement });
 	}
 
 	//读主从关系信息
@@ -187,16 +187,16 @@ void StructureFem::Input_data(const char* filename)
 	std::cout << "\n";
 
 	//读指派单元截面信息
-	int nElement = m_Element.size();
+	int nElement = m_Elements.size();
 	for (int i = 0; i < nElement; ++i)
 	{
 		int idElement, idSection;
 		fin >> idElement >> idSection;
-		LinkElement_Base* pElement = Find_Element(idElement);
+		Element_Base* pElement = Find_Element(idElement);
 		pElement->m_idSection = idSection;
 	}
 	std::cout << "Assign_Sections:\n";
-	for (auto& a : m_Element)
+	for (auto& a : m_Elements)
 	{
 		a.second->Disp();
 	}
@@ -239,9 +239,9 @@ void StructureFem::Input_data(const char* filename)
 
 void StructureFem::Init_DOFs()
 {//分配节点自由度
-	for (auto& a : m_Element)
+	for (auto& a : m_Elements)
 	{//设置每个节点的自由度个数
-		LinkElement_Base* pElement = a.second;
+		Element_Base* pElement = a.second;
 		pElement->Set_NodeDOF();
 	}
 	for (auto& a : m_Nodes)
@@ -307,14 +307,10 @@ void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 
 	std::list<Tri> list_K11, list_K21, list_K22;
 
-	for (auto& a : m_Element)
+	for (auto& a : m_Elements)
 	{
-		LinkElement_Base* pElement = a.second;
-		pElement->calculate_T();
-		pElement->calculate_ke();
-		pElement->calculate_me();
-		pElement->calculate_Ke();
-		pElement->calculate_Me();
+		Element_Base* pElement = a.second;
+		pElement->calculate_all();
 		pElement->Assemble_ke(list_K11, list_K21, list_K22);	
 	}
 
@@ -357,9 +353,6 @@ void StructureFem::Equivalent_Force()
 		qVector(1) = q;
 
 		qVector = pElement->m_Lambda * qVector;
-		cout << "qVector" << "\n";
-		cout << qVector << "\n";
-
 
 		VectorXd x1(6);
 		VectorXd x2(6);
@@ -381,9 +374,6 @@ void StructureFem::Equivalent_Force()
 
 		VectorXd equialentForce(12);
 		equialentForce << x1, x2;  // 组合等效外力矩阵
-
-		std::cout << "\n\n" << std::endl;
-		cout << equialentForce << std::endl;
 
 		a.second->m_Force = equialentForce;
 
@@ -516,22 +506,22 @@ void StructureFem::Analyse()
 		}
 	}
 
-	for (auto& a : m_Element)
-	{
-		NodeFem* startNode = Find_Node(a.second->m_idNode[0]);
-		NodeFem* endNode = Find_Node(a.second->m_idNode[1]);
+	//for (auto& a : m_Elements)
+	//{
+	//	NodeFem* startNode = Find_Node(a.second->m_idNode[0]);
+	//	NodeFem* endNode = Find_Node(a.second->m_idNode[1]);
 
-		Eigen::VectorXd combinedDisp(12);
-		// 单元两个节点的位移
-		combinedDisp << startNode->m_Displacement, endNode->m_Displacement;
-		// 通过节点位移计算单元力
-		Eigen::VectorXd Force(12);
-		// 将整体坐标系下的位移转换到单元坐标下
-		combinedDisp = a.second->m_T * combinedDisp;
+	//	Eigen::VectorXd combinedDisp(12);
+	//	// 单元两个节点的位移
+	//	combinedDisp << startNode->m_Displacement, endNode->m_Displacement;
+	//	// 通过节点位移计算单元力
+	//	Eigen::VectorXd Force(12);
+	//	// 将整体坐标系下的位移转换到单元坐标下
+	//	combinedDisp = a.second->m_T * combinedDisp;
 
-		// ke * u - Feq 为梁单元两端内力
-		Force = a.second->m_ke * combinedDisp - a.second->m_Force;
-	}
+	//	// ke * u - Feq 为梁单元两端内力
+	//	Force = a.second->m_ke * combinedDisp - a.second->m_Force;
+	//}
 }
 
 StructureFem::~StructureFem()
@@ -541,7 +531,7 @@ StructureFem::~StructureFem()
 	{
 		delete a.second;
 	}
-	for (auto& a : m_Element)
+	for (auto& a : m_Elements)
 	{
 		delete a.second;
 	}

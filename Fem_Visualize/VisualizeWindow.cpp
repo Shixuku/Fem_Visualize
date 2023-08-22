@@ -65,7 +65,7 @@ void VisualizeWindow::InitNode(std::map<int, NodeFem*> nodes)
 void VisualizeWindow::InitElement()
 {
 	vtkNew <vtkCellArray> cellArray;
-	for (auto element : m_structure.m_Element)
+	for (auto element : m_structure.m_Elements)
 	{
 		vtkNew<vtkLine> line;
 		line->GetPointIds()->SetId(0, element.second->m_idNode.at(0) - 1);
@@ -77,7 +77,7 @@ void VisualizeWindow::InitElement()
 	int startNodeIndex;
 	int endNodeIndex;
 
-	for (auto element : m_structure.m_Element)
+	for (auto element : m_structure.m_Elements)
 	{
 		startNodeIndex = element.second->m_idNode.at(0);
 		endNodeIndex = element.second->m_idNode.at(1);

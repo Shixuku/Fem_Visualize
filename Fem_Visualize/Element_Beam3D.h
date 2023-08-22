@@ -12,10 +12,13 @@ public:
 	virtual int Get_DOF_Node() override { return 6; }
 	void Input_Data(std::ifstream& fin)override;
 	void Disp();
-	void Get_ke(MatrixXd& ke) override;
 
 	void calculate_ke()override;
 	void calculate_me()override;
 	void calculate_T()override;
+
+	void Equivalent_Force();
+
+	void calculate_all();
 };
 
