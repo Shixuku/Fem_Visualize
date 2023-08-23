@@ -75,18 +75,11 @@ void SoildElement_Tri2DS::calculate_ke()
 	SoildSection_Base* pSectionTir = dynamic_cast<SoildSection_Base*>(pSection);
 
 	m_ke = pSectionTir->m_t * m_volume * m_B.transpose() * m_D * m_B;
-
-	cout << "D" << endl;
-	cout << m_D << endl;
-	cout << "\nB" << endl;
-	cout << m_B << endl;
-	cout << "\nKe" << endl;
-	cout << m_ke << endl;
 }
 
 void SoildElement_Tri2DS::Disp()
 {
-	std::cout << m_id << " " << m_idMaterial << " ";
+	std::cout << m_id << " " << m_idSection << " ";
 	int nNode = m_idNode.size();
 	for (int i = 0; i < nNode; i++)
 	{

@@ -39,7 +39,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_data("../data6.txt");
+	m_structure->Input_data("../data9.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();

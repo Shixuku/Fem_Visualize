@@ -4,6 +4,7 @@
 #include "Element_Beam3D.h"
 #include "Element_Base.h"
 #include "SoildElement_Tri2DS.h"
+#include "SoildElement_Terach3D.h"
 #include "Boundary.h"
 #include "ForceNode.h"
 #include "Material.h"
@@ -134,6 +135,21 @@ void StructureFem::Input_data(const char* filename)
 		pElement->Disp();
 		m_Elements.insert({ pElement->m_id ,pElement });
 	}
+	
+	// 读空间四面体单元
+	int nTerach3D = 0;
+	fin >> nTerach3D;
+	if (nTerach3D > 0)
+	{
+		std::cout << "SoildElement_Tri2DS:\n";
+	}
+	for (int i = 0; i < nTerach3D; i++)
+	{
+		SoildElement_Terach3D* pElement = new SoildElement_Terach3D;
+		pElement->Input_Data(fin);
+		pElement->Disp();
+		m_Elements.insert({ pElement->m_id ,pElement });
+	}
 
 	//读主从关系信息
 	int nDependant = 0;
@@ -208,13 +224,30 @@ void StructureFem::Input_data(const char* filename)
 	fin >> nSectio_Tri;
 	if (nSectio_Tri > 0)
 	{
-		std::cout << "Sectio_Triangle:\n";
+		std::cout << "Section_Triangle:\n";
 	}
 	for (int i = 0; i < nSectio_Tri; ++i)
 	{
 		SoildSection_Base* pSection = new SoildSection_Base;
 		fin >> pSection->m_id >> pSection->m_idMaterial;
 		fin >> pSection->m_t;
+		pSection->Disp();
+		m_Section.insert({ pSection->m_id ,pSection });
+	}
+	std::cout << "\n";
+
+
+	//读四面体截面
+	int nSectio_Ter = 0;
+	fin >> nSectio_Ter;
+	if (nSectio_Ter > 0)
+	{
+		std::cout << "Sectio_Terach3D:\n";
+	}
+	for (int i = 0; i < nSectio_Ter; ++i)
+	{
+		SoildSection_Base* pSection = new SoildSection_Base;
+		fin >> pSection->m_id >> pSection->m_idMaterial;
 		pSection->Disp();
 		m_Section.insert({ pSection->m_id ,pSection });
 	}

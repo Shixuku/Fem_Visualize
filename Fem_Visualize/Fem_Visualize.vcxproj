@@ -98,6 +98,7 @@
     <ClCompile Include="Section_Beam3D.cpp" />
     <ClCompile Include="Section_Truss.cpp" />
     <ClCompile Include="SoildElement_Base.cpp" />
+    <ClCompile Include="SoildElement_Terach3D.cpp" />
     <ClCompile Include="SoildElement_Tri2DS.cpp" />
     <ClCompile Include="SoildSection_Base.cpp" />
     <ClCompile Include="StructureFem.cpp" />
@@ -134,6 +135,7 @@
     <ClInclude Include="Section_Beam3D.h" />
     <ClInclude Include="Section_Truss.h" />
     <ClInclude Include="SoildElement_Base.h" />
+    <ClInclude Include="SoildElement_Terach3D.h" />
     <ClInclude Include="SoildElement_Tri2DS.h" />
     <ClInclude Include="SoildSection_Base.h" />
     <ClInclude Include="StructureFem.h" />
