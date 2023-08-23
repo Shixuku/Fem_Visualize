@@ -90,6 +90,7 @@ void SoildElement_Terach3D::calculate_all()
 	calculate_B();
 	calculate_D();
 	calculate_ke();
+	cout << m_volume << endl;
 }
 
 void SoildElement_Terach3D::calculate_ke()
@@ -151,4 +152,14 @@ Eigen::MatrixXd SoildElement_Terach3D::Remove(int rowToRemove, int colToRemove, 
 SoildElement_Terach3D::SoildElement_Terach3D()
 {
 	m_idNode.resize(4);
+}
+
+SoildElement_Terach3D::SoildElement_Terach3D(int id, int node1, int node2, int node3, int node4)
+{
+	*this = SoildElement_Terach3D();
+	m_id = id;
+	m_idNode[0] = node1;
+	m_idNode[1] = node2;
+	m_idNode[2] = node3;
+	m_idNode[3] = node4;
 }

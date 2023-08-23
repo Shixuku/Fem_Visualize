@@ -5,6 +5,8 @@ class SoildSection_Base :
 {
 public:
     double m_t;
+    SoildSection_Base();
+    SoildSection_Base(int id, int idMaterial);
     void Disp();//ÏÔÊ¾Êı¾İ
 };
 

@@ -2,6 +2,19 @@
 #include "NodeFem.h"
 #include "StructureFem.h"
 
+Boundary::Boundary(int id, int idNode, int ixyz, double value)
+{
+	m_id = id;
+	m_idNode = idNode;
+	m_ixyz = ixyz;
+	m_value = value;
+}
+
+Boundary::Boundary()
+{
+
+}
+
 void Boundary::Disp()
 {
 	std::cout << m_id << " " << m_idNode << " " << m_ixyz << " " << m_value << "\n";

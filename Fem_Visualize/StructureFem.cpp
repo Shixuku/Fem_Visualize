@@ -15,6 +15,11 @@
 
 #include <fstream>
 #include <iostream>
+#include <qfile.h>
+#include <QDebug>
+#include <QRegularExpression>
+
+# pragma execution_character_set("utf-8")
 
 NodeFem* StructureFem::Find_Node(int idNode)
 {//找节点
@@ -302,6 +307,318 @@ void StructureFem::Input_data(const char* filename)
 	fin.close();
 
 	std::cout << "read completed\n";
+}
+
+
+bool StructureFem::Input_datas(const QString& FileName)
+{
+	if (!QFile::exists(FileName))
+	{//文件不存在
+		qDebug() << "Error: 文件 " << FileName << " 不存在";
+		exit(1);
+		return false;
+	}
+	StructureFem* pStructure = this;
+
+	QFile aFile(FileName);//定义文件
+	aFile.open(QIODevice::ReadOnly);//打开文件进行读入
+	QTextStream ssin(&aFile);//绑定文件流
+	QString strdata;
+
+	while (ReadLine(ssin, strdata))
+	{//读取到有效数据行，存放在strdata中
+		QStringList list_str = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+		if (list_str[0].compare("*Node", Qt::CaseInsensitive) == 0)
+		{//数据行为节点关键字行
+			Q_ASSERT(list_str.size() == 2);
+			int nNode = list_str[1].toInt();//得到节点个数，可控制后续循环次数
+			qDebug() << "\n节点数: " << nNode;
+			for (int i = 0; i < nNode; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 节点数据不够";
+					exit(1);
+				}
+				QStringList strlist_node = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_node.size() == 4);
+				int idNode = strlist_node[0].toInt();//取得节点号
+				double xi = strlist_node[1].toDouble();
+				double yi = strlist_node[2].toDouble();
+				double zi = strlist_node[3].toDouble();
+				qDebug() << idNode << "  " << xi << " " << yi << " " << zi;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Nodes.insert(make_pair(idNode, new NodeFem(idNode, xi, yi, zi)));
+			}
+		}
+
+		else if (list_str[0].compare("*Element_Truss3D", Qt::CaseInsensitive) == 0)
+		{//读取到空间桁架单元
+			Q_ASSERT(list_str.size() == 2);
+			int nEle = list_str[1].toInt();//得到单元个数，可控制后续循环次数
+
+			qDebug() << "\n空间桁架单元数: " << nEle;
+			for (int i = 0; i < nEle; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 单元数据不够";
+					exit(1);
+				}
+				QStringList strlist_ele = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_ele.size() == 3);
+				int idEle = strlist_ele[0].toInt();//取得单元号
+				int idNode1 = strlist_ele[1].toInt();
+				int idNode2 = strlist_ele[2].toInt();
+				qDebug() << idEle << "  " << idNode1 << " " << idNode2;//输出，以便检查
+				//保存到模型数据库
+
+				pStructure->m_Elements.insert(make_pair(idEle, new Element_Truss3D(idEle, idNode1, idNode2)));
+			}
+		}
+
+		else if (list_str[0].compare("*Element_Beam3D", Qt::CaseInsensitive) == 0)
+		{//读取到空间梁单元
+			Q_ASSERT(list_str.size() == 2);
+			int nEle = list_str[1].toInt();//得到单元个数，可控制后续循环次数
+
+			qDebug() << "\n空间梁单元数: " << nEle;
+			for (int i = 0; i < nEle; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 梁单元数据不够";
+					exit(1);
+				}
+				QStringList strlist_ele = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_ele.size() == 3);
+				int idEle = strlist_ele[0].toInt();//取得单元号
+				int idNode1 = strlist_ele[1].toInt();
+				int idNode2 = strlist_ele[2].toInt();
+				qDebug() << idEle << "  " << idNode1 << " " << idNode2;//输出，以便检查
+
+				pStructure->m_Elements.insert(make_pair(idEle, new Element_Beam3D(idEle, idNode1, idNode2)));
+			}
+		}
+
+		else if (list_str[0].compare("*Tetrahedral_Element", Qt::CaseInsensitive) == 0)
+		{//读取到空间四面体单元
+			Q_ASSERT(list_str.size() == 2);
+			int nEle = list_str[1].toInt();//得到单元个数，可控制后续循环次数
+
+			qDebug() << "\n空间四面体单元数: " << nEle;
+			for (int i = 0; i < nEle; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 空间四面体单元数据不够";
+					exit(1);
+				}
+				QStringList strlist_ele = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_ele.size() == 5);
+				int idEle = strlist_ele[0].toInt();//取得单元号
+				int idNode1 = strlist_ele[1].toInt();
+				int idNode2 = strlist_ele[2].toInt();
+				int idNode3 = strlist_ele[3].toInt();
+				int idNode4 = strlist_ele[4].toInt();
+				qDebug() << idEle << "  " << idNode1 << " " << idNode2 << " " << idNode3 << " " << idNode4;
+
+				pStructure->m_Elements.insert(make_pair(idEle, new SoildElement_Terach3D(idEle, idNode1, idNode2, idNode3, idNode4)));
+			}
+		}
+
+		else if (list_str[0].compare("*Material", Qt::CaseInsensitive) == 0)
+		{//读取到材料
+			Q_ASSERT(list_str.size() == 2);
+			int nMat = list_str[1].toInt();//得到材料个数，可控制后续循环次数
+			qDebug() << "\n材料数: " << nMat;
+			for (int i = 0; i < nMat; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 材料数据不够";
+					exit(1);
+				}
+				QStringList strlist_mat = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_mat.size() == 4);
+				int idMat = strlist_mat[0].toInt();
+				double elasticity = strlist_mat[1].toDouble();
+				double poisson = strlist_mat[2].toDouble();
+				double density = strlist_mat[3].toDouble();
+				qDebug() << idMat << "  " << elasticity << " " << poisson << " " << density;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Material.insert(make_pair(idMat, new Material(idMat, elasticity, poisson, density)));
+			}
+		}
+		else if (list_str[0].compare("*Section_Truss", Qt::CaseInsensitive) == 0)
+		{//读取到空间杆截面
+			Q_ASSERT(list_str.size() == 2);
+			int nSecT = list_str[1].toInt();//得到杆截面数个数，可控制后续循环次数
+			qDebug() << "\n杆截面数: " << nSecT;
+			for (int i = 0; i < nSecT; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 杆截面数据不够";
+					exit(1);
+				}
+				QStringList strlist_secT = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_secT.size() == 3);
+				int idSecT = strlist_secT[0].toInt();
+				int idMat = strlist_secT[1].toInt();
+				double area = strlist_secT[2].toDouble();
+				qDebug() << idSecT << "  " << idMat << " " << area;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Section.insert(make_pair(idSecT, new Section_Truss(idSecT, idMat, area)));
+			}
+		}
+
+		else if (list_str[0].compare("*Section_Beam3D", Qt::CaseInsensitive) == 0)
+		{//读取到空间梁截面
+			Q_ASSERT(list_str.size() == 2);
+			int nSecB = list_str[1].toInt();//得到梁截面数个数，可控制后续循环次数
+			qDebug() << "\n梁截面数: " << nSecB;
+			for (int i = 0; i < nSecB; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 梁截面数据不够";
+					exit(1);
+				}
+				QStringList strlist_secB = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_secB.size() == 5);
+				int idSecT = strlist_secB[0].toInt();
+				int idMat = strlist_secB[1].toInt();
+				double area = strlist_secB[2].toDouble();
+				double Iy = strlist_secB[3].toDouble();
+				double Iz = strlist_secB[4].toDouble();
+				qDebug() << idSecT << "  " << idMat << " " << area << Iy << " " << Iz;//输出，以便检查
+				//保存到模型数据库
+				Section_Beam3D* beam = new Section_Beam3D(idSecT, idMat, area, Iy, Iz);
+				pStructure->m_Section.insert(make_pair(idSecT, beam));
+			}
+		}
+
+		else if (list_str[0].compare("*Section_Tetrahedral3D", Qt::CaseInsensitive) == 0)
+		{//读取到空间梁截面
+			Q_ASSERT(list_str.size() == 2);
+			int nSecB = list_str[1].toInt();//得到梁截面数个数，可控制后续循环次数
+			qDebug() << "\n空间四面体截面数: " << nSecB;
+			for (int i = 0; i < nSecB; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 空间四面体数据不够";
+					exit(1);
+				}
+				QStringList strlist_secB = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_secB.size() == 2);
+				int idSecT = strlist_secB[0].toInt();
+				int idMat = strlist_secB[1].toInt();
+				qDebug() << idSecT << "  " << idMat;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Section.insert(make_pair(idSecT, new SoildSection_Base(idSecT, idMat)));
+			}
+			}
+
+		else if (list_str[0].compare("*Section_Assign", Qt::CaseInsensitive) == 0)
+		{//读取到截面指派
+			Q_ASSERT(list_str.size() == 2);
+			int nSec = list_str[1].toInt();//得到截面指派个数，可控制后续循环次数
+			qDebug() << "\n截面指派数: " << nSec;
+			for (int i = 0; i < nSec; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 梁截面数据不够";
+					exit(1);
+				}
+				QStringList strlist_sec = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_sec.size() == 2);
+				int idElement = strlist_sec[0].toInt();
+				int	idSection = strlist_sec[1].toInt();
+				Element_Base* pElement = Find_Element(idElement);
+				pElement->m_idSection = idSection;
+			}
+		}
+
+		else if (list_str[0].compare("*Constraint", Qt::CaseInsensitive) == 0)
+		{//读取到约束
+			Q_ASSERT(list_str.size() == 2);
+			int nConstraint = list_str[1].toInt();//得到约束个数，可控制后续循环次数
+			qDebug() << "\n约束个数: " << nConstraint;
+			for (int i = 0; i < nConstraint; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error:约束数据不够";
+					exit(1);
+				}
+				QStringList strlist_Constraint = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_Constraint.size() == 4);
+				int id = strlist_Constraint[0].toInt();
+				int idNode = strlist_Constraint[1].toInt();
+				int direction = strlist_Constraint[2].toInt();
+				double P = strlist_Constraint[3].toDouble();
+				qDebug() << id << "  " << idNode << "  " << "  " << direction << "  " << P;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Boundary.insert(make_pair(id, new Boundary(id, idNode, direction, P)));
+				NodeFem* pNode = Find_Node(idNode);
+				pNode->boundaryFlag = true;
+			}
+		}
+
+		else if (list_str[0].compare("*Force_Node_Function", Qt::CaseInsensitive) == 0)
+		{//读取到节点荷载
+			Q_ASSERT(list_str.size() == 2);
+			int nForce_Node = list_str[1].toInt();//得到结点荷载个数，可控制后续循环次数
+			qDebug() << "\n结点荷载数: " << nForce_Node;
+			for (int i = 0; i < nForce_Node; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error:节点荷载数据不够";
+					exit(1);
+				}
+				QStringList strlist_Force_Node = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_Force_Node.size() == 4);
+				int idForce = strlist_Force_Node[0].toInt();
+				int idNode = strlist_Force_Node[1].toInt();
+				int direction = strlist_Force_Node[2].toInt();
+				double expression = strlist_Force_Node[3].toDouble();
+				qDebug() << idForce << "  " << idNode << "  " << direction << "  " << expression;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_ForceNode.insert(make_pair(idForce, new ForceNode(idForce, idNode, direction, expression)));
+			}
+		}
+	}
+}
+
+bool StructureFem::ReadLine(QTextStream& ssin, QString& str)
+{
+	while (!ssin.atEnd())
+	{
+		str = ssin.readLine();
+		if (str.left(2).compare("**") == 0) continue;//注释行，继续读取下一行
+
+		str = str.trimmed();//去除开头和末尾的空格
+		if (str.isEmpty()) continue;//注释行，继续读取下一行
+
+		return true;//读取到有效数据，完成一行读取
+	}
+
+	return false;//文件读完，没有得到有效的数据行
 }
 
 void StructureFem::Init_DOFs()

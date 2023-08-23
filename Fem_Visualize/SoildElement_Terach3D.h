@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 
 class SoildElement_Terach3D :
-    public SoildElement_Base
+	public SoildElement_Base
 {
 public:
 	void calculate_D() override;
@@ -25,6 +25,5 @@ public:
 	Eigen::MatrixXd Remove(int rowToRemove, int colToRemove, Eigen::MatrixXd originalMatrix);
 
 	SoildElement_Terach3D();
-
+	SoildElement_Terach3D(int id, int node1, int node2, int node3, int node4);
 };
-

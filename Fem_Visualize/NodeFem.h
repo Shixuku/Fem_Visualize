@@ -14,6 +14,8 @@ public:
 	bool boundaryFlag = false;
 
 	NodeFem();
+
+	NodeFem(int Id, double x, double y, double z);
 	~NodeFem();
 };
 

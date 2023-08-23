@@ -4,6 +4,7 @@ class Element_Truss3D : public LinkElement_Base
 {
 public:
 	Element_Truss3D();
+	Element_Truss3D(int id, int idNode1, int idNode2);
 
 	virtual int Get_DOF_Node() override { return 3; }
 

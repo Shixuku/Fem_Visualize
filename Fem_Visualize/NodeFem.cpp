@@ -12,6 +12,15 @@ NodeFem::NodeFem()
 	m_Force.setZero();
 }
 
+NodeFem::NodeFem(int Id, double x, double y, double z)
+{
+	*this = NodeFem();
+	m_id = Id;
+	m_x = x;
+	m_y = y;
+	m_z = z;
+}
+
 NodeFem::~NodeFem()
 {
 	

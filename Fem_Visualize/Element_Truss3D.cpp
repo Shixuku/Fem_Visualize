@@ -11,6 +11,14 @@ Element_Truss3D::Element_Truss3D()
 	m_idNode.resize(2);
 }
 
+Element_Truss3D::Element_Truss3D(int id, int idNode1, int idNode2)
+{
+	*this = Element_Truss3D();
+	m_idNode[0] = idNode1;
+	m_idNode[1] = idNode2;
+	m_id = id;
+}
+
 void Element_Truss3D::calculate_ke()
 {
 	Eigen::MatrixXd ke;

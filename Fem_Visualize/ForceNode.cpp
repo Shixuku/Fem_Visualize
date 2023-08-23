@@ -3,6 +3,19 @@
 #include "NodeFem.h"
 #include "StructureFem.h"
 
+ForceNode::ForceNode(int id, int idNode, int ixyz, int value)
+{
+	m_id = id;
+	m_idNode = idNode;
+	m_ixyz = ixyz;
+	m_value = value;
+}
+
+ForceNode::ForceNode()
+{
+
+}
+
 void ForceNode::Disp()
 {
 	std::cout << m_id << " " << m_idNode << " " << m_ixyz << " " << m_value << "\n";

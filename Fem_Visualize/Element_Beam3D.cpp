@@ -12,6 +12,14 @@ Element_Beam3D::Element_Beam3D()
 	m_e3.resize(3);
 }
 
+Element_Beam3D::Element_Beam3D(int id, int idNode1, int idNode2)
+{
+	*this = Element_Beam3D();
+	m_idNode[0] = idNode1;
+	m_idNode[1] = idNode2;
+	m_id = id;
+}
+
 void Element_Beam3D::Input_Data(std::ifstream& fin)
 {
 	fin >> m_id;

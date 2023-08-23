@@ -6,6 +6,8 @@ public:
 	int m_idNode;
 	int m_ixyz;           //0:x,1:y,2:z
 	double m_value;
+	ForceNode();
+	ForceNode(int id, int idNode, int ixyz, int value);
 
 	void Disp();
 

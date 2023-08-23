@@ -13,6 +13,8 @@ class Section_Base;
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <QString>
+#include <QTextStream>
 #include "Dependant.h"
 
 using namespace Eigen;
@@ -45,6 +47,10 @@ public:
 	Element_Base* Find_Element(int idElement); //找单元
 
 	void Input_data(const char* filename);
+
+	bool Input_datas(const QString& FileName);
+
+	bool ReadLine(QTextStream& ssin, QString& str);
 
 	void Init_DOFs();     //分配节点自由度
 
