@@ -5,6 +5,7 @@
 #include "Element_Base.h"
 #include "SoildElement_Tri2DS.h"
 #include "SoildElement_Terach3D.h"
+#include "SoildElement_Brick3D.h"
 #include "Boundary.h"
 #include "ForceNode.h"
 #include "Material.h"
@@ -431,6 +432,42 @@ bool StructureFem::Input_datas(const QString& FileName)
 			}
 		}
 
+		else if (list_str[0].compare("*Brick_Element", Qt::CaseInsensitive) == 0)
+		{//读取到空间八节点六面体单元
+			Q_ASSERT(list_str.size() == 2);
+			int nEle = list_str[1].toInt();//得到单元个数，可控制后续循环次数
+
+			qDebug() << "\n空间六面体单元数: " << nEle;
+			for (int i = 0; i < nEle; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 空间六面体单元数据不够";
+					exit(1);
+				}
+				QStringList strlist_ele = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_ele.size() == 9);
+				int idEle = strlist_ele[0].toInt();//取得单元号
+				int idNode1 = strlist_ele[1].toInt();
+				int idNode2 = strlist_ele[2].toInt();
+				int idNode3 = strlist_ele[3].toInt();
+				int idNode4 = strlist_ele[4].toInt();
+				int idNode5 = strlist_ele[5].toInt();
+				int idNode6 = strlist_ele[6].toInt();
+				int idNode7 = strlist_ele[7].toInt();
+				int idNode8 = strlist_ele[8].toInt();
+				std::vector<int> idNodes;
+				for (int j = 0; j < 8; j++)
+				{
+					idNodes.push_back(strlist_ele[j + 1].toInt());
+				}
+				qDebug() << idEle << "  " << idNode1 << " " << idNode2 << " " << idNode3 << " " << idNode4
+					<<" " << idNode5<< " " << idNode6 << " " << idNode7 << " " << idNode8;
+				pStructure->m_Elements.insert(make_pair(idEle, new SoildElement_Brick3D(idEle, idNodes)));
+			}
+		}
+
 		else if (list_str[0].compare("*Material", Qt::CaseInsensitive) == 0)
 		{//读取到材料
 			Q_ASSERT(list_str.size() == 2);
@@ -506,7 +543,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 			}
 		}
 
-		else if (list_str[0].compare("*Section_Tetrahedral3D", Qt::CaseInsensitive) == 0)
+		else if (list_str[0].compare("*Section_SoildElement3D", Qt::CaseInsensitive) == 0)
 		{//读取到空间梁截面
 			Q_ASSERT(list_str.size() == 2);
 			int nSecB = list_str[1].toInt();//得到梁截面数个数，可控制后续循环次数
