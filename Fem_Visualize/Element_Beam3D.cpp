@@ -10,6 +10,7 @@ Element_Beam3D::Element_Beam3D()
 	m_e1.resize(3);
 	m_e2.resize(3);
 	m_e3.resize(3);
+	m_type = "Beam";
 }
 
 Element_Beam3D::Element_Beam3D(int id, int idNode1, int idNode2)
@@ -232,7 +233,6 @@ void Element_Beam3D::calculate_internal_force(Eigen::VectorXd disp)
 	disp = m_T * disp;
 
 	m_force = m_ke * disp - m_EqForce;
-	cout << m_force << endl;
 }
 
 void Element_Beam3D::Equivalent_Force()

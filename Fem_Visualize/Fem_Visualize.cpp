@@ -137,33 +137,28 @@ void Fem_Visualize::InitElement()
 	int startNodeIndex;
 	int endNodeIndex;
 
-	vtkNew<vtkAppendFilter> fiter;
 	for (auto element : m_structure->m_Elements)
 	{
-		startNodeIndex = element.second->m_idNode.at(0);
-		endNodeIndex = element.second->m_idNode.at(1);
+		if (element.second->m_type == "Beam")
+		{
+			startNodeIndex = element.second->m_idNode.at(0);
+			endNodeIndex = element.second->m_idNode.at(1);
 
-		NodeFem* startNode = m_structure->Find_Node(startNodeIndex);
-		NodeFem* endNode = m_structure->Find_Node(endNodeIndex);
+			NodeFem* startNode = m_structure->Find_Node(startNodeIndex);
+			NodeFem* endNode = m_structure->Find_Node(endNodeIndex);
 
-		startPoint[0] = startNode->m_x;
-		startPoint[1] = startNode->m_y;
-		startPoint[2] = startNode->m_z;
+			startPoint[0] = startNode->m_x;
+			startPoint[1] = startNode->m_y;
+			startPoint[2] = startNode->m_z;
 
-		endPoint[0] = endNode->m_x;
-		endPoint[1] = endNode->m_y;
-		endPoint[2] = endNode->m_z;
+			endPoint[0] = endNode->m_x;
+			endPoint[1] = endNode->m_y;
+			endPoint[2] = endNode->m_z;
 
-		middlePoint[0] = (startPoint[0] + endPoint[0]) / 2;
-		middlePoint[1] = (startPoint[1] + endPoint[1]) / 2 + 0.1;
-		middlePoint[2] = (startPoint[2] + endPoint[2]) / 2;
+			CreateRecSection(0.2, 0.1, startPoint, endPoint);
+		}
 
-		pts->InsertNextPoint(middlePoint);
-		label->InsertNextValue(std::to_string(element.second->m_id));
-
-		CreateRecSection(0.2, 0.1, startPoint, endPoint);
-
-		if (element.second->m_type == "Brick")
+		else if (element.second->m_type == "Brick")
 		{
 			vtkNew<vtkPoints> points;
 			vtkNew<vtkHexahedron> hexahedron;
@@ -183,11 +178,11 @@ void Fem_Visualize::InitElement()
 			vtkNew<vtkUnstructuredGrid> uGrid;
 			uGrid->SetPoints(points);
 			uGrid->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
-
-			fiter->AddInputData(uGrid);
+			soildAppendFilter->AddInputData(uGrid);
+			soildAppendFilter->Update();
 		}
 
-		if (element.second->m_type == "Tetra")
+		else if (element.second->m_type == "Tetra")
 		{
 			vtkNew<vtkPoints> points;
 			vtkNew<vtkTetra> tetra;
@@ -207,11 +202,22 @@ void Fem_Visualize::InitElement()
 			vtkNew<vtkUnstructuredGrid> uGrid;
 			uGrid->SetPoints(points);
 			uGrid->InsertNextCell(tetra->GetCellType(), tetra->GetPointIds());
-			fiter->AddInputData(uGrid);
+			soildAppendFilter->AddInputData(uGrid);
+			soildAppendFilter->Update();
 		}
-		appendFilter->Update();
-	}
 
+		int pointsNum = element.second->m_idNode.size();
+		double centerPoints[3] = { 0,0,0 };
+		for (int i = 0; i < pointsNum; i++)
+		{
+			NodeFem *node = m_structure->Find_Node(element.second->m_idNode[i]);
+			centerPoints[0] += node->m_x / pointsNum;
+			centerPoints[1] += (node->m_y + 0.1) / pointsNum;
+			centerPoints[2] += node->m_z / pointsNum;
+		}
+		pts->InsertNextPoint(centerPoints);
+		label->InsertNextValue(std::to_string(element.second->m_id));
+	}
 	label->SetName("Labels");
 	GeneraterLable(pts, label, elementLableActor);
 
@@ -219,27 +225,33 @@ void Fem_Visualize::InitElement()
 	polyData->SetPoints(points);
 	polyData->SetLines(cellArray);
 
-	//vtkNew<vtkDoubleArray> stress;
-	//stress->SetNumberOfComponents(1);
-	//stress->InsertNextValue(10);
-	//stress->InsertNextValue(20);
-	//stress->InsertNextValue(5);
-	//stress->InsertNextValue(60);
-	//polyData->GetPointData()->SetScalars(stress);
+	vtkNew<vtkDataSetMapper> soildMapper;
+	if (soildAppendFilter->GetOutput()->GetNumberOfPoints() != 0)
+	{
+		soildMapper->SetInputConnection(soildAppendFilter->GetOutputPort());
 
-	vtkNew<vtkDataSetMapper> elemnetMapper;
-	elemnetMapper->SetInputConnection(fiter->GetOutputPort());
+		soildActor->SetMapper(soildMapper);
+		soildActor->GetProperty()->SetEdgeColor(0, 0, 0);
+		soildActor->GetProperty()->SetColor(0.8, 1, 1); // µ­À¶É«
+		soildActor->GetProperty()->EdgeVisibilityOn();
+		soildActor->GetProperty()->SetLineWidth(1);
+		renderer->AddActor(soildActor);
+	}
+
+	vtkNew<vtkPolyDataMapper> linkMapper;
+	if (linkAppendFilter->GetOutput()->GetNumberOfPoints() != 0)
+	{
+		//mapper->SetInputData(polyData);
+		linkMapper->SetInputConnection(linkAppendFilter->GetOutputPort());
+		linkMapper->SetScalarRange(0, 90);
+		linkMapper->SetScalarModeToUsePointData();
+		renderer->AddActor(linkActor);
+	}
 
 	vtkNew<vtkPolyDataMapper> lineMapper;
 	lineMapper->SetInputData(polyData);
 
-	vtkNew<vtkPolyDataMapper> mapper;
-	//mapper->SetInputData(polyData);
-	mapper->SetInputConnection(appendFilter->GetOutputPort());
-	mapper->SetScalarRange(0, 90);
-	mapper->SetScalarModeToUsePointData();
-
-	scalarBar->SetLookupTable(mapper->GetLookupTable());
+	scalarBar->SetLookupTable(linkMapper->GetLookupTable());
 	scalarBar->SetOrientationToHorizontal();
 	scalarBar->SetPosition(0.05, 0.1);
 	scalarBar->SetPosition2(0.9, 0.11);
@@ -250,14 +262,8 @@ void Fem_Visualize::InitElement()
 	lineActor->SetMapper(lineMapper);
 	lineActor->GetProperty()->SetLineWidth(3);
 	lineActor->GetProperty()->SetColor(0, 0, 1);
+	linkActor->SetMapper(linkMapper);
 
-	sectionActor->SetMapper(elemnetMapper);
-	sectionActor->GetProperty()->SetEdgeColor(0, 0, 0);
-	sectionActor->GetProperty()->EdgeVisibilityOn();
-
-	sectionActor->GetProperty()->SetLineWidth(2);
-
-	renderer->AddActor(sectionActor);
 	renderer->AddActor(scalarBar);
 	renderer->AddActor(elementLableActor);
 }
@@ -369,14 +375,15 @@ void Fem_Visualize::CreateRecSection(double length, double width, double startPo
 	}
 	extrusion->GetOutput()->GetPointData()->SetScalars(stress);
 
-	appendFilter->AddInputConnection(extrusion->GetOutputPort());
+	linkAppendFilter->AddInputConnection(extrusion->GetOutputPort());
+	linkAppendFilter->Update();
 }
 
 void Fem_Visualize::onIsShowSection()
 {
 	if (showFlag == 0)
 	{
-		renderer->RemoveActor(sectionActor);
+		renderer->RemoveActor(linkActor);
 		renderer->AddActor(lineActor);
 		ui.widget->GetRenderWindow()->Render();
 		showFlag = 1;
@@ -385,7 +392,7 @@ void Fem_Visualize::onIsShowSection()
 	if (showFlag == 1);
 	{
 		renderer->RemoveActor(lineActor);
-		renderer->AddActor(sectionActor);
+		renderer->AddActor(linkActor);
 		renderer->ResetCamera();
 		ui.widget->GetRenderWindow()->Render();
 		showFlag = 0;

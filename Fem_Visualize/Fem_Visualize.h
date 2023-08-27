@@ -7,6 +7,7 @@
 #include <vtkPoints.h>
 #include <vtkRenderWindow.h>
 #include <vtkAppendPolyData.h>
+#include <vtkAppendFilter.h>
 #include <vtkScalarBarActor.h>
 #include <vtkStringArray.h>
 #include "StructureFem.h"
@@ -70,7 +71,8 @@ private:
 	// A renderer and render window
 	vtkNew<vtkRenderer> renderer;
 	vtkNew<vtkActor> lineActor;
-	vtkNew<vtkActor> sectionActor;
+	vtkNew<vtkActor> linkActor;
+	vtkNew<vtkActor> soildActor;
 	vtkSmartPointer<vtkActor2D> pointLabelActor = vtkSmartPointer<vtkActor2D>::New();
 	vtkSmartPointer<vtkActor2D> elementLableActor = vtkSmartPointer<vtkActor2D>::New();
 
@@ -78,7 +80,8 @@ private:
 	// An interactor
 	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
 	vtkNew<vtkPoints> points;
-	vtkNew<vtkAppendPolyData> appendFilter;
+	vtkNew<vtkAppendPolyData> linkAppendFilter;
+	vtkNew<vtkAppendFilter> soildAppendFilter;
 
 
 	StructureFem* m_structure = new StructureFem();

@@ -856,7 +856,6 @@ void StructureFem::Analyse()
 	{
 		Element_Base* element = a.second;
 		Eigen::VectorXd combinedDisp;
-		cout << element->m_type << endl;
 		int dofPerNode = element->Get_DOF_Node(); // Assuming this returns the DOF per node
 		int dofNum = element->m_idNode.size() * dofPerNode;
 		combinedDisp.resize(dofNum);
