@@ -9,8 +9,11 @@
 class SoildElement_Base : public Element_Base
 {
 public:
-	int m_idMaterial;             // 材料号
-	double m_t;                  // 单元厚度 
+	int m_idMaterial;               // 材料号
+	double m_t;                     // 单元厚度
+	Eigen::VectorXd m_centerStress; //单元中心点的应力
+	std::vector<Eigen::VectorXd > m_Stress;
+	
 
 	// 初始化节点自由度
 	int Get_DOF_Node() override { m_dof = 2;  return 2;}
@@ -32,6 +35,9 @@ public:
 
 	// 计算单元应变矩阵
 	virtual void calculate_B() = 0;
+
+	// 计算应力矩阵
+	virtual void calculate_Stress(Eigen::VectorXd disp) = 0;
 
 	// 计算面积
 	virtual void calculate_volume() = 0;

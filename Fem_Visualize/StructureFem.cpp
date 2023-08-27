@@ -752,78 +752,6 @@ void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 	std::cout << "M22：" << "\n" << M22 << "\n";*/
 }
 
-void StructureFem::Equivalent_Force()
-{
-	for (auto a : m_Element)
-	{
-		LinkElement_Base* pElement = a.second;
-		Section_Base* pSection = Find_Section(pElement->m_idSection);
-		Section_Beam3D* pSectionBeam = dynamic_cast<Section_Beam3D*>(pSection);
-
-		NodeFem* startNode = Find_Node(pElement->m_idNode[0]);
-		NodeFem* endNode = Find_Node(pElement->m_idNode[1]);
-		double dx = startNode->m_x - endNode->m_x;
-		double dy = startNode->m_y - endNode->m_y;
-		double dz = startNode->m_z - endNode->m_z;
-		double L = std::sqrt(dx * dx + dy * dy + dz * dz);
-
-		double q = -9.8 * 7800 * pSectionBeam->m_Area;
-
-		VectorXd qVector(3);
-		qVector.setZero();
-		qVector(1) = q;
-
-		qVector = pElement->m_Lambda * qVector;
-
-		VectorXd x1(6);
-		VectorXd x2(6);
-		x1.setZero();
-		x2.setZero();
-
-		x1(1) = 1.0 / 2.0 * qVector(1) * L;
-		x1(5) = 1.0 / 12.0 * qVector(1) * L * L;
-		x2(1) = x1(1);
-		x2(5) = -x1(5);
-
-		x1(0) = 0.5 * qVector(0) * L;
-		x2(0) = 0.5 * qVector(0) * L;
-
-		x1(2) = 1.0 / 2.0 * qVector(2) * L;
-		x1(4) = -1.0 / 12.0 * qVector(2) * L * L;
-		x2(2) = x1(2);
-		x2(4) = -x1(4);
-
-		VectorXd equialentForce(12);
-		equialentForce << x1, x2;  // 组合等效外力矩阵
-
-		a.second->m_Force = equialentForce;
-
-		equialentForce = pElement->m_T.transpose() * equialentForce;
-
-		for (int i = 0; i < 6; i++)
-		{
-			if (equialentForce[i] != 0)
-			{
-				ForceNode* pForceNode = new ForceNode();
-				pForceNode->m_idNode = startNode->m_id;
-				pForceNode->m_ixyz = i;
-				pForceNode->m_id = m_ForceNode.size() + 1;
-				pForceNode->m_value = equialentForce[i];
-				m_ForceNode.insert({ pForceNode->m_id, pForceNode });
-			}
-			if (equialentForce[i + 6] != 0)
-			{
-				ForceNode* pForceNode = new ForceNode();
-				pForceNode->m_idNode = endNode->m_id;
-				pForceNode->m_ixyz = i;
-				pForceNode->m_id = m_ForceNode.size() + 1;
-				pForceNode->m_value = equialentForce[i + 6];
-				m_ForceNode.insert({ pForceNode->m_id, pForceNode });
-			}
-		}
-	}
-}
-
 void StructureFem::Assemble_xF(VectorXd& x1, VectorXd& F1, VectorXd& F2)
 {
 	x1.resize(m_nFixed);
@@ -858,8 +786,6 @@ void StructureFem::Analyse()
 	//std::cout << "M11(K11)：" << "\n" << M11 << "\n";
 	//std::cout << "M21(K21)：" << "\n" << M21 << "\n";
 	//std::cout << "M22(K22)：" << "\n" << M22 << "\n";
-
-	Equivalent_Force(); // 计算等效外力荷载
 
 	VectorXd x1, F1, F2;
 	Assemble_xF(x1, F1, F2);
@@ -941,8 +867,18 @@ void StructureFem::Analyse()
 			combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
 		}
 
-		//element->m_force = element->m_D * element->m_B * combinedDisp;
-		//cout << element->m_force << endl;
+		SoildElement_Base* soildElement = dynamic_cast<SoildElement_Base*>(element);
+		LinkElement_Base* linkElement = dynamic_cast<LinkElement_Base*>(element);
+
+		if (soildElement) 
+		{
+			soildElement->calculate_Stress(combinedDisp);
+		}
+		else if (linkElement) 
+		{
+			linkElement->calculate_internal_force(combinedDisp);
+		}
+			
 	}
 }
 

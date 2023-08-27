@@ -56,8 +56,6 @@ public:
 
 	void Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22);       //组装总纲矩阵
 
-	void Equivalent_Force(); // 将外部荷载等效到节点上
-
 	void Assemble_xF(VectorXd& x1, VectorXd& F1, VectorXd& F2);//形成x,F
 
 	void Analyse();       //分析计算

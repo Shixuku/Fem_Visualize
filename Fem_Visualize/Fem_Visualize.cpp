@@ -46,7 +46,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_datas("../data10.txt");
+	m_structure->Input_datas("../data9.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();
@@ -170,7 +170,7 @@ void Fem_Visualize::InitElement()
 			for (int i = 0; i < element.second->m_idNode.size(); i++)
 			{
 				NodeFem* node = m_structure->Find_Node(element.second->m_idNode[i]);
-				points->InsertNextPoint(node->m_x, node->m_y, node->m_z); // ¶¥µã0
+				points->InsertNextPoint(node->m_x, node->m_y, node->m_z); // ¶¥µã
 				std::cout << "m_x:" << node->m_x << " m_y:" << node->m_y << " m_z:" << node->m_z << std::endl;
 				hexahedron->GetPointIds()->SetId(i, i);
 			}

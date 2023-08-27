@@ -20,6 +20,8 @@ public:
 
 	void Input_Data(std::ifstream& fin);
 
+	void calculate_Stress(Eigen::VectorXd disp);
+
 	int Get_DOF_Node() override;
 
 	SoildElement_Tri2DS();

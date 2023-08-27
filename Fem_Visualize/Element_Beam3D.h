@@ -18,6 +18,8 @@ public:
 	void calculate_me()override;
 	void calculate_T()override;
 
+	void calculate_internal_force(Eigen::VectorXd disp)override;
+
 	void Equivalent_Force();
 
 	void calculate_all();

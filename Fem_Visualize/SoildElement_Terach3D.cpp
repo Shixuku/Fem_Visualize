@@ -127,6 +127,12 @@ int SoildElement_Terach3D::Get_DOF_Node()
 	return m_dof;
 }
 
+void SoildElement_Terach3D::calculate_Stress(Eigen::VectorXd disp)
+{
+	m_centerStress = m_D * m_B * disp;
+	cout << m_centerStress << endl;
+}
+
 Eigen::MatrixXd SoildElement_Terach3D::Remove(int rowToRemove, int colToRemove, Eigen::MatrixXd originalMatrix)
 {
 	int numRows = originalMatrix.rows();

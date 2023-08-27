@@ -100,6 +100,11 @@ void SoildElement_Tri2DS::Input_Data(std::ifstream& fin)
 	}
 }
 
+void SoildElement_Tri2DS::calculate_Stress(Eigen::VectorXd disp)
+{
+
+}
+
 int SoildElement_Tri2DS::Get_DOF_Node()
 {
 	m_dof = 2;

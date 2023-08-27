@@ -11,5 +11,6 @@ public:
 	void calculate_ke()override;
 	void calculate_me()override;
 	void calculate_T()override;
+	void calculate_internal_force(Eigen::VectorXd disp)override;
 };
 

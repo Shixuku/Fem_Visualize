@@ -227,6 +227,14 @@ void Element_Beam3D::calculate_T()
 	m_T = T;
 }
 
+void Element_Beam3D::calculate_internal_force(Eigen::VectorXd disp)
+{
+	disp = m_T * disp;
+
+	m_force = m_ke * disp - m_EqForce;
+	cout << m_force << endl;
+}
+
 void Element_Beam3D::Equivalent_Force()
 {
 	StructureFem* pSt = Get_Structure();
@@ -269,7 +277,7 @@ void Element_Beam3D::Equivalent_Force()
 	VectorXd equialentForce(12);
 	equialentForce << x1, x2;  // 组合等效外力矩阵
 
-	m_force = equialentForce;
+	m_EqForce = equialentForce;
 
 	equialentForce = m_T.transpose() * equialentForce;
 

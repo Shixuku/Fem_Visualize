@@ -22,6 +22,8 @@ public:
 
 	int Get_DOF_Node() override;
 
+	void calculate_Stress(Eigen::VectorXd disp);
+
 	Eigen::MatrixXd Remove(int rowToRemove, int colToRemove, Eigen::MatrixXd originalMatrix);
 
 	SoildElement_Terach3D();

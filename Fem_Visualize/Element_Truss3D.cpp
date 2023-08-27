@@ -64,3 +64,8 @@ void Element_Truss3D::calculate_T()
 {
 
 }
+
+void Element_Truss3D::calculate_internal_force(Eigen::VectorXd disp)
+{
+
+}

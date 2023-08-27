@@ -1,7 +1,6 @@
 #pragma once
 #include "SoildElement_Base.h"
 #include <tuple>
-#include <vector>
 class SoildElement_Brick3D :
     public SoildElement_Base
 {
@@ -26,6 +25,8 @@ public:
 	void Input_Data(std::ifstream& fin);
 
 	int Get_DOF_Node() override;
+
+	void calculate_Stress(Eigen::VectorXd disp);
 
 	SoildElement_Brick3D();
 	SoildElement_Brick3D(int id, std::vector<int> idNodes);

@@ -201,6 +201,36 @@ int SoildElement_Brick3D::Get_DOF_Node()
 	return 3;
 }
 
+void SoildElement_Brick3D::calculate_Stress(Eigen::VectorXd disp)
+{
+	Eigen::VectorXd node(3);
+	Eigen::MatrixXd B(6,24);
+	node << 0, 0, 0;
+	auto result = calculate_B(node);
+	B = std::get<0>(result);
+	m_centerStress = m_D * B * disp;
+
+	for (int i = 0; i < 8; ++i) {
+		node.setZero();
+		switch (i) 
+		{
+		case 0: node << -1.0, -1.0, -1.0; break;
+		case 1: node << 1.0, -1.0, -1.0; break;
+		case 2: node << 1.0, 1.0, -1.0; break;
+		case 3: node << -1.0, 1.0, -1.0; break;
+		case 4: node << -1.0, -1.0, 1.0; break;
+		case 5: node << 1.0, -1.0, 1.0; break;
+		case 6: node << 1.0, 1.0, 1.0; break;
+		case 7: node << -1.0, 1.0, 1.0; break;
+		default: break;
+		}
+
+		auto result = calculate_B(node);
+		B = std::get<0>(result);
+		m_Stress.push_back(m_D * B * disp);
+	}
+}
+
 SoildElement_Brick3D::SoildElement_Brick3D()
 {
 	m_type = "Brick";
