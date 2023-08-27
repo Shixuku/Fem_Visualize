@@ -16,11 +16,18 @@
 #include <vtkLabelPlacementMapper.h>
 #include <vtkFreeTypeLabelRenderStrategy.h>
 #include <vtkPolyData.h>
+#include <vtkHexahedron.h>
+#include <vtkTetra.h>
+#include <vtkAppendFilter.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkDataSetMapper.h>
 #include <vtkRenderer.h>
+#include <vtkPointData.h>
 #include "Boundary.h"
 #include "VisualizeWindow.h"
 #include "Element_Beam3D.h"
 #include "Section_Beam3D.h"
+#include "Element_Base.h"
 
 using namespace std;
 
@@ -130,6 +137,7 @@ void Fem_Visualize::InitElement()
 	int startNodeIndex;
 	int endNodeIndex;
 
+	vtkNew<vtkAppendFilter> fiter;
 	for (auto element : m_structure->m_Elements)
 	{
 		startNodeIndex = element.second->m_idNode.at(0);
@@ -154,23 +162,73 @@ void Fem_Visualize::InitElement()
 		label->InsertNextValue(std::to_string(element.second->m_id));
 
 		CreateRecSection(0.2, 0.1, startPoint, endPoint);
+
+		if (element.second->m_type == "Brick")
+		{
+			vtkNew<vtkPoints> points;
+			vtkNew<vtkHexahedron> hexahedron;
+			for (int i = 0; i < element.second->m_idNode.size(); i++)
+			{
+				NodeFem* node = m_structure->Find_Node(element.second->m_idNode[i]);
+				points->InsertNextPoint(node->m_x, node->m_y, node->m_z); // ¶¥µã0
+				std::cout << "m_x:" << node->m_x << " m_y:" << node->m_y << " m_z:" << node->m_z << std::endl;
+				hexahedron->GetPointIds()->SetId(i, i);
+			}
+
+			// Add the hexahedron to a cell array.
+			vtkNew<vtkCellArray> hexs;
+			hexs->InsertNextCell(hexahedron);
+
+			// Add the points and hexahedron to an unstructured grid.
+			vtkNew<vtkUnstructuredGrid> uGrid;
+			uGrid->SetPoints(points);
+			uGrid->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
+
+			fiter->AddInputData(uGrid);
+		}
+
+		if (element.second->m_type == "Tetra")
+		{
+			vtkNew<vtkPoints> points;
+			vtkNew<vtkTetra> tetra;
+			for (int i = 0; i < element.second->m_idNode.size(); i++)
+			{
+				NodeFem* node = m_structure->Find_Node(element.second->m_idNode[i]);
+				points->InsertNextPoint(node->m_x, node->m_y, node->m_z); // ¶¥µã0
+				std::cout << "m_x:" << node->m_x << " m_y:" << node->m_y << " m_z:" << node->m_z << std::endl;
+				tetra->GetPointIds()->SetId(i, i);
+			}
+
+			// Add the hexahedron to a cell array.
+			vtkNew<vtkCellArray> cells;
+			cells->InsertNextCell(tetra);
+
+			// Add the points and hexahedron to an unstructured grid.
+			vtkNew<vtkUnstructuredGrid> uGrid;
+			uGrid->SetPoints(points);
+			uGrid->InsertNextCell(tetra->GetCellType(), tetra->GetPointIds());
+			fiter->AddInputData(uGrid);
+		}
+		appendFilter->Update();
 	}
 
 	label->SetName("Labels");
 	GeneraterLable(pts, label, elementLableActor);
-	cout << "array sizes:" << label->GetSize() << std::endl;
 
 	vtkNew<vtkPolyData> polyData;
 	polyData->SetPoints(points);
 	polyData->SetLines(cellArray);
 
-	vtkNew<vtkDoubleArray> stress;
-	stress->SetNumberOfComponents(1);
-	stress->InsertNextValue(10);
-	stress->InsertNextValue(20);
-	stress->InsertNextValue(5);
-	stress->InsertNextValue(60);
+	//vtkNew<vtkDoubleArray> stress;
+	//stress->SetNumberOfComponents(1);
+	//stress->InsertNextValue(10);
+	//stress->InsertNextValue(20);
+	//stress->InsertNextValue(5);
+	//stress->InsertNextValue(60);
 	//polyData->GetPointData()->SetScalars(stress);
+
+	vtkNew<vtkDataSetMapper> elemnetMapper;
+	elemnetMapper->SetInputConnection(fiter->GetOutputPort());
 
 	vtkNew<vtkPolyDataMapper> lineMapper;
 	lineMapper->SetInputData(polyData);
@@ -193,7 +251,9 @@ void Fem_Visualize::InitElement()
 	lineActor->GetProperty()->SetLineWidth(3);
 	lineActor->GetProperty()->SetColor(0, 0, 1);
 
-	sectionActor->SetMapper(mapper);
+	sectionActor->SetMapper(elemnetMapper);
+	sectionActor->GetProperty()->SetEdgeColor(0, 0, 0);
+	sectionActor->GetProperty()->EdgeVisibilityOn();
 
 	sectionActor->GetProperty()->SetLineWidth(2);
 

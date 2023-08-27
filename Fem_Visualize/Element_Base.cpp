@@ -14,6 +14,7 @@ void Element_Base::Set_NodeDOF()
 		if (pNode->m_DOF.size() < nDOF_Node)
 		{
 			pNode->m_DOF.resize(nDOF_Node);
+			pNode->m_Displacement.resize(nDOF_Node);
 		}
 	}
 }

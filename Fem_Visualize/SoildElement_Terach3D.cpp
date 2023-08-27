@@ -152,6 +152,7 @@ Eigen::MatrixXd SoildElement_Terach3D::Remove(int rowToRemove, int colToRemove, 
 SoildElement_Terach3D::SoildElement_Terach3D()
 {
 	m_idNode.resize(4);
+	m_type = "Tetra";
 }
 
 SoildElement_Terach3D::SoildElement_Terach3D(int id, int node1, int node2, int node3, int node4)

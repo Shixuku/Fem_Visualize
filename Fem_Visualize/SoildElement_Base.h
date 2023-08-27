@@ -9,12 +9,8 @@
 class SoildElement_Base : public Element_Base
 {
 public:
-	Eigen::MatrixXd m_B;         // 单元应变矩阵
-	Eigen::MatrixXd m_D;         // 单元本构矩阵
-	Eigen::VectorXd m_Stress;    // 单元应力
 	int m_idMaterial;             // 材料号
-	double m_t;                  // 单元厚度  
-	std::string m_type;          // 单元类型
+	double m_t;                  // 单元厚度 
 
 	// 初始化节点自由度
 	int Get_DOF_Node() override { m_dof = 2;  return 2;}

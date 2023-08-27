@@ -137,6 +137,10 @@ void SoildElement_Brick3D::calculate_volume()
 void SoildElement_Brick3D::calculate_all()
 {
 	calculate_D();
+	Eigen::VectorXd node(3);
+	node << 0, 0, 0;
+	auto result = calculate_B(node);
+	m_B = std::get<0>(result);
 	calculate_ke();
 }
 
@@ -199,6 +203,7 @@ int SoildElement_Brick3D::Get_DOF_Node()
 
 SoildElement_Brick3D::SoildElement_Brick3D()
 {
+	m_type = "Brick";
 	m_idNode.resize(8);
 	m_ke.resize(24, 24);
 	m_ke.setZero();
@@ -208,6 +213,7 @@ SoildElement_Brick3D::SoildElement_Brick3D(int id, std::vector<int> idNodes)
 {
 	*this = SoildElement_Brick3D();
 	m_id = id;
+	m_type = "Brick";
 	for (int i = 0; i < idNodes.size(); i++)
 	{
 		m_idNode[i] = idNodes[i];

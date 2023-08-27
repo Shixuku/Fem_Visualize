@@ -901,7 +901,6 @@ void StructureFem::Analyse()
 	std::cout << "\nx2=\n" << m_x2 << "\n";
 	std::cout << "\nR1=\n" << R1 << "\n"<<"\n";
 
-
 	for (auto& a : m_Nodes)
 	{
 		NodeFem* pNode = a.second;
@@ -927,22 +926,24 @@ void StructureFem::Analyse()
 		}
 	}
 
-	//for (auto& a : m_Elements)
-	//{
-	//	NodeFem* startNode = Find_Node(a.second->m_idNode[0]);
-	//	NodeFem* endNode = Find_Node(a.second->m_idNode[1]);
+	for (auto& a : m_Elements)
+	{
+		Element_Base* element = a.second;
+		Eigen::VectorXd combinedDisp;
+		cout << element->m_type << endl;
+		int dofPerNode = element->Get_DOF_Node(); // Assuming this returns the DOF per node
+		int dofNum = element->m_idNode.size() * dofPerNode;
+		combinedDisp.resize(dofNum);
 
-	//	Eigen::VectorXd combinedDisp(12);
-	//	// 单元两个节点的位移
-	//	combinedDisp << startNode->m_Displacement, endNode->m_Displacement;
-	//	// 通过节点位移计算单元力
-	//	Eigen::VectorXd Force(12);
-	//	// 将整体坐标系下的位移转换到单元坐标下
-	//	combinedDisp = a.second->m_T * combinedDisp;
+		for (int i = 0; i < a.second->m_idNode.size(); i++)
+		{
+			NodeFem* node = Find_Node(a.second->m_idNode[i]);
+			combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
+		}
 
-	//	// ke * u - Feq 为梁单元两端内力
-	//	Force = a.second->m_ke * combinedDisp - a.second->m_Force;
-	//}
+		//element->m_force = element->m_D * element->m_B * combinedDisp;
+		//cout << element->m_force << endl;
+	}
 }
 
 StructureFem::~StructureFem()

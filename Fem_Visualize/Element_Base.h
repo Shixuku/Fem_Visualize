@@ -10,6 +10,9 @@ public:
 	int m_idSection;             //截面号
 	Eigen::MatrixXd m_ke;		 // 单元刚度矩阵
 	Eigen::MatrixXd m_me;		 // 单元质量矩阵
+	Eigen::MatrixXd m_B;         // 单元应变矩阵
+	Eigen::MatrixXd m_D;         // 单元本构矩阵
+	Eigen::VectorXd m_force;	 // 单元内力
 	double m_dim;                // 单元维度
 	double m_volume;             // 单元体积，一维单元返回长度，二维单元返回面积
 	double m_dof;				 // 单元自由度

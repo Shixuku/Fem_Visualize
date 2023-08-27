@@ -269,7 +269,7 @@ void Element_Beam3D::Equivalent_Force()
 	VectorXd equialentForce(12);
 	equialentForce << x1, x2;  // 组合等效外力矩阵
 
-	m_Force = equialentForce;
+	m_force = equialentForce;
 
 	equialentForce = m_T.transpose() * equialentForce;
 
