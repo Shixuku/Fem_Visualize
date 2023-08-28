@@ -21,6 +21,9 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Header Files\VisualWindow">
+      <UniqueIdentifier>{e5db1349-13dd-47c3-9bd0-cace12a313e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Fem_Visualize.qrc">
@@ -29,9 +32,6 @@
     <QtUic Include="Fem_Visualize.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="Fem_Visualize.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClCompile Include="Fem_Visualize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,6 +88,42 @@
     <ClCompile Include="DisplacementWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SoildElement_Base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Brick3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Terach3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Tri2DS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildSection_Base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkElement_Base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeckWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RopeWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TowerWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BridgeProperty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SectionProperty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -123,13 +159,40 @@
     <ClInclude Include="StructureFem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VisualizeWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Section_Truss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Element_Truss3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkElement_Base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildElement_Base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildElement_Brick3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildElement_Terach3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildElement_Tri2DS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildSection_Base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualizeWindow.h">
+      <Filter>Header Files\VisualWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionProperty.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BridgeProperty.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeDisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -140,13 +203,34 @@
     <QtUic Include="DisplacementWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="RopeWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="DeckWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="TowerWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReactionForceWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="DisplacementWindow.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\VisualWindow</Filter>
+    </QtMoc>
+    <QtMoc Include="Fem_Visualize.h">
+      <Filter>Header Files\VisualWindow</Filter>
+    </QtMoc>
+    <QtMoc Include="DeckWindow.h">
+      <Filter>Header Files\VisualWindow</Filter>
+    </QtMoc>
+    <QtMoc Include="TowerWindow.h">
+      <Filter>Header Files\VisualWindow</Filter>
+    </QtMoc>
+    <QtMoc Include="RopeWindow.h">
+      <Filter>Header Files\VisualWindow</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

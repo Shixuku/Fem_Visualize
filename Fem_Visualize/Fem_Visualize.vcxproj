@@ -89,22 +89,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BridgeProperty.cpp" />
+    <ClCompile Include="DeckWindow.cpp" />
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
     <ClCompile Include="ReactionForceWindow.cpp" />
+    <ClCompile Include="RopeWindow.cpp" />
+    <ClCompile Include="SectionProperty.cpp" />
     <ClCompile Include="Section_Base.cpp" />
     <ClCompile Include="Section_Beam3D.cpp" />
     <ClCompile Include="Section_Truss.cpp" />
+    <ClCompile Include="ShapeDisplay.cpp" />
     <ClCompile Include="SoildElement_Base.cpp" />
     <ClCompile Include="SoildElement_Brick3D.cpp" />
     <ClCompile Include="SoildElement_Terach3D.cpp" />
     <ClCompile Include="SoildElement_Tri2DS.cpp" />
     <ClCompile Include="SoildSection_Base.cpp" />
     <ClCompile Include="StructureFem.cpp" />
+    <ClCompile Include="TowerWindow.cpp" />
     <ClCompile Include="VisualizeWindow.cpp" />
     <QtRcc Include="Fem_Visualize.qrc" />
+    <QtUic Include="DeckWindow.ui" />
     <QtUic Include="DisplacementWindow.ui" />
     <QtUic Include="Fem_Visualize.ui" />
     <QtMoc Include="Fem_Visualize.h" />
@@ -118,9 +125,13 @@
     <ClCompile Include="ForceNode.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="ReactionForceWindow.ui" />
+    <QtUic Include="RopeWindow.ui" />
+    <QtUic Include="TowerWindow.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h" />
+    <QtMoc Include="DeckWindow.h" />
+    <ClInclude Include="BridgeProperty.h" />
     <ClInclude Include="Dependant.h" />
     <QtMoc Include="DisplacementWindow.h" />
     <ClInclude Include="Element_Base.h" />
@@ -132,15 +143,19 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="NodeFem.h" />
     <QtMoc Include="ReactionForceWindow.h" />
+    <QtMoc Include="RopeWindow.h" />
+    <ClInclude Include="SectionProperty.h" />
     <ClInclude Include="Section_Base.h" />
     <ClInclude Include="Section_Beam3D.h" />
     <ClInclude Include="Section_Truss.h" />
+    <ClInclude Include="ShapeDisplay.h" />
     <ClInclude Include="SoildElement_Base.h" />
     <ClInclude Include="SoildElement_Brick3D.h" />
     <ClInclude Include="SoildElement_Terach3D.h" />
     <ClInclude Include="SoildElement_Tri2DS.h" />
     <ClInclude Include="SoildSection_Base.h" />
     <ClInclude Include="StructureFem.h" />
+    <QtMoc Include="TowerWindow.h" />
     <ClInclude Include="VisualizeWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
