@@ -662,23 +662,27 @@ void BridgeProperty::GenerateInclinedRopes(vtkSmartPointer<vtkPoints> deckPoints
 	ropeAppendFilter->Update();
 }
 
-void BridgeProperty::GenerateInclinedRopes_2(vtkSmartPointer<vtkPoints> deckPoints, vtkSmartPointer<vtkPoints> towerPoints, vtkSmartPointer<vtkPoints> ropeShapePoints, QString sectionShape)
+vtkSmartPointer<vtkPoints> BridgeProperty::GenerateInclinedRopes_2(vtkSmartPointer<vtkPoints> deckPoints, vtkSmartPointer<vtkPoints> towerPoints, vtkSmartPointer<vtkPoints> ropeShapePoints, QString shapeSection)
 {
 	double startPoint[3];
 	double endPoint[3];
 	int pointNum = deckPoints->GetNumberOfPoints() < towerPoints->GetNumberOfPoints() ?
 		deckPoints->GetNumberOfPoints() : towerPoints->GetNumberOfPoints();
+	vtkSmartPointer<vtkPoints> ropePoints = vtkSmartPointer<vtkPoints>::New();
 	for (vtkIdType i = 0; i < pointNum - 1; i++)
 	{
 		vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 		deckPoints->GetPoint(i + 1, startPoint);
 		towerPoints->GetPoint(towerPoints->GetNumberOfPoints() - i - 2, endPoint);
 
+		ropePoints->InsertNextPoint(startPoint);
+		ropePoints->InsertNextPoint(endPoint);
+
 		// 将原始的截面点复制给临时对象
 		vtkSmartPointer<vtkPoints> tempPoints = vtkSmartPointer<vtkPoints>::New();
 		tempPoints->DeepCopy(ropeShapePoints);
 
-		ChooseCreateSectionShape(tempPoints, polyData, startPoint, endPoint, sectionShape);
+		ChooseCreateSectionShape(tempPoints, polyData, startPoint, endPoint, shapeSection);
 		g_PolyDataList.push_back(polyData);
 
 		// Create linear extrusion filter for the first cross-sectional shape
@@ -693,6 +697,7 @@ void BridgeProperty::GenerateInclinedRopes_2(vtkSmartPointer<vtkPoints> deckPoin
 		ropeAppendFilter->AddInputConnection(extrude->GetOutputPort());
 	}
 	ropeAppendFilter->Update();
+	return ropePoints;
 }
 
 void BridgeProperty::VisualPoint(vtkSmartPointer<vtkActor> actor)

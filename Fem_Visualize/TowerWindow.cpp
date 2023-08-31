@@ -86,31 +86,29 @@ void TowerWindow::OnSureButtonClicked()
 	towerBridge->GenerateBridgeTower_2(baseHeight, towerBridge->rightTowerPoints, startPoint, towerShapePoint, towerSectionShape);
 	towerBridge->PrintPoint(towerBridge->rightTowerPoints);
 
-	vtkSmartPointer<vtkPoints> leftTowerPierPoints = vtkSmartPointer<vtkPoints>::New();
 	towerBridge->leftTowerPoints->GetPoint(0, startPoint);
 	startPoint[1] -= baseHeight;
-	leftTowerPierPoints->InsertNextPoint(startPoint);
+	towerBridge->leftTowerPierPoints->InsertNextPoint(startPoint);
 	towerBridge->leftTowerPoints->GetPoint(0, startPoint);
-	leftTowerPierPoints->InsertNextPoint(startPoint);
+	towerBridge->leftTowerPierPoints->InsertNextPoint(startPoint);
 
-	vtkSmartPointer<vtkPoints> rigntTowerPierPoints = vtkSmartPointer<vtkPoints>::New();
 	towerBridge->rightTowerPoints->GetPoint(0, startPoint);
 	startPoint[1] -= baseHeight;
-	rigntTowerPierPoints->InsertNextPoint(startPoint);
+	towerBridge->rightTowerPierPoints->InsertNextPoint(startPoint);
 	towerBridge->rightTowerPoints->GetPoint(0, startPoint);
-	rigntTowerPierPoints->InsertNextPoint(startPoint);
+	towerBridge->rightTowerPierPoints->InsertNextPoint(startPoint);
 
 	towerBridge->towerLineDisplay->CreateCell(towerBridge->leftTowerPoints);
 	towerBridge->towerLineDisplay->CreateCell(towerBridge->rightTowerPoints);
-	towerBridge->towerLineDisplay->CreateCell(leftTowerPierPoints);
-	towerBridge->towerLineDisplay->CreateCell(rigntTowerPierPoints);
+	towerBridge->towerLineDisplay->CreateCell(towerBridge->leftTowerPierPoints);
+	towerBridge->towerLineDisplay->CreateCell(towerBridge->rightTowerPierPoints);
 	towerBridge->towerLineDisplay->LinkActor();
 
-	// 将点加入一个集合中
+	// 将点加入一个集合中（先塔腿后塔）
+	towerBridge->MergePoints(towerBridge->leftTowerPierPoints);
 	towerBridge->MergePoints(towerBridge->leftTowerPoints);
-	towerBridge->MergePoints(leftTowerPierPoints);
+	towerBridge->MergePoints(towerBridge->rightTowerPierPoints);
 	towerBridge->MergePoints(towerBridge->rightTowerPoints);
-	towerBridge->MergePoints(rigntTowerPierPoints);
 
 	// 输出所有点的坐标
 	for (vtkIdType i = 0; i < towerBridge->appendPoints->GetNumberOfPoints(); ++i) {

@@ -138,26 +138,28 @@ void Fem_Visualize::InitNodes()
 {
 	// Get a point point in the set
 	double inSet[3];
-	vtkNew<vtkPolyData> points;
-	points->SetPoints(bridge->appendPoints);
+	vtkNew<vtkPolyData> polyData;
+	polyData->SetPoints(bridge->appendPoints);
 
-	std::cout << "There are " << points->GetNumberOfPoints() << " input points."
+	std::cout << "There are " << polyData->GetNumberOfPoints() << " input points."
 		<< std::endl;
 
 	vtkIdType id;
 
 	// Insert all of the points
 	vtkNew<vtkMergePoints> mergePoints;
-	mergePoints->SetDataSet(points);
+	mergePoints->SetDataSet(polyData);
 	mergePoints->SetDivisions(10, 10, 10);
-	mergePoints->InitPointInsertion(points->GetPoints(), points->GetBounds());
+	mergePoints->InitPointInsertion(polyData->GetPoints(), polyData->GetBounds());
 
 	//清空Node map 容器
 	m_structure->m_Nodes.clear();
+	//清空points
+	points->Reset();
 	int inserted;
-	for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i++)
+	for (vtkIdType i = 0; i < polyData->GetNumberOfPoints(); i++)
 	{
-		points->GetPoint(i, inSet);
+		polyData->GetPoint(i, inSet);
 		inserted = mergePoints->InsertUniquePoint(inSet, id);
 		std::cout << "\tPoint: " << inSet[0] << ", " << inSet[1] << ", " << inSet[2]
 			<< " ";
@@ -166,6 +168,7 @@ void Fem_Visualize::InitNodes()
 			int idNode = (int)id;
 			m_structure->m_Nodes.insert(
 				make_pair(idNode, new NodeFem(idNode, inSet[0], inSet[1], inSet[2])));
+			points->InsertNextPoint(inSet);
 		}
 		std::cout << "Inserted? " << ((inserted == 0) ? "No, " : "Yes, ");
 		std::cout << "Id:: " << id << std::endl;
@@ -330,25 +333,92 @@ void Fem_Visualize::InitElement()
 
 void Fem_Visualize::InitElements()
 {
-	double inSet[3];
-	vtkNew<vtkPolyData> points;
-	points->SetPoints(bridge->appendPoints);
+	vtkNew<vtkPolyData> polyData;
+	polyData->SetPoints(bridge->appendPoints);
 
-	std::cout << "There are " << points->GetNumberOfPoints() << " input points."
+	std::cout << "There are " << polyData->GetNumberOfPoints() << " input points."
 		<< std::endl;
-
-	vtkIdType id;
 
 	// Insert all of the points
 	vtkNew<vtkMergePoints> mergePoints;
-	mergePoints->SetDataSet(points);
+	mergePoints->SetDataSet(polyData);
 	mergePoints->SetDivisions(10, 10, 10);
-	mergePoints->InitPointInsertion(points->GetPoints(), points->GetBounds());
+	mergePoints->InitPointInsertion(polyData->GetPoints(), polyData->GetBounds());
 
 	m_structure->m_Elements.clear();
-	int inserted;
 	int elementId = 1;
-	for (int i = 0 ; i < bridge->leftDeckPoints->GetNumberOfPoints() - 1; i++)
+
+	// 生成桥面板单元
+	GennerateBeamElement(mergePoints, bridge->leftDeckPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->centerLeftDeckPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->centerRightDeckPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->rightDeckPoints, elementId);
+
+	// 生成桥塔单元
+	GennerateBeamElement(mergePoints, bridge->leftTowerPierPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->leftTowerPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->rightTowerPierPoints, elementId);
+	GennerateBeamElement(mergePoints, bridge->rightTowerPoints, elementId);
+
+	// 生成斜拉索单元
+	GennerateRopeElement(mergePoints, bridge->leftRopePoints, elementId);
+	GennerateRopeElement(mergePoints, bridge->centerLeftRopePoints, elementId);
+	GennerateRopeElement(mergePoints, bridge->centerRightRopePoints, elementId);
+	GennerateRopeElement(mergePoints, bridge->rightRopePoints, elementId);
+
+	bridge->PrintPoint(bridge->leftDeckPoints);
+	bridge->PrintPoint(bridge->centerLeftDeckPoints);
+	bridge->PrintPoint(bridge->centerRightDeckPoints);
+	bridge->PrintPoint(bridge->rightDeckPoints);
+
+	renderer->RemoveAllViewProps();
+
+	vtkNew<vtkCellArray> cellArray;
+
+	for (auto a : m_structure->m_Elements)
+	{
+		Element_Base* element = a.second;
+		vtkNew<vtkLine> line;
+		line->GetPointIds()->SetId(0, element->m_idNode[0]);
+		line->GetPointIds()->SetId(1, element->m_idNode[1]);
+		cellArray->InsertNextCell(line);
+	}
+
+	vtkNew<vtkPolyData> lineData;
+	lineData->SetPoints(points);
+	lineData->SetLines(cellArray);
+
+	vtkNew<vtkPolyDataMapper> mapper;
+	mapper->SetInputData(lineData);
+
+	vtkNew<vtkActor> actor;
+	actor->SetMapper(mapper);
+	actor->GetProperty()->SetPointSize(5);
+
+	vtkNew<vtkVertexGlyphFilter> vertexFiliter;
+	vertexFiliter->SetInputData(lineData);
+
+	vtkNew<vtkPolyDataMapper> vertexMapper;
+	vertexMapper->SetInputConnection(vertexFiliter->GetOutputPort());
+
+	vtkNew<vtkActor> vertexActor;
+	vertexActor->SetMapper(vertexMapper);
+	vertexActor->GetProperty()->SetColor(1, 0, 0);
+	vertexActor->GetProperty()->SetPointSize(5);
+
+	renderer->AddActor(actor);
+	renderer->AddActor(vertexActor);
+
+	this->ui.widget->GetRenderWindow()->Render();
+}
+
+void Fem_Visualize::GennerateBeamElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId)
+{
+	int inserted;
+	double inSet[3];
+	vtkIdType id;
+	// 仅针对梁单元模型
+	for (int i = 0; i < points->GetNumberOfPoints() - 1; i++)
 	{
 		Element_Beam3D* element = new Element_Beam3D();
 		points->GetPoint(i, inSet);
@@ -361,13 +431,27 @@ void Fem_Visualize::InitElements()
 		elementId++;
 		m_structure->m_Elements.insert(make_pair(elementId, element));
 	}
+}
 
-	for (auto a : m_structure->m_Elements)
+void Fem_Visualize::GennerateRopeElement(vtkMergePoints* mergePoints, vtkPoints* points, int& elementId)
+{
+	int inserted;
+	double inSet[3];
+	vtkIdType id;
+	// 仅针对梁单元模型
+	for (int i = 0; i < points->GetNumberOfPoints() - 2; i +=2)
 	{
-		Element_Base* element = a.second;
-		std::cout << element->m_id << std::endl;
+		Element_Beam3D* element = new Element_Beam3D();
+		points->GetPoint(i, inSet);
+		inserted = mergePoints->InsertUniquePoint(inSet, id);
+		element->m_idNode[0] = id;
+		points->GetPoint(i + 1, inSet);
+		inserted = mergePoints->InsertUniquePoint(inSet, id);
+		element->m_idNode[1] = id;
+		element->m_id = elementId;
+		elementId++;
+		m_structure->m_Elements.insert(make_pair(elementId, element));
 	}
-
 }
 
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)

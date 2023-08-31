@@ -34,6 +34,10 @@ public:
     void InitElement();
 	void InitElements();
 
+	void GennerateBeamElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId);
+
+	void GennerateRopeElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId);
+
 	/* ¹¹½¨Ðý×ª¾ØÕó */
 	void ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix);
 

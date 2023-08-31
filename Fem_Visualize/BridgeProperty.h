@@ -101,7 +101,7 @@ public:
 	void GenerateInclinedRopes(vtkSmartPointer<vtkPoints> deckPoints, vtkSmartPointer<vtkPoints> towerPoints);
 
 	/* 创建斜拉索 */
-	void GenerateInclinedRopes_2(vtkSmartPointer<vtkPoints> deckPoints, vtkSmartPointer<vtkPoints> towerPoints, vtkSmartPointer<vtkPoints> ropeShapePoints, QString shapeSection);
+	vtkSmartPointer<vtkPoints> GenerateInclinedRopes_2(vtkSmartPointer<vtkPoints> deckPoints, vtkSmartPointer<vtkPoints> towerPoints, vtkSmartPointer<vtkPoints> ropeShapePoints, QString shapeSection);
 
 	/* 节点可视化*/
 	void VisualPoint(vtkSmartPointer<vtkActor> actor);
@@ -127,11 +127,19 @@ public:
 	vtkSmartPointer<vtkAppendPolyData> deckEdgesAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 
 	vtkSmartPointer<vtkPoints> leftDeckPoints = vtkSmartPointer<vtkPoints>::New();
-	vtkSmartPointer<vtkPoints> leftTowerPoints = vtkSmartPointer<vtkPoints>::New();
-	vtkSmartPointer<vtkPoints> rightTowerPoints = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkPoints> centerLeftDeckPoints = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkPoints> centerRightDeckPoints = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkPoints> rightDeckPoints = vtkSmartPointer<vtkPoints>::New();
+
+	vtkSmartPointer<vtkPoints> leftTowerPoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> rightTowerPoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> rightTowerPierPoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> leftTowerPierPoints = vtkSmartPointer<vtkPoints>::New();
+
+	vtkSmartPointer<vtkPoints> leftRopePoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> centerLeftRopePoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> centerRightRopePoints = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkPoints> rightRopePoints = vtkSmartPointer<vtkPoints>::New();
 
 	vtkNew<vtkMergePoints> mergePoints;
 	vtkNew<vtkPoints> appendPoints;

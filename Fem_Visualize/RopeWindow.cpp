@@ -56,8 +56,8 @@ void RopeWindow::OnSureButtonClicked()
 	QString ropeSectionShape = "Tube";
 
 	// 生成斜拉索
-	ropeBridge->GenerateInclinedRopes_2(ropeBridge->leftDeckPoints, ropeBridge->leftTowerPoints, ropeShapePoint, ropeSectionShape);
-
+	ropeBridge->leftRopePoints = ropeBridge->GenerateInclinedRopes_2
+	(ropeBridge->leftDeckPoints, ropeBridge->leftTowerPoints, ropeShapePoint, ropeSectionShape);
 
 	// 生成斜拉索
 	vtkSmartPointer<vtkPoints> newPoints = vtkSmartPointer<vtkPoints>::New();
@@ -67,10 +67,12 @@ void RopeWindow::OnSureButtonClicked()
 		ropeBridge->centerLeftDeckPoints->GetPoint(i, point);
 		newPoints->SetPoint(j, point);
 	}
-	ropeBridge->GenerateInclinedRopes_2(newPoints, ropeBridge->leftTowerPoints, ropeShapePoint, ropeSectionShape);
+	ropeBridge->centerLeftRopePoints = ropeBridge->GenerateInclinedRopes_2
+	(newPoints, ropeBridge->leftTowerPoints, ropeShapePoint, ropeSectionShape);
 
 	// 生成斜拉索
-	ropeBridge->GenerateInclinedRopes_2(ropeBridge->centerRightDeckPoints, ropeBridge->rightTowerPoints, ropeShapePoint, ropeSectionShape);
+	ropeBridge->centerRightRopePoints = ropeBridge->GenerateInclinedRopes_2
+	(ropeBridge->centerRightDeckPoints, ropeBridge->rightTowerPoints, ropeShapePoint, ropeSectionShape);
 
 	// 生成斜拉索
 	newPoints->SetNumberOfPoints(ropeBridge->rightDeckPoints->GetNumberOfPoints());
@@ -79,7 +81,8 @@ void RopeWindow::OnSureButtonClicked()
 		ropeBridge->rightDeckPoints->GetPoint(i, point);
 		newPoints->SetPoint(j, point);
 	}
-	ropeBridge->GenerateInclinedRopes_2(newPoints, ropeBridge->rightTowerPoints, ropeShapePoint, ropeSectionShape);
+	ropeBridge->rightRopePoints = ropeBridge->GenerateInclinedRopes_2
+	(newPoints, ropeBridge->rightTowerPoints, ropeShapePoint, ropeSectionShape);
 
 	vtkSmartPointer<vtkPolyDataMapper> ropeMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	// Create a mapper and actor for the 3D shape
