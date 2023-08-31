@@ -27,16 +27,19 @@
 #include <vtkFeatureEdges.h>
 #include <vtkNamedColors.h>
 #include <vtkProperty.h>
+#include <vtkAppendPoints.h>
 #include <vtkSphereSource.h>
 #include <vtkGlyph3D.h>
 #include <vtkTubeFilter.h>
 #include <vtkPolygon.h>
 #include <vtkDelaunay2D.h>
+#include <vtkMergePoints.h>
 #include <vector>
 #include <sstream>
 #include <string>
 #include "qstring.h"
 #include "ShapeDisplay.h"
+#include "EntityBase.h"
 
 using namespace std;
 
@@ -44,7 +47,7 @@ VTK_MODULE_INIT(vtkRenderingOpenGL2)
 VTK_MODULE_INIT(vtkInteractionStyle)
 VTK_MODULE_INIT(vtkRenderingFreeType)
 
-class BridgeProperty
+class BridgeProperty : public EntityBase
 {
 public:
 	BridgeProperty();
@@ -112,6 +115,8 @@ public:
 	/* ´òÓ¡½Úµã */
 	void PrintPoint(vtkSmartPointer<vtkPoints> points);
 
+	void MergePoints(vtkSmartPointer<vtkPoints> points);
+
 public:
 	vector<vtkSmartPointer<vtkPolyData>> g_PolyDataList;
 	vector<vtkSmartPointer<vtkLinearExtrusionFilter>> g_ExtrusionList;
@@ -119,7 +124,7 @@ public:
 	vtkSmartPointer<vtkAppendPolyData> deckAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 	vtkSmartPointer<vtkAppendPolyData> towerAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 	vtkSmartPointer<vtkAppendPolyData> ropeAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
-	vtkSmartPointer<vtkAppendPolyData> duckEdgesAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
+	vtkSmartPointer<vtkAppendPolyData> deckEdgesAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 
 	vtkSmartPointer<vtkPoints> leftDeckPoints = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkPoints> leftTowerPoints = vtkSmartPointer<vtkPoints>::New();
@@ -128,7 +133,8 @@ public:
 	vtkSmartPointer<vtkPoints> centerRightDeckPoints = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkPoints> rightDeckPoints = vtkSmartPointer<vtkPoints>::New();
 
-	vtkSmartPointer<vtkRenderer> bridgeRender = vtkSmartPointer<vtkRenderer>::New();
+	vtkNew<vtkMergePoints> mergePoints;
+	vtkNew<vtkPoints> appendPoints;
 
 	LineDisplay* deckLineDisplay = new LineDisplay();
 	LineDisplay* towerLineDisplay = new LineDisplay();

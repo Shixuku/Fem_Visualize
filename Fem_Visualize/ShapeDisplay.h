@@ -12,6 +12,7 @@
 #include <vtkPolyLine.h>
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
+#include <vtkVertexGlyphFilter.h>
 #include <QDebug>
 
 class ShapeDisplay

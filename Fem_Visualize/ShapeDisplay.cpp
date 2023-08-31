@@ -27,8 +27,11 @@ void LineDisplay::CreateCell(vtkSmartPointer<vtkPoints> points)
 	polyData->SetPoints(points);
 	polyData->SetLines(cellArray);
 
-	qDebug() << "cell numbers" << polyData->GetNumberOfCells();
+	vtkNew<vtkVertexGlyphFilter> vertexfilter;
+	vertexfilter->AddInputData(polyData);
+	vertexfilter->Update();
 
+	appendPolyData->AddInputConnection(vertexfilter->GetOutputPort());
 	appendPolyData->AddInputData(polyData);
 	appendPolyData->Update();
 }
@@ -40,6 +43,7 @@ void LineDisplay::LinkActor()
 
 	//actor->GetProperty()->SetLineWidth(2);
 	actor->GetProperty()->SetColor(0, 0, 1.0);
+	actor->GetProperty()->SetPointSize(5);
 }
 
 vtkSmartPointer<vtkActor> ShapeDisplay::GetActor()

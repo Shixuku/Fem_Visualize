@@ -106,12 +106,19 @@ void TowerWindow::OnSureButtonClicked()
 	towerBridge->towerLineDisplay->CreateCell(rigntTowerPierPoints);
 	towerBridge->towerLineDisplay->LinkActor();
 
+	// 将点加入一个集合中
+	towerBridge->MergePoints(towerBridge->leftTowerPoints);
+	towerBridge->MergePoints(leftTowerPierPoints);
+	towerBridge->MergePoints(towerBridge->rightTowerPoints);
+	towerBridge->MergePoints(rigntTowerPierPoints);
 
-	towerBridge->towerPointDisplay->CreateCell(towerBridge->leftTowerPoints);
-	towerBridge->towerPointDisplay->CreateCell(towerBridge->rightTowerPoints);
-	towerBridge->towerPointDisplay->CreateCell(leftTowerPierPoints);
-	towerBridge->towerPointDisplay->CreateCell(rigntTowerPierPoints);
-	towerBridge->towerPointDisplay->LinkActor();
+	// 输出所有点的坐标
+	for (vtkIdType i = 0; i < towerBridge->appendPoints->GetNumberOfPoints(); ++i) {
+		double point[3];
+		towerBridge->appendPoints->GetPoint(i, point);
+		std::cout << "Point " << i << ": (" << point[0] << ", " << point[1] << ", " << point[2] << ")" << std::endl;
+	}
+
 
 	vtkSmartPointer<vtkPolyDataMapper> towerMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	// Create a mapper and actor for the 3D shape

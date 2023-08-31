@@ -21,8 +21,35 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
-    <Filter Include="Header Files\VisualWindow">
+    <Filter Include="Header Files\Fem_Base">
+      <UniqueIdentifier>{c7463ffa-8331-4651-bb5c-dfb755805024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Element">
+      <UniqueIdentifier>{dde7c28d-e5b1-4dcf-80c0-bc8404908dbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Section">
+      <UniqueIdentifier>{fad039a2-c09a-4001-9ce1-caa2682fab65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Window">
       <UniqueIdentifier>{e5db1349-13dd-47c3-9bd0-cace12a313e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Visualize">
+      <UniqueIdentifier>{525d38a6-7454-4e74-af3d-9f262fb037bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Fem_Base">
+      <UniqueIdentifier>{ca93eb10-fb0c-41ba-9443-f157a713b7a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Element">
+      <UniqueIdentifier>{020335c5-77e4-4113-bac6-5dd38dce891e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Section">
+      <UniqueIdentifier>{634b51ff-8f69-4855-9213-8fe0a19f2eb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Visualize">
+      <UniqueIdentifier>{a07f3612-30f5-41d7-96c3-feef8ef753e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Window">
+      <UniqueIdentifier>{5dc39c25-a5f2-48de-91e5-e2204fcbfa5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -32,168 +59,162 @@
     <QtUic Include="Fem_Visualize.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <ClCompile Include="Fem_Visualize.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Boundary.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependant.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityBase.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ForceNode.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeFem.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="StructureFem.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Element_Truss3D.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="Element_Base.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="Element_Beam3D.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Tri2DS.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Base.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Brick3D.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildElement_Terach3D.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkElement_Base.cpp">
+      <Filter>Source Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="Section_Base.cpp">
+      <Filter>Source Files\Section</Filter>
+    </ClCompile>
+    <ClCompile Include="Section_Beam3D.cpp">
+      <Filter>Source Files\Section</Filter>
+    </ClCompile>
+    <ClCompile Include="Section_Truss.cpp">
+      <Filter>Source Files\Section</Filter>
+    </ClCompile>
+    <ClCompile Include="SoildSection_Base.cpp">
+      <Filter>Source Files\Section</Filter>
+    </ClCompile>
+    <ClCompile Include="DeckWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplacementWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="TowerWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="RopeWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Fem_Visualize.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="ReactionForceWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeDisplay.cpp">
+      <Filter>Source Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="SectionProperty.cpp">
+      <Filter>Source Files\Visualize</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Boundary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependant.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Element_Base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Element_Beam3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Element_Truss3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ForceNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NodeFem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Section_Base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Section_Beam3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Section_Truss.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StructureFem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VisualizeWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReactionForceWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DisplacementWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoildElement_Base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoildElement_Brick3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoildElement_Terach3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoildElement_Tri2DS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SoildSection_Base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LinkElement_Base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DeckWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RopeWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TowerWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BridgeProperty.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SectionProperty.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShapeDisplay.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Visualize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="Dependant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Element_Base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Element_Beam3D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="EntityBase.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="ForceNode.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="NodeFem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
-    <ClInclude Include="Section_Base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Section_Beam3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StructureFem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Section_Truss.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Element_Beam3D.h">
+      <Filter>Header Files\Element</Filter>
     </ClInclude>
     <ClInclude Include="Element_Truss3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LinkElement_Base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SoildElement_Base.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Element</Filter>
     </ClInclude>
     <ClInclude Include="SoildElement_Brick3D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="SoildElement_Base.h">
+      <Filter>Header Files\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkElement_Base.h">
+      <Filter>Header Files\Element</Filter>
     </ClInclude>
     <ClInclude Include="SoildElement_Terach3D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Element</Filter>
     </ClInclude>
     <ClInclude Include="SoildElement_Tri2DS.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="Section_Truss.h">
+      <Filter>Header Files\Section</Filter>
+    </ClInclude>
+    <ClInclude Include="Section_Beam3D.h">
+      <Filter>Header Files\Section</Filter>
     </ClInclude>
     <ClInclude Include="SoildSection_Base.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Section</Filter>
     </ClInclude>
-    <ClInclude Include="VisualizeWindow.h">
-      <Filter>Header Files\VisualWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="SectionProperty.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="StructureFem.h">
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
     <ClInclude Include="BridgeProperty.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionProperty.h">
+      <Filter>Header Files\Visualize</Filter>
     </ClInclude>
     <ClInclude Include="ShapeDisplay.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="Element_Base.h">
+      <Filter>Header Files\Element</Filter>
+    </ClInclude>
+    <ClInclude Include="Section_Base.h">
+      <Filter>Header Files\Section</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -214,23 +235,23 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="ReactionForceWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="DisplacementWindow.h">
-      <Filter>Header Files\VisualWindow</Filter>
+      <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="Fem_Visualize.h">
-      <Filter>Header Files\VisualWindow</Filter>
+      <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="DeckWindow.h">
-      <Filter>Header Files\VisualWindow</Filter>
+      <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="TowerWindow.h">
-      <Filter>Header Files\VisualWindow</Filter>
+      <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="RopeWindow.h">
-      <Filter>Header Files\VisualWindow</Filter>
+      <Filter>Header Files\Window</Filter>
+    </QtMoc>
+    <QtMoc Include="ReactionForceWindow.h">
+      <Filter>Header Files\Window</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

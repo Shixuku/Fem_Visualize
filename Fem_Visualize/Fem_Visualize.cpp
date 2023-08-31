@@ -23,12 +23,19 @@
 #include <vtkDataSetMapper.h>
 #include <vtkRenderer.h>
 #include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+#include <vtkLine.h>
+#include <vtkMergePoints.h>
+#include <vtkCellArray.h>
 #include "Boundary.h"
-#include "VisualizeWindow.h"
 #include "Element_Beam3D.h"
 #include "Section_Beam3D.h"
 #include "Element_Base.h"
+#include "NodeFem.h"
+#include <vtkVertexGlyphFilter.h>
+#include <QStandardItemModel>
 
+#include <map>
 using namespace std;
 
 Fem_Visualize::Fem_Visualize(QWidget *parent)
@@ -36,7 +43,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 {
     ui.setupUi(this);
 
-	this->setFixedSize(1200, 800);
+	showMaximized();
 
 	renderer->SetGradientBackground(true);
 	renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
@@ -62,9 +69,17 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	connect(displacement, &DisplacementWindow::signalSendForceType,
 		this, &Fem_Visualize::onSendDispType);
 	
+
+	//SetRenderWidget();
+	SetTreeWidget();
+
+	connect(deckWindow, &DeckWindow::SignalShowDeckModel, this, &Fem_Visualize::onShowDeckModel);
+	connect(towerWindow, &TowerWindow::SignalShowTowerModel, this, &Fem_Visualize::onShowTowerModel);
+	connect(ropeWindow, &RopeWindow::SignalShowRopeModel, this, &Fem_Visualize::onShowRopeModel);
 	//VisualizeWindow* window = new VisualizeWindow(ss);
 	//ShowDisplacement();
 	//ShowAxialForces();
+
 }
 
 Fem_Visualize::~Fem_Visualize()
@@ -118,6 +133,51 @@ void Fem_Visualize::InitNode(std::map<int, NodeFem*> nodes)
 	renderer->AddActor(actor);
 	//renderer->AddActor(pointLabelActor);
 }
+
+void Fem_Visualize::InitNodes()
+{
+	// Get a point point in the set
+	double inSet[3];
+	vtkNew<vtkPolyData> points;
+	points->SetPoints(bridge->appendPoints);
+
+	std::cout << "There are " << points->GetNumberOfPoints() << " input points."
+		<< std::endl;
+
+	vtkIdType id;
+
+	// Insert all of the points
+	vtkNew<vtkMergePoints> mergePoints;
+	mergePoints->SetDataSet(points);
+	mergePoints->SetDivisions(10, 10, 10);
+	mergePoints->InitPointInsertion(points->GetPoints(), points->GetBounds());
+
+	//清空Node map 容器
+	m_structure->m_Nodes.clear();
+	int inserted;
+	for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i++)
+	{
+		points->GetPoint(i, inSet);
+		inserted = mergePoints->InsertUniquePoint(inSet, id);
+		std::cout << "\tPoint: " << inSet[0] << ", " << inSet[1] << ", " << inSet[2]
+			<< " ";
+		if (inserted != 0)
+		{
+			int idNode = (int)id;
+			m_structure->m_Nodes.insert(
+				make_pair(idNode, new NodeFem(idNode, inSet[0], inSet[1], inSet[2])));
+		}
+		std::cout << "Inserted? " << ((inserted == 0) ? "No, " : "Yes, ");
+		std::cout << "Id:: " << id << std::endl;
+	}
+
+	for (int i = 0; i < m_structure->m_Nodes.size(); i++)
+	{
+		NodeFem* node = m_structure->m_Nodes[i];
+		std::cout << "id:" << node->m_id << " x:" << node->m_x << " y:" << node->m_y << " z:" << node->m_z << std::endl;
+	} 
+}
+
 
 void Fem_Visualize::InitElement()
 {
@@ -266,6 +326,48 @@ void Fem_Visualize::InitElement()
 
 	renderer->AddActor(scalarBar);
 	renderer->AddActor(elementLableActor);
+}
+
+void Fem_Visualize::InitElements()
+{
+	double inSet[3];
+	vtkNew<vtkPolyData> points;
+	points->SetPoints(bridge->appendPoints);
+
+	std::cout << "There are " << points->GetNumberOfPoints() << " input points."
+		<< std::endl;
+
+	vtkIdType id;
+
+	// Insert all of the points
+	vtkNew<vtkMergePoints> mergePoints;
+	mergePoints->SetDataSet(points);
+	mergePoints->SetDivisions(10, 10, 10);
+	mergePoints->InitPointInsertion(points->GetPoints(), points->GetBounds());
+
+	m_structure->m_Elements.clear();
+	int inserted;
+	int elementId = 1;
+	for (int i = 0 ; i < bridge->leftDeckPoints->GetNumberOfPoints() - 1; i++)
+	{
+		Element_Beam3D* element = new Element_Beam3D();
+		points->GetPoint(i, inSet);
+		inserted = mergePoints->InsertUniquePoint(inSet, id);
+		element->m_idNode[0] = id;
+		points->GetPoint(i + 1, inSet);
+		inserted = mergePoints->InsertUniquePoint(inSet, id);
+		element->m_idNode[1] = id;
+		element->m_id = elementId;
+		elementId++;
+		m_structure->m_Elements.insert(make_pair(elementId, element));
+	}
+
+	for (auto a : m_structure->m_Elements)
+	{
+		Element_Base* element = a.second;
+		std::cout << element->m_id << std::endl;
+	}
+
 }
 
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)
@@ -750,4 +852,160 @@ void Fem_Visualize::onSendDispType()
 		break;
 	}
 	std::cout << "\n\n";
+}
+
+void Fem_Visualize::onShowDeckModel()
+{
+	renderer->RemoveAllViewProps();
+	renderer->AddActor(bridge->deckPointDisplay->GetActor());
+	renderer->AddActor(bridge->deckLineDisplay->GetActor());
+
+	//cout << "numbers of cells" << bridge->deckLineDisplay->GetActor()->GetMapper()->GetOutputPort()->.
+	ui.widget->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
+	ui.widget->GetRenderWindow()->Render();
+}
+
+void Fem_Visualize::onShowTowerModel()
+{
+	renderer->RemoveAllViewProps();
+	renderer->AddActor(bridge->deckLineDisplay->GetActor());
+	renderer->AddActor(bridge->towerLineDisplay->GetActor());
+
+	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
+	renderWindow->AddRenderer(renderer);
+	renderWindow->Render();
+
+	ui.widget->update();
+}
+
+
+void Fem_Visualize::onShowRopeModel()
+{
+	renderer->RemoveAllViewProps();
+	renderer->AddActor(bridge->deckLineDisplay->GetActor());
+	renderer->AddActor(ropeWindow->ropeActor);
+	renderer->AddActor(bridge->towerLineDisplay->GetActor());
+
+	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
+	renderWindow->AddRenderer(renderer);
+	renderWindow->Render();
+	InitNodes();
+	InitElements();
+	ui.widget->update();
+}
+
+void Fem_Visualize::onHiddenOrShowModel()
+{
+	static bool isPressed = false;
+
+	if (isPressed)
+	{
+		onShowRopeModel();
+	}
+	else
+	{
+		renderer->RemoveAllViewProps();
+		renderer->AddActor(deckWindow->deckActor);
+		renderer->AddActor(towerWindow->towerActor);
+		renderer->AddActor(ropeWindow->ropeActor);
+
+		renderer->SetGradientBackground(true);
+		renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
+		renderer->SetBackground(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
+
+		vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
+		renderWindow->AddRenderer(renderer);
+		renderWindow->Render();
+
+		ui.widget->update();
+	}
+
+	isPressed = !isPressed;
+}
+
+void Fem_Visualize::ShowDeckWindow()
+{
+	deckWindow->exec();
+}
+
+void Fem_Visualize::ShowTowerWindow()
+{
+	towerWindow->exec();
+}
+
+void Fem_Visualize::ShowRopeWindow()
+{
+	ropeWindow->exec();
+}
+
+void Fem_Visualize::SetTreeWidget()
+{
+	ui.treeView->header()->hide();
+	ui.treeView->setUniformRowHeights(true);
+	ui.treeView->setStyleSheet("QTreeView::item { height: 50px; }");
+
+	// 添加树状菜单的数据模型
+	QStandardItemModel* model = new QStandardItemModel(this);
+	QStandardItem* rootItem = model->invisibleRootItem();
+	QStandardItem* item1 = new QStandardItem(tr("Model Build"));
+	QStandardItem* sectionItem = new QStandardItem(tr("Model Generate"));
+	QStandardItem* deckItem = new QStandardItem(tr("Deck Build"));
+	deckItem->setData("Deck", Qt::UserRole);
+	QStandardItem* towerItem = new QStandardItem(tr("Tower Build"));
+	towerItem->setData("Tower", Qt::UserRole);
+	QStandardItem* ropeItem = new QStandardItem(tr("Rope Build"));
+	ropeItem->setData("Rope", Qt::UserRole);
+	item1->appendRow(deckItem);
+	item1->appendRow(towerItem);
+	item1->appendRow(ropeItem);
+	rootItem->appendRow(item1);
+	rootItem->appendRow(sectionItem);
+
+	ui.treeView->setModel(model);
+
+	// 禁止编辑树状菜单
+	ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	// 连接树状菜单的信号和槽，实现点击展开
+	connect(ui.treeView, &QTreeView::clicked, ui.treeView, &QTreeView::expand);
+	connect(ui.treeView, &QTreeView::clicked, this, &Fem_Visualize::onHandleItemClick);
+}
+
+void Fem_Visualize::SetRenderWidget()
+{
+	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer->SetGradientBackground(true);
+	renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
+	renderer->SetBackground(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
+
+	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
+	renderWindow->AddRenderer(renderer);
+}
+
+void Fem_Visualize::SetMenuWidget()
+{
+
+}
+
+void Fem_Visualize::onHandleItemClick(const QModelIndex& index)
+{
+	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui.treeView->model());
+	QStandardItem* item = model->itemFromIndex(index);
+	if (item)
+	{
+		QVariant data = item->data(Qt::UserRole); // 获取item的标识符
+		QString function = data.toString();
+		if (function == "Deck") {
+			// 执行函数1
+			ShowDeckWindow();
+		}
+		else if (function == "Tower") {
+			// 执行函数2
+			ShowTowerWindow();
+		}
+		else if (function == "Rope") {
+			// 执行函数3
+			ShowRopeWindow();
+		}
+	}
 }

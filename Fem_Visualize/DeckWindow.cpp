@@ -1,5 +1,6 @@
 #include "DeckWindow.h"
 #include "SectionProperty.h"
+#include <vtkAppendPoints.h>
 //#include "MainWindow.h"
 #include "QDebug"
 
@@ -81,7 +82,7 @@ void DeckWindow::OnSureButtonClicked()
 
 	vtkSmartPointer<vtkPolyDataMapper> boundMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	// Create a mapper and actor for the 3D shape
-	boundMapper->SetInputConnection(deckBridge->duckEdgesAppendFilter->GetOutputPort());
+	boundMapper->SetInputConnection(deckBridge->deckEdgesAppendFilter->GetOutputPort());
 
 	deckBridge->PrintPoint(deckBridge->leftDeckPoints);
 	deckBridge->PrintPoint(deckBridge->centerLeftDeckPoints);
@@ -92,12 +93,21 @@ void DeckWindow::OnSureButtonClicked()
 	deckBridge->deckLineDisplay->CreateCell(deckBridge->rightDeckPoints);
 	deckBridge->deckLineDisplay->LinkActor();
 
-	deckBridge->deckPointDisplay->CreateCell(deckBridge->centerLeftDeckPoints);
-	deckBridge->deckPointDisplay->CreateCell(deckBridge->centerRightDeckPoints);
-	deckBridge->deckPointDisplay->CreateCell(deckBridge->leftDeckPoints);
-	deckBridge->deckPointDisplay->CreateCell(deckBridge->rightDeckPoints);
-	deckBridge->deckPointDisplay->LinkActor();
+	// 将点加入一个集合中
+	deckBridge->MergePoints(deckBridge->leftDeckPoints);
+	deckBridge->MergePoints(deckBridge->centerLeftDeckPoints);
+	deckBridge->MergePoints(deckBridge->centerRightDeckPoints);
+	deckBridge->MergePoints(deckBridge->rightDeckPoints);
 
+
+	// 输出所有点的坐标
+	for (vtkIdType i = 0; i < deckBridge->appendPoints->GetNumberOfPoints(); ++i) {
+		double point[3];
+		deckBridge->appendPoints->GetPoint(i, point);
+		std::cout << "Point " << i << ": (" << point[0] << ", " << point[1] << ", " << point[2] << ")" << std::endl;
+	}
+
+	// 桥面板截面形状actor编辑
 	deckActor->SetVisibility(1);
 	deckActor->GetProperty()->SetColor(0.5, 0.75, 1.0);
 	deckActor->GetProperty()->SetOpacity(0.5); // Set opacity to 0.5

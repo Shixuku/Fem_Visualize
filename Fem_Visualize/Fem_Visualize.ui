@@ -16,58 +16,39 @@
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4">
    <item>
     <widget class="QWidget" name="widget_2" native="true">
-     <widget class="QPushButton" name="pushButtonDis">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>161</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>变形</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonShow">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>70</y>
-        <width>161</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>消隐</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonForce">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>130</y>
-        <width>161</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>轴力</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButtonRea">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>190</y>
-        <width>161</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>反力</string>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButtonDis">
+        <property name="text">
+         <string>变形</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonShow">
+        <property name="text">
+         <string>消隐</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonForce">
+        <property name="text">
+         <string>轴力</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonRea">
+        <property name="text">
+         <string>反力</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeView" name="treeView"/>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

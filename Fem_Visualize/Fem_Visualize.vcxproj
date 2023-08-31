@@ -109,7 +109,6 @@
     <ClCompile Include="SoildSection_Base.cpp" />
     <ClCompile Include="StructureFem.cpp" />
     <ClCompile Include="TowerWindow.cpp" />
-    <ClCompile Include="VisualizeWindow.cpp" />
     <QtRcc Include="Fem_Visualize.qrc" />
     <QtUic Include="DeckWindow.ui" />
     <QtUic Include="DisplacementWindow.ui" />
@@ -156,7 +155,6 @@
     <ClInclude Include="SoildSection_Base.h" />
     <ClInclude Include="StructureFem.h" />
     <QtMoc Include="TowerWindow.h" />
-    <ClInclude Include="VisualizeWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

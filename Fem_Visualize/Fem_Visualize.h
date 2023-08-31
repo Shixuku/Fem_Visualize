@@ -14,6 +14,11 @@
 #include "ui_Fem_Visualize.h"
 #include "ReactionForceWindow.h"
 #include "DisplacementWindow.h"
+#include "DeckWindow.h"
+#include "TowerWindow.h"
+#include "RopeWindow.h"
+#include "BridgeProperty.h"
+
 
 class Fem_Visualize : public QWidget
 {
@@ -25,7 +30,9 @@ public:
 
     void SetRenderWindow();
 	void InitNode(std::map<int, NodeFem*> nodes);
+	void InitNodes();
     void InitElement();
+	void InitElements();
 
 	/* ¹¹½¨Ðý×ª¾ØÕó */
 	void ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix);
@@ -88,6 +95,31 @@ private:
 	ReactionForceWindow* reactionForce = new ReactionForceWindow();
 	DisplacementWindow* displacement = new DisplacementWindow();
 
+
+	BridgeProperty* bridge = new BridgeProperty();
+	DeckWindow* deckWindow = new DeckWindow(bridge, this);
+	TowerWindow* towerWindow = new TowerWindow(bridge, this);
+	RopeWindow* ropeWindow = new RopeWindow(bridge, this);
+
+private slots:
+	void onShowDeckModel();
+	void onShowTowerModel();
+	void onShowRopeModel();
+	void onHiddenOrShowModel();
+
+
+private:
+	void ShowDeckWindow();
+	void ShowTowerWindow();
+	void ShowRopeWindow();
+
+
+	void SetTreeWidget();
+	void SetRenderWidget();
+	void SetMenuWidget();
+
+
+	void onHandleItemClick(const QModelIndex& index);
 	enum ForceType {
 		FX,
 		FY,

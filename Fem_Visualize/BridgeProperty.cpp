@@ -524,10 +524,10 @@ void BridgeProperty::GenerateBridgeDecks(vtkSmartPointer<vtkPoints> deckPoints, 
 		}
 
 		deckAppendFilter->AddInputConnection(extrude->GetOutputPort());
-		duckEdgesAppendFilter->AddInputConnection(featureEdges->GetOutputPort());
+		deckEdgesAppendFilter->AddInputConnection(featureEdges->GetOutputPort());
 	}
 	deckAppendFilter->Update();
-	duckEdgesAppendFilter->Update();
+	deckEdgesAppendFilter->Update();
 }
 
 void BridgeProperty::GenerateBridgeTower(double towerHeight, vtkSmartPointer<vtkPoints> towerPoint, double point[3])
@@ -777,6 +777,15 @@ void BridgeProperty::PrintPoint(vtkSmartPointer<vtkPoints> points)
 		double point[3];
 		points->GetPoint(i, point);
 		qDebug() << "Point " << i << ": (" << point[0] << ", " << point[1] << ", " << point[2] << ")";
+	}
+}
+
+void BridgeProperty::MergePoints(vtkSmartPointer<vtkPoints> points)
+{
+	for (vtkIdType i = 0; i < points->GetNumberOfPoints(); ++i) {
+		double point[3];
+		points->GetPoint(i, point);
+		appendPoints->InsertNextPoint(point);
 	}
 }
 
