@@ -51,7 +51,6 @@ void DeckWindow::OnSureButtonClicked()
 	deckBridge->GeneratePoints(outPut, "x", startPoint, deckBridge->leftDeckPoints);
 	deckBridge->GenerateBridgeDecks(deckBridge->leftDeckPoints, deckShapePoint, deckSectionShape);
 
-
 	// 生成中左桥面板
 	outPut = deckBridge->GenerateCoordinateString(ui.textCenterLeftDeck->text().toStdString());
 	deckBridge->leftDeckPoints->GetPoint(deckBridge->leftDeckPoints->GetNumberOfPoints() - 1, startPoint);

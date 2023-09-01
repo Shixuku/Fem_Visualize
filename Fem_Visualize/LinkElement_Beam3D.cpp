@@ -1,10 +1,10 @@
-#include "Element_Beam3D.h"
+#include "LinkElement_Beam3D.h"
 #include "Section_Beam3D.h"
 #include "StructureFem.h"
 #include "ForceNode.h"
 #include "NodeFem.h"
 
-Element_Beam3D::Element_Beam3D()
+LinkElement_Beam3D::LinkElement_Beam3D()
 {
 	m_idNode.resize(2);
 	m_e1.resize(3);
@@ -13,15 +13,15 @@ Element_Beam3D::Element_Beam3D()
 	m_type = "Beam";
 }
 
-Element_Beam3D::Element_Beam3D(int id, int idNode1, int idNode2)
+LinkElement_Beam3D::LinkElement_Beam3D(int id, int idNode1, int idNode2)
 {
-	*this = Element_Beam3D();
+	*this = LinkElement_Beam3D();
 	m_idNode[0] = idNode1;
 	m_idNode[1] = idNode2;
 	m_id = id;
 }
 
-void Element_Beam3D::Input_Data(std::ifstream& fin)
+void LinkElement_Beam3D::Input_Data(std::ifstream& fin)
 {
 	fin >> m_id;
 	for (auto& a : m_idNode)
@@ -33,7 +33,7 @@ void Element_Beam3D::Input_Data(std::ifstream& fin)
 	fin >> m_g(2);
 }
 
-void Element_Beam3D::Disp()
+void LinkElement_Beam3D::Disp()
 {//Ωÿ√Ê–≈œ¢
 	std::cout << m_id << " " << m_idSection << " ";
 	int nNode = m_idNode.size();
@@ -47,7 +47,7 @@ void Element_Beam3D::Disp()
 }
 
 
-void Element_Beam3D::calculate_ke()
+void LinkElement_Beam3D::calculate_ke()
 {
 	Eigen::MatrixXd ke(12, 12);
 	StructureFem* pSt = Get_Structure();
@@ -123,7 +123,7 @@ void Element_Beam3D::calculate_ke()
 	m_ke = ke;
 }
 
-void Element_Beam3D::calculate_me()
+void LinkElement_Beam3D::calculate_me()
 {
 	Eigen::MatrixXd me(12, 12);
 	StructureFem* pSt = Get_Structure();
@@ -164,7 +164,7 @@ void Element_Beam3D::calculate_me()
 	m_me = me;
 }
 
-void Element_Beam3D::calculate_T()
+void LinkElement_Beam3D::calculate_T()
 {
 	StructureFem* pSt = Get_Structure();
 	MatrixXd lambda(3, 3);
@@ -228,14 +228,14 @@ void Element_Beam3D::calculate_T()
 	m_T = T;
 }
 
-void Element_Beam3D::calculate_internal_force(Eigen::VectorXd disp)
+void LinkElement_Beam3D::calculate_internal_force(Eigen::VectorXd disp)
 {
 	disp = m_T * disp;
 
 	m_force = m_ke * disp - m_EqForce;
 }
 
-void Element_Beam3D::Equivalent_Force()
+void LinkElement_Beam3D::Equivalent_Force()
 {
 	StructureFem* pSt = Get_Structure();
 	Section_Base* pSection = pSt->Find_Section(m_idSection);
@@ -304,7 +304,7 @@ void Element_Beam3D::Equivalent_Force()
 	}
 }
 
-void Element_Beam3D::calculate_all()
+void LinkElement_Beam3D::calculate_all()
 {
 	calculate_T();
 	calculate_ke();

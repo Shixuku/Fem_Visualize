@@ -28,10 +28,12 @@
 #include <vtkMergePoints.h>
 #include <vtkCellArray.h>
 #include "Boundary.h"
-#include "Element_Beam3D.h"
+#include "LinkElement_Beam3D.h"
 #include "Section_Beam3D.h"
+#include "LinkElement_Truss3D.h"
 #include "Element_Base.h"
 #include "NodeFem.h"
+#include "Material.h"
 #include <vtkVertexGlyphFilter.h>
 #include <QStandardItemModel>
 
@@ -53,7 +55,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_datas("../data9.txt");
+	m_structure->Input_datas("../data13.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();
@@ -420,7 +422,7 @@ void Fem_Visualize::GennerateBeamElement(vtkMergePoints *mergePoints, vtkPoints 
 	// 仅针对梁单元模型
 	for (int i = 0; i < points->GetNumberOfPoints() - 1; i++)
 	{
-		Element_Beam3D* element = new Element_Beam3D();
+		LinkElement_Beam3D* element = new LinkElement_Beam3D();
 		points->GetPoint(i, inSet);
 		inserted = mergePoints->InsertUniquePoint(inSet, id);
 		element->m_idNode[0] = id;
@@ -438,10 +440,9 @@ void Fem_Visualize::GennerateRopeElement(vtkMergePoints* mergePoints, vtkPoints*
 	int inserted;
 	double inSet[3];
 	vtkIdType id;
-	// 仅针对梁单元模型
 	for (int i = 0; i < points->GetNumberOfPoints() - 2; i +=2)
 	{
-		Element_Beam3D* element = new Element_Beam3D();
+		LinkElement_Truss3D* element = new LinkElement_Truss3D();
 		points->GetPoint(i, inSet);
 		inserted = mergePoints->InsertUniquePoint(inSet, id);
 		element->m_idNode[0] = id;
@@ -452,6 +453,37 @@ void Fem_Visualize::GennerateRopeElement(vtkMergePoints* mergePoints, vtkPoints*
 		elementId++;
 		m_structure->m_Elements.insert(make_pair(elementId, element));
 	}
+}
+
+void Fem_Visualize::InitMaterial()
+{
+	m_structure->m_Material.clear();
+	double density = 7800;
+	double E = 2.1e8;
+	double possion = 0.3;
+	int id = 1;
+
+	Material* pMaiterial = new Material(id, E, possion, density);
+	m_structure->m_Material.insert(make_pair(id, pMaiterial));
+}
+
+void Fem_Visualize::InitSections()
+{
+	m_structure->m_Section.clear();
+	int materialId = 1;
+	int sectionId = 1;
+	double area = 3.141593e-2;
+	double Iy = 7.853982e-5;
+	double Iz = 7.853982e-5;
+
+	Section_Beam3D *pSection = new Section_Beam3D(sectionId, materialId, area, Iy, Iz);
+	m_structure->m_Section.insert(make_pair(sectionId, pSection));
+}
+
+void Fem_Visualize::InitBoundarys()
+{
+	m_structure->m_Boundary.clear();
+
 }
 
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)

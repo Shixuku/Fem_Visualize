@@ -31,12 +31,17 @@ public:
     void SetRenderWindow();
 	void InitNode(std::map<int, NodeFem*> nodes);
 	void InitNodes();
+
     void InitElement();
 	void InitElements();
-
 	void GennerateBeamElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId);
-
 	void GennerateRopeElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId);
+
+	void InitMaterial();
+
+	void InitSections();
+
+	void InitBoundarys();
 
 	/* ¹¹½¨Ðý×ª¾ØÕó */
 	void ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix);

@@ -1,7 +1,7 @@
 #include "StructureFem.h"
 #include "NodeFem.h"
-#include "Element_Truss3D.h"
-#include "Element_Beam3D.h"
+#include "LinkElement_Truss3D.h"
+#include "LinkElement_Beam3D.h"
 #include "Element_Base.h"
 #include "SoildElement_Tri2DS.h"
 #include "SoildElement_Terach3D.h"
@@ -105,7 +105,7 @@ void StructureFem::Input_data(const char* filename)
 	}
 	for (int i = 0; i < nTruss3D; ++i)
 	{
-		Element_Truss3D* pTruss = new Element_Truss3D;
+		LinkElement_Truss3D* pTruss = new LinkElement_Truss3D;
 		pTruss->Input_Data(fin);
 		pTruss->Disp();
 		m_Elements.insert({ pTruss->m_id ,pTruss });
@@ -121,7 +121,7 @@ void StructureFem::Input_data(const char* filename)
 	}
 	for (int i = 0; i < nBeam3D; i++)
 	{
-		Element_Beam3D* pElement = new Element_Beam3D;
+		LinkElement_Beam3D* pElement = new LinkElement_Beam3D;
 		pElement->Input_Data(fin);
 		pElement->Disp();
 		m_Elements.insert({ pElement->m_id ,pElement });
@@ -376,7 +376,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				qDebug() << idEle << "  " << idNode1 << " " << idNode2;//输出，以便检查
 				//保存到模型数据库
 
-				pStructure->m_Elements.insert(make_pair(idEle, new Element_Truss3D(idEle, idNode1, idNode2)));
+				pStructure->m_Elements.insert(make_pair(idEle, new LinkElement_Truss3D(idEle, idNode1, idNode2)));
 			}
 		}
 
@@ -401,7 +401,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				int idNode2 = strlist_ele[2].toInt();
 				qDebug() << idEle << "  " << idNode1 << " " << idNode2;//输出，以便检查
 
-				pStructure->m_Elements.insert(make_pair(idEle, new Element_Beam3D(idEle, idNode1, idNode2)));
+				pStructure->m_Elements.insert(make_pair(idEle, new LinkElement_Beam3D(idEle, idNode1, idNode2)));
 			}
 		}
 
@@ -492,7 +492,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				pStructure->m_Material.insert(make_pair(idMat, new Material(idMat, elasticity, poisson, density)));
 			}
 		}
-		else if (list_str[0].compare("*Section_Truss", Qt::CaseInsensitive) == 0)
+		else if (list_str[0].compare("*Section_Truss3D", Qt::CaseInsensitive) == 0)
 		{//读取到空间杆截面
 			Q_ASSERT(list_str.size() == 2);
 			int nSecT = list_str[1].toInt();//得到杆截面数个数，可控制后续循环次数

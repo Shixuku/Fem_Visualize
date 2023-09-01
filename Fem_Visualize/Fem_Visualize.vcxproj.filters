@@ -82,13 +82,13 @@
     <ClCompile Include="StructureFem.cpp">
       <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
-    <ClCompile Include="Element_Truss3D.cpp">
+    <ClCompile Include="LinkElement_Truss3D.cpp">
       <Filter>Source Files\Element</Filter>
     </ClCompile>
     <ClCompile Include="Element_Base.cpp">
       <Filter>Source Files\Element</Filter>
     </ClCompile>
-    <ClCompile Include="Element_Beam3D.cpp">
+    <ClCompile Include="LinkElement_Beam3D.cpp">
       <Filter>Source Files\Element</Filter>
     </ClCompile>
     <ClCompile Include="SoildElement_Tri2DS.cpp">
@@ -168,10 +168,10 @@
     <ClInclude Include="NodeFem.h">
       <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
-    <ClInclude Include="Element_Beam3D.h">
+    <ClInclude Include="LinkElement_Beam3D.h">
       <Filter>Header Files\Element</Filter>
     </ClInclude>
-    <ClInclude Include="Element_Truss3D.h">
+    <ClInclude Include="LinkElement_Truss3D.h">
       <Filter>Header Files\Element</Filter>
     </ClInclude>
     <ClInclude Include="SoildElement_Brick3D.h">
