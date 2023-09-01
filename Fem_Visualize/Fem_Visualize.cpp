@@ -55,7 +55,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderWindow->AddRenderer(renderer);
 
 	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_datas("../data13.txt");
+	m_structure->Input_datas("../data11.txt");
 	m_structure->Analyse();
 	m_structure = m_structure;
 	SetRenderWindow();
@@ -386,6 +386,23 @@ void Fem_Visualize::InitElements()
 		cellArray->InsertNextCell(line);
 	}
 
+	vtkNew<vtkPoints> pts;
+	vtkNew<vtkStringArray> label;
+	double lablePoint[3];
+	for (auto a : m_structure->m_Nodes)
+	{
+		NodeFem* node = a.second;
+		lablePoint[0] = node->m_x;
+		lablePoint[1] = node->m_y;
+		lablePoint[2] = node->m_z;
+		pts->InsertNextPoint(lablePoint);
+		label->InsertNextValue(std::to_string(node->m_id));
+	}
+
+	vtkNew<vtkActor2D> labelActor;
+	label->SetName("Labels");
+	GeneraterLable(pts, label, labelActor);
+
 	vtkNew<vtkPolyData> lineData;
 	lineData->SetPoints(points);
 	lineData->SetLines(cellArray);
@@ -410,7 +427,7 @@ void Fem_Visualize::InitElements()
 
 	renderer->AddActor(actor);
 	renderer->AddActor(vertexActor);
-
+	renderer->AddActor(labelActor);
 	this->ui.widget->GetRenderWindow()->Render();
 }
 
@@ -459,7 +476,7 @@ void Fem_Visualize::InitMaterial()
 {
 	m_structure->m_Material.clear();
 	double density = 7800;
-	double E = 2.1e8;
+	double E = 2.1e10;
 	double possion = 0.3;
 	int id = 1;
 
@@ -477,13 +494,93 @@ void Fem_Visualize::InitSections()
 	double Iz = 7.853982e-5;
 
 	Section_Beam3D *pSection = new Section_Beam3D(sectionId, materialId, area, Iy, Iz);
+	Section_Truss3D* pSection2 = new Section_Truss3D(2, 1, area);
+
 	m_structure->m_Section.insert(make_pair(sectionId, pSection));
+	m_structure->m_Section.insert(make_pair(2, pSection2));
 }
 
 void Fem_Visualize::InitBoundarys()
 {
 	m_structure->m_Boundary.clear();
 
+	for (int i = 0; i < 6; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 0;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 41;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 43;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 55;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 10;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		Boundary* pBoundary = new Boundary();
+		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
+		pBoundary->m_ixyz = i;
+		pBoundary->m_idNode = 32;
+		pBoundary->m_value = 0;
+		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
+	}
+}
+
+void Fem_Visualize::AssignSection()
+{
+	for (auto a : m_structure->m_Elements)
+	{
+		Element_Base* pElement = a.second;
+		LinkElement_Beam3D* pBeam = dynamic_cast<LinkElement_Beam3D*>(pElement);
+		LinkElement_Truss3D* pTruss = dynamic_cast<LinkElement_Truss3D*>(pElement);
+		if (pBeam)
+		{
+			pBeam->m_idSection = 1;
+		}
+		else
+		{
+			pTruss->m_idSection = 2;
+		}
+	}
 }
 
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)
@@ -1007,6 +1104,11 @@ void Fem_Visualize::onShowRopeModel()
 	renderWindow->Render();
 	InitNodes();
 	InitElements();
+	InitMaterial();
+	InitSections();
+	InitBoundarys();
+	AssignSection();
+	m_structure->Analyse();
 	ui.widget->update();
 }
 

@@ -1,6 +1,6 @@
 #pragma once
-#include "Section_Truss.h"
-class Section_Beam3D : public Section_Truss
+#include "Section_Truss3D.h"
+class Section_Beam3D : public Section_Truss3D
 {
 public:
     double m_Ix;

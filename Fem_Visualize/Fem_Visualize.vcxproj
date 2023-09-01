@@ -100,7 +100,7 @@
     <ClCompile Include="SectionProperty.cpp" />
     <ClCompile Include="Section_Base.cpp" />
     <ClCompile Include="Section_Beam3D.cpp" />
-    <ClCompile Include="Section_Truss.cpp" />
+    <ClCompile Include="Section_Truss3D.cpp" />
     <ClCompile Include="ShapeDisplay.cpp" />
     <ClCompile Include="SoildElement_Base.cpp" />
     <ClCompile Include="SoildElement_Brick3D.cpp" />
@@ -146,7 +146,7 @@
     <ClInclude Include="SectionProperty.h" />
     <ClInclude Include="Section_Base.h" />
     <ClInclude Include="Section_Beam3D.h" />
-    <ClInclude Include="Section_Truss.h" />
+    <ClInclude Include="Section_Truss3D.h" />
     <ClInclude Include="ShapeDisplay.h" />
     <ClInclude Include="SoildElement_Base.h" />
     <ClInclude Include="SoildElement_Brick3D.h" />

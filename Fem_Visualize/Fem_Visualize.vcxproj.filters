@@ -112,7 +112,7 @@
     <ClCompile Include="Section_Beam3D.cpp">
       <Filter>Source Files\Section</Filter>
     </ClCompile>
-    <ClCompile Include="Section_Truss.cpp">
+    <ClCompile Include="Section_Truss3D.cpp">
       <Filter>Source Files\Section</Filter>
     </ClCompile>
     <ClCompile Include="SoildSection_Base.cpp">
@@ -189,7 +189,7 @@
     <ClInclude Include="SoildElement_Tri2DS.h">
       <Filter>Header Files\Element</Filter>
     </ClInclude>
-    <ClInclude Include="Section_Truss.h">
+    <ClInclude Include="Section_Truss3D.h">
       <Filter>Header Files\Section</Filter>
     </ClInclude>
     <ClInclude Include="Section_Beam3D.h">

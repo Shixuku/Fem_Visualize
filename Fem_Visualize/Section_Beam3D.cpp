@@ -24,7 +24,7 @@ double Section_Beam3D::Get_J()
 
 void Section_Beam3D::Disp()
 {
-	Section_Truss::Disp();
+	Section_Truss3D::Disp();
 	std::cout << m_Iz << " ";
 	std::cout << m_Iy << "\n";
 }

@@ -9,7 +9,7 @@
 #include "Boundary.h"
 #include "ForceNode.h"
 #include "Material.h"
-#include "Section_Truss.h"
+#include "Section_Truss3D.h"
 #include "Section_Beam3D.h"
 #include "SoildSection_Base.h"
 #include "Dependant.h"
@@ -201,7 +201,7 @@ void StructureFem::Input_data(const char* filename)
 	}
 	for (int i = 0; i < nSection_Truss; ++i)
 	{
-		Section_Truss* pSection = new Section_Truss;
+		Section_Truss3D* pSection = new Section_Truss3D;
 		fin >> pSection->m_id >> pSection->m_idMaterial >> pSection->m_Area;
 		pSection->Disp();
 		m_Section.insert({ pSection->m_id ,pSection });
@@ -512,7 +512,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				double area = strlist_secT[2].toDouble();
 				qDebug() << idSecT << "  " << idMat << " " << area;//输出，以便检查
 				//保存到模型数据库
-				pStructure->m_Section.insert(make_pair(idSecT, new Section_Truss(idSecT, idMat, area)));
+				pStructure->m_Section.insert(make_pair(idSecT, new Section_Truss3D(idSecT, idMat, area)));
 			}
 		}
 
@@ -860,22 +860,32 @@ void StructureFem::Analyse()
 		int dofNum = element->m_idNode.size() * dofPerNode;
 		combinedDisp.resize(dofNum);
 
-		for (int i = 0; i < a.second->m_idNode.size(); i++)
-		{
-			NodeFem* node = Find_Node(a.second->m_idNode[i]);
-			combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
-		}
-
 		SoildElement_Base* soildElement = dynamic_cast<SoildElement_Base*>(element);
-		LinkElement_Base* linkElement = dynamic_cast<LinkElement_Base*>(element);
+		LinkElement_Beam3D* beamElement = dynamic_cast<LinkElement_Beam3D*>(element);
+		LinkElement_Truss3D* trussElement = dynamic_cast<LinkElement_Truss3D*>(element);
 
 		if (soildElement) 
 		{
 			soildElement->calculate_Stress(combinedDisp);
 		}
-		else if (linkElement) 
+		else if (beamElement)
 		{
-			linkElement->calculate_internal_force(combinedDisp);
+			for (int i = 0; i < a.second->m_idNode.size(); i++)
+			{
+				NodeFem* node = Find_Node(a.second->m_idNode[i]);
+				combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
+			}
+			beamElement->calculate_internal_force(combinedDisp);
+		}
+		else if (trussElement)
+		{
+			for (int i = 0; i < a.second->m_idNode.size(); i++)
+			{
+				NodeFem* node = Find_Node(a.second->m_idNode[i]);
+				node->m_Displacement.resize(3);
+				combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
+			}
+			trussElement->calculate_internal_force(combinedDisp);
 		}
 			
 	}

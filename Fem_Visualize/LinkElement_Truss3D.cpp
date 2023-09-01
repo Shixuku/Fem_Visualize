@@ -2,7 +2,7 @@
 #include "StructureFem.h"
 #include "NodeFem.h"
 #include "ForceNode.h"
-#include "Section_Truss.h"
+#include "Section_Truss3D.h"
 
 #include <iostream>
 using namespace std;
@@ -36,7 +36,7 @@ void LinkElement_Truss3D::calculate_ke()
 
 	Section_Base* pSection = Get_Structure()->Find_Section(m_idSection);
 	double E = pSection->Get_E();
-	Section_Truss* pSectionTruss = dynamic_cast<Section_Truss*>(pSection);//截面基类指针动态转换为3D桁架截面指针
+	Section_Truss3D* pSectionTruss = dynamic_cast<Section_Truss3D*>(pSection);//截面基类指针动态转换为3D桁架截面指针
 	assert(pSectionTruss != nullptr);         //检查指针是否为空
 	double A = pSectionTruss->m_Area;
 	double a = E * A / L;
@@ -44,9 +44,6 @@ void LinkElement_Truss3D::calculate_ke()
 	ke.resize(2, 2);
 	ke << a, -a, -a, a;
 	m_ke = ke;
-	
-	cout << ke << endl;
-	cout << "\n";
 }
 
 void LinkElement_Truss3D::calculate_me()
@@ -61,7 +58,7 @@ void LinkElement_Truss3D::calculate_T()
 	m_T.resize(2, 6);
 
 	Section_Base* pSection = pSt->Find_Section(m_idSection);
-	Section_Truss* pSectionBeam = dynamic_cast<Section_Truss*>(pSection);
+	Section_Truss3D* pSectionBeam = dynamic_cast<Section_Truss3D*>(pSection);
 	assert(pSectionBeam != nullptr);
 
 	NodeFem* pNode0 = pSt->Find_Node(m_idNode[0]);
@@ -129,7 +126,7 @@ void LinkElement_Truss3D::Equivalent_Force()
 {
 	StructureFem* pSt = Get_Structure();
 	Section_Base* pSection = pSt->Find_Section(m_idSection);
-	Section_Truss* pSectionBeam = dynamic_cast<Section_Truss*>(pSection);
+	Section_Truss3D* pSectionBeam = dynamic_cast<Section_Truss3D*>(pSection);
 
 	NodeFem* startNode = pSt->Find_Node(m_idNode[0]);
 	NodeFem* endNode = pSt->Find_Node(m_idNode[1]);

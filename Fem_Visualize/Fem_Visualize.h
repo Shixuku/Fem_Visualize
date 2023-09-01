@@ -43,6 +43,8 @@ public:
 
 	void InitBoundarys();
 
+	void AssignSection();
+
 	/* ¹¹½¨Ðý×ª¾ØÕó */
 	void ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix);
 
