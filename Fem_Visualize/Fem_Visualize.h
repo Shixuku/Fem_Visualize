@@ -1,4 +1,5 @@
 #pragma once
+#pragma execution_character_set("utf-8")//防止出现中文乱码
 
 #include <QtWidgets/QWidget>
 #include <vtkRendererCollection.h>
@@ -29,6 +30,8 @@ public:
     ~Fem_Visualize();
 
     void SetRenderWindow();
+	void InitActors();
+
 	void InitNode(std::map<int, NodeFem*> nodes);
 	void InitNodes();
 
@@ -102,7 +105,7 @@ private:
 	vtkNew<vtkAppendFilter> soildAppendFilter;
 
 
-	StructureFem* m_structure = new StructureFem();
+	StructureFem* m_structure;
 	ReactionForceWindow* reactionForce = new ReactionForceWindow();
 	DisplacementWindow* displacement = new DisplacementWindow();
 
@@ -117,7 +120,7 @@ private slots:
 	void onShowTowerModel();
 	void onShowRopeModel();
 	void onHiddenOrShowModel();
-
+	void onSelectFile();
 
 private:
 	void ShowDeckWindow();

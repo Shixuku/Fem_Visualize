@@ -36,6 +36,7 @@
 #include "Material.h"
 #include <vtkVertexGlyphFilter.h>
 #include <QStandardItemModel>
+#include <QFileDialog>
 
 #include <map>
 using namespace std;
@@ -54,16 +55,17 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
 	renderWindow->AddRenderer(renderer);
 
-	EntityBase::Set_Structure(m_structure);
-	m_structure->Input_datas("../data11.txt");
-	m_structure->Analyse();
-	m_structure = m_structure;
-	SetRenderWindow();
+	//EntityBase::Set_Structure(m_structure);
+	//m_structure->Input_datas("../data9.txt");
+	//m_structure->Analyse();
+
+	ui.widget->GetRenderWindow()->AddRenderer(renderer);
 
 	connect(ui.pushButtonShow, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
 	connect(ui.pushButtonDis, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement);
 	connect(ui.pushButtonForce, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
 	connect(ui.pushButtonRea, &QPushButton::clicked, this, &Fem_Visualize::onShowReactionForces);
+	connect(ui.pushButtonSelFile, &QPushButton::clicked, this, &Fem_Visualize::onSelectFile);
 
 	connect(reactionForce, &ReactionForceWindow::signalSendForceType, 
 		this, &Fem_Visualize::onSendForceType);
@@ -81,7 +83,6 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	//VisualizeWindow* window = new VisualizeWindow(ss);
 	//ShowDisplacement();
 	//ShowAxialForces();
-
 }
 
 Fem_Visualize::~Fem_Visualize()
@@ -89,11 +90,26 @@ Fem_Visualize::~Fem_Visualize()
 
 void Fem_Visualize::SetRenderWindow()
 {
+	std::cout << "Number of actors after removal: " << renderer->GetActors()->GetNumberOfItems() << std::endl;
+
+	InitActors();
 	InitNode(m_structure->m_Nodes);
 	InitElement();
+	std::cout << "Number of actors after create: " << renderer->GetActors()->GetNumberOfItems() << std::endl;
 
-	ui.widget->GetRenderWindow()->AddRenderer(renderer);
+	ui.widget->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
 	ui.widget->GetRenderWindow()->Render();
+}
+
+void Fem_Visualize::InitActors()
+{
+	// 清空所有Actor
+	renderer->RemoveAllViewProps();
+
+	// 清空数据
+	points->Reset();
+	linkAppendFilter->RemoveAllInputs();
+	soildAppendFilter->RemoveAllInputs();
 }
 
 void Fem_Visualize::InitNode(std::map<int, NodeFem*> nodes)
@@ -189,6 +205,7 @@ void Fem_Visualize::InitElement()
 	vtkNew <vtkCellArray> cellArray;
 	vtkNew<vtkPoints> pts;
 	vtkNew<vtkStringArray> label;
+
 	for (auto element : m_structure->m_Elements)
 	{
 		vtkNew<vtkLine> line;
@@ -1139,6 +1156,28 @@ void Fem_Visualize::onHiddenOrShowModel()
 	}
 
 	isPressed = !isPressed;
+}
+
+void Fem_Visualize::onSelectFile()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+		tr("选择文件"),
+		QDir::currentPath(),
+		tr("所有文件 (*.*);;文本文件 (*.txt);;图像文件 (*.png *.jpg)"));
+
+	if (!fileName.isEmpty()) {
+		// 用户选择了一个文件，fileName 包含了选择的文件的路径
+		qDebug() << "选择的文件是：" << fileName;
+		m_structure = new StructureFem();
+		EntityBase::Set_Structure(m_structure);
+		m_structure->Input_datas(fileName);
+		m_structure->Analyse();
+		SetRenderWindow();
+	}
+	else {
+		// 用户取消了操作
+		qDebug() << "用户取消了选择操作";
+	}
 }
 
 void Fem_Visualize::ShowDeckWindow()

@@ -67,9 +67,6 @@
     <ClCompile Include="Dependant.cpp">
       <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
-    <ClCompile Include="EntityBase.cpp">
-      <Filter>Source Files\Fem_Base</Filter>
-    </ClCompile>
     <ClCompile Include="ForceNode.cpp">
       <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
@@ -147,6 +144,9 @@
     </ClCompile>
     <ClCompile Include="BridgeProperty.cpp">
       <Filter>Source Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityBase.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

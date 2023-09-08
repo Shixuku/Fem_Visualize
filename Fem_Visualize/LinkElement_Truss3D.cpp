@@ -113,6 +113,11 @@ void LinkElement_Truss3D::calculate_T()
 	m_Lambda = lambda;
 	m_T << lx, mx, nx, 0, 0, 0,
 		0, 0, 0, lx, mx, nx;
+
+	Matrix<double, 6, 6> T = Matrix<double, 6, 6>::Zero();
+	T.block<3, 3>(0, 0) = lambda;
+	T.block<3, 3>(3, 3) = lambda;
+	R = T;
 }
 
 void LinkElement_Truss3D::calculate_internal_force(Eigen::VectorXd disp)
@@ -143,41 +148,50 @@ void LinkElement_Truss3D::Equivalent_Force()
 
 	qVector = m_Lambda * qVector;
 
-	VectorXd x1(1);
-	VectorXd x2(1);
+	VectorXd x1(3);
+	VectorXd x2(3);
 	x1.setZero();
 	x2.setZero();
 
 
 	x1(0) = 0.5 * qVector(0) * L;
 	x2(0) = 0.5 * qVector(0) * L;
+
+	x1(1) = 0.5 * qVector(1) * L;
+	x2(1) = 0.5 * qVector(1) * L;
+
+	x1(2) = 0.5 * qVector(2) * L;
+	x2(2) = 0.5 * qVector(2) * L;
 ;
 
-	VectorXd equialentForce(2);
+	VectorXd equialentForce(6);
 	equialentForce << x1, x2;  // 组合等效外力矩阵
 
 	m_EqForce = equialentForce;
 
-	equialentForce = m_T.transpose() * equialentForce;
+	equialentForce = R.transpose() * equialentForce;
 
 
-	if (equialentForce[0] != 0)
+	for (int i = 0; i < 3; i++)
 	{
-		ForceNode* pForceNode = new ForceNode();
-		pForceNode->m_idNode = startNode->m_id;
-		pForceNode->m_ixyz = 0;
-		pForceNode->m_id = pSt->m_ForceNode.size() + 1;
-		pForceNode->m_value = equialentForce[0];
-		pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
-	}
-	if (equialentForce[1] != 0)
-	{
-		ForceNode* pForceNode = new ForceNode();
-		pForceNode->m_idNode = endNode->m_id;
-		pForceNode->m_ixyz = 1;
-		pForceNode->m_id = pSt->m_ForceNode.size() + 1;
-		pForceNode->m_value = equialentForce[1];
-		pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+		if (equialentForce[i] != 0)
+		{
+			ForceNode* pForceNode = new ForceNode();
+			pForceNode->m_idNode = startNode->m_id;
+			pForceNode->m_ixyz = i;
+			pForceNode->m_id = pSt->m_ForceNode.size() + 1;
+			pForceNode->m_value = equialentForce[i];
+			pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+		}
+		if (equialentForce[i + 3] != 0)
+		{
+			ForceNode* pForceNode = new ForceNode();
+			pForceNode->m_idNode = endNode->m_id;
+			pForceNode->m_ixyz = i;
+			pForceNode->m_id = pSt->m_ForceNode.size() + 1;
+			pForceNode->m_value = equialentForce[i + 3];
+			pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+		}
 	}
 }
 

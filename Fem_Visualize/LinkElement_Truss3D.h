@@ -6,6 +6,7 @@ public:
 	LinkElement_Truss3D();
 	LinkElement_Truss3D(int id, int idNode1, int idNode2);
 
+	Eigen::MatrixXd R;
 	virtual int Get_DOF_Node() override { return 3; }
 
 	void calculate_ke()override;
