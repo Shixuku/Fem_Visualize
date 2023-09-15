@@ -9,23 +9,34 @@ void Dependant::Set_HostSize()
 void Dependant::Set_DOF(int& iStart)
 {//处理主从信息的自由度
 	StructureFem* pStructure = Get_Structure();
-	NodeFem* pNode = pStructure->Find_Node(m_idNode);//本身从节点
-	for (int i = 0; i < 3; ++i)
+	NodeFem* mainNode = pStructure->Find_Node(m_idMainNode);//本身从节点
+	NodeFem* subNode = pStructure->Find_Node(m_idSubNode);//本身从节点
+	int tempConstrian = m_constrainValue;
+
+	// 分配主节点自由度
+	for (int i = 0; i < mainNode->m_DOF.size(); ++i)
 	{
-		if (m_idHost[i] > 0)
-		{//该自由度为从属自由度
-			//自由度对应的主节点
-			NodeFem* pNodeHost = pStructure->Find_Node(m_idHost[i]);
-			for (auto& dof : pNodeHost->m_DOF)
-			{//主节点分配自由度
-				if (dof == -1) dof = iStart++;
-			}
-			pNode->m_DOF[i] = pNodeHost->m_DOF[i];
-		}
-		else
-		{//该自由度为独立自由度
-			pNode->m_DOF[i] = iStart++;
-		}
+		int dof = mainNode->m_DOF[i];
+		//主节点分配自由度
+		if (dof == -1) dof = iStart++;
+		mainNode->m_DOF[i] = iStart;
 	}
 
+	// 分配从节点自由度
+	for (int i = 0; i < mainNode->m_DOF.size(); ++i)
+	{
+		int dof = mainNode->m_DOF[i];
+
+		tempConstrian >>= 1;
+		//主节点分配自由度
+		if ((tempConstrian & 1) && (dof == -1))
+		{
+			subNode->m_DOF[i] = iStart++;
+		}
+
+		else if ( dof == -1)
+		{
+			subNode->m_DOF[i] = mainNode->m_DOF[i];
+		}
+	}
 }

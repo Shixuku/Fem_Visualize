@@ -117,14 +117,25 @@ void LinkElement_Truss3D::calculate_T()
 	Matrix<double, 6, 6> T = Matrix<double, 6, 6>::Zero();
 	T.block<3, 3>(0, 0) = lambda;
 	T.block<3, 3>(3, 3) = lambda;
-	R = T;
+	m_R = T;
 }
 
 void LinkElement_Truss3D::calculate_internal_force(Eigen::VectorXd disp)
 {
-	disp = m_T * disp;
+	//cout << "\n";
+	//cout << disp << std::endl;
 
-	m_force = m_ke * disp - m_EqForce;
+	//cout << "\n";
+
+	//cout << m_R << std::endl;
+
+	//disp = m_R * disp;
+
+	//cout << "\n";
+
+	//cout << disp << std::endl;
+
+	//m_force = m_ke * disp - m_EqForce;
 }
 
 void LinkElement_Truss3D::Equivalent_Force()
@@ -169,7 +180,7 @@ void LinkElement_Truss3D::Equivalent_Force()
 
 	m_EqForce = equialentForce;
 
-	equialentForce = R.transpose() * equialentForce;
+	equialentForce = m_R.transpose() * equialentForce;
 
 
 	for (int i = 0; i < 3; i++)

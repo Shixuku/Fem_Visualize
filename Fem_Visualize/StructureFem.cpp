@@ -168,7 +168,7 @@ void StructureFem::Input_data(const char* filename)
 	{
 		Dependant* pDependant = new Dependant;
 		fin >> pDependant->m_id;
-		fin >> pDependant->m_idNode;
+		fin >> pDependant->m_idMainNode;
 		fin >> pDependant->m_idHost[0];
 		fin >> pDependant->m_idHost[1];
 		fin >> pDependant->m_idHost[2];
@@ -674,6 +674,7 @@ void StructureFem::Init_DOFs()
 		}
 	}
 
+	// 处理约束
 	auto iStart = 0;
 	for (auto& a : m_Boundary)
 	{
@@ -687,6 +688,7 @@ void StructureFem::Init_DOFs()
 	m_nFixed = iStart;//约束自由度个数
 	std::cout << "\nm_nFixed=" << m_nFixed << "\n";
 
+	// 处理主从节点
 	for (auto& a : m_Dependant)
 	{//处理主从信息
 		Dependant* pDependant = a.second;
@@ -882,8 +884,7 @@ void StructureFem::Analyse()
 			for (int i = 0; i < a.second->m_idNode.size(); i++)
 			{
 				NodeFem* node = Find_Node(a.second->m_idNode[i]);
-				node->m_Displacement.resize(3);
-				combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
+				combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement.head(3);
 			}
 			trussElement->calculate_internal_force(combinedDisp);
 		}

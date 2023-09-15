@@ -1119,6 +1119,8 @@ void Fem_Visualize::onShowRopeModel()
 	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
 	renderWindow->AddRenderer(renderer);
 	renderWindow->Render();
+	m_structure = new StructureFem();
+	Element_Base::Set_Structure(m_structure);
 	InitNodes();
 	InitElements();
 	InitMaterial();
