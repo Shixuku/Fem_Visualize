@@ -37,7 +37,8 @@
 #include <vtkVertexGlyphFilter.h>
 #include <QStandardItemModel>
 #include <QFileDialog>
-
+#include <QMenu>
+#include <QContextMenuEvent>
 #include <map>
 using namespace std;
 
@@ -47,6 +48,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
     ui.setupUi(this);
 
 	showMaximized();
+	Init_Action();
 
 	renderer->SetGradientBackground(true);
 	renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
@@ -105,6 +107,11 @@ void Fem_Visualize::InitActors()
 {
 	// 清空所有Actor
 	renderer->RemoveAllViewProps();
+	vtkNew<vtkAppendPolyData> newLinkFilter;
+	vtkNew<vtkAppendFilter> newSoildFilter;
+
+	linkAppendFilter = newLinkFilter;
+	soildAppendFilter = newSoildFilter;
 
 	// 清空数据
 	points->Reset();
@@ -203,8 +210,8 @@ void Fem_Visualize::InitNodes()
 void Fem_Visualize::InitElement()
 {
 	vtkNew <vtkCellArray> cellArray;
-	vtkNew<vtkPoints> pts;
-	vtkNew<vtkStringArray> label;
+	vtkNew<vtkPoints> elementPoints;
+	vtkNew<vtkStringArray> elementLabel;
 
 	for (auto element : m_structure->m_Elements)
 	{
@@ -297,11 +304,27 @@ void Fem_Visualize::InitElement()
 			centerPoints[1] += (node->m_y + 0.1) / pointsNum;
 			centerPoints[2] += node->m_z / pointsNum;
 		}
-		pts->InsertNextPoint(centerPoints);
-		label->InsertNextValue(std::to_string(element.second->m_id));
+		elementPoints->InsertNextPoint(centerPoints);
+		elementLabel->InsertNextValue(std::to_string(element.second->m_id));
 	}
-	label->SetName("Labels");
-	GeneraterLable(pts, label, elementLableActor);
+
+	vtkNew<vtkPoints> nodePoints;
+	vtkNew<vtkStringArray> nodeLabel;
+	nodeLabel->SetName("Labels");
+
+	for (int i = 0; i < m_structure->m_Nodes.size(); i++)
+	{
+		double nodePoint[3];
+		NodeFem* node = m_structure->Find_Node(i + 1);
+		nodePoint[0] = node->m_x;
+		nodePoint[1] = node->m_y + 0.1;
+		nodePoint[2] = node->m_z;
+		nodePoints->InsertNextPoint(nodePoint);
+		nodeLabel->InsertNextValue(std::to_string(node->m_id));
+	}
+	elementLabel->SetName("Labels");
+	GeneraterLable(elementPoints, elementLabel, elementLableActor);
+	GeneraterLable(nodePoints, nodeLabel, nodeLabelActor);
 
 	vtkNew<vtkPolyData> polyData;
 	polyData->SetPoints(points);
@@ -348,6 +371,7 @@ void Fem_Visualize::InitElement()
 
 	renderer->AddActor(scalarBar);
 	renderer->AddActor(elementLableActor);
+	renderer->AddActor(nodeLabelActor);
 }
 
 void Fem_Visualize::InitElements()
@@ -416,9 +440,8 @@ void Fem_Visualize::InitElements()
 		label->InsertNextValue(std::to_string(node->m_id));
 	}
 
-	vtkNew<vtkActor2D> labelActor;
 	label->SetName("Labels");
-	GeneraterLable(pts, label, labelActor);
+	GeneraterLable(pts, label, elementLableActor);
 
 	vtkNew<vtkPolyData> lineData;
 	lineData->SetPoints(points);
@@ -444,7 +467,7 @@ void Fem_Visualize::InitElements()
 
 	renderer->AddActor(actor);
 	renderer->AddActor(vertexActor);
-	renderer->AddActor(labelActor);
+	renderer->AddActor(elementLableActor);
 	this->ui.widget->GetRenderWindow()->Render();
 }
 
@@ -600,6 +623,44 @@ void Fem_Visualize::AssignSection()
 	}
 }
 
+void Fem_Visualize::Init_Action()
+{
+	//新建菜单
+	menu = new QMenu(this);              //添加菜单
+	pointSelectMenu = new QMenu(this);   //添加点选子菜单
+	windowSelectMenu = new QMenu(this);  //添加窗选子菜单
+
+	//添加动作
+	pointSelect = new QAction(this);
+	elementSelect = new QAction(this); 
+	close_system = new QAction(this);;
+
+	pointSelect->setText("节点");
+	elementSelect->setText("单元");
+	close_system->setText("退出");
+
+	//添加菜单
+	pointSelectMenu = menu->addMenu("点选");
+	menu->addSeparator();//添加分割线
+	windowSelectMenu = menu->addMenu("窗选");
+
+	pointSelectMenu->addAction(pointSelect);
+	pointSelectMenu->addAction(elementSelect);
+
+	windowSelectMenu->addAction(pointSelect);
+	windowSelectMenu->addAction(elementSelect);
+
+	menu->addSeparator();//添加分割线
+	menu->addAction(close_system);  //添加换皮肤动作
+}
+
+void Fem_Visualize::contextMenuEvent(QContextMenuEvent* event)
+{
+	qDebug() << " 进入右键菜单栏";
+	menu->exec(QCursor::pos()); //在光标当前位置处出现
+	event->accept();
+}
+
 void Fem_Visualize::ConstuctRotationMatrix(double startPoint[3], double endPoint[3], vtkMatrix4x4* transformMatrix)
 {
 	// 计算连接这两个点的向量
@@ -715,16 +776,18 @@ void Fem_Visualize::onIsShowSection()
 {
 	if (showFlag == 0)
 	{
-		renderer->RemoveActor(linkActor);
+		renderer->RemoveAllViewProps();
 		renderer->AddActor(lineActor);
+		renderer->AddActor(elementLableActor);
 		ui.widget->GetRenderWindow()->Render();
 		showFlag = 1;
 		return;
 	}
 	if (showFlag == 1);
 	{
-		renderer->RemoveActor(lineActor);
+		renderer->RemoveAllViewProps();
 		renderer->AddActor(linkActor);
+		renderer->AddActor(elementLableActor);
 		renderer->ResetCamera();
 		ui.widget->GetRenderWindow()->Render();
 		showFlag = 0;

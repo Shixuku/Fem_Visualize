@@ -18,9 +18,36 @@
     <widget class="QWidget" name="widget_2" native="true">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QPushButton" name="pushButtonSelFile">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>读取文件</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonPoint">
+        <property name="text">
+         <string>显示节点编号</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCell">
+        <property name="text">
+         <string>显示单元编号</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonDis">
         <property name="text">
-         <string>变形</string>
+         <string>显示变形</string>
         </property>
        </widget>
       </item>
@@ -42,19 +69,6 @@
        <widget class="QPushButton" name="pushButtonRea">
         <property name="text">
          <string>反力</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButtonSelFile">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>读取文件</string>
         </property>
        </widget>
       </item>

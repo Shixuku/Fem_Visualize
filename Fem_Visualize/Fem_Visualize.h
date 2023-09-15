@@ -94,16 +94,16 @@ private:
 	vtkNew<vtkActor> lineActor;
 	vtkNew<vtkActor> linkActor;
 	vtkNew<vtkActor> soildActor;
-	vtkSmartPointer<vtkActor2D> pointLabelActor = vtkSmartPointer<vtkActor2D>::New();
+	vtkNew<vtkActor2D> labelActor;
+	vtkSmartPointer<vtkActor2D> nodeLabelActor = vtkSmartPointer<vtkActor2D>::New();
 	vtkSmartPointer<vtkActor2D> elementLableActor = vtkSmartPointer<vtkActor2D>::New();
 
 	vtkNew<vtkScalarBarActor> scalarBar;
 	// An interactor
 	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
 	vtkNew<vtkPoints> points;
-	vtkNew<vtkAppendPolyData> linkAppendFilter;
-	vtkNew<vtkAppendFilter> soildAppendFilter;
-
+	vtkSmartPointer<vtkAppendPolyData> linkAppendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
+	vtkSmartPointer<vtkAppendFilter> soildAppendFilter = vtkSmartPointer<vtkAppendFilter>::New();
 
 	StructureFem* m_structure;
 	ReactionForceWindow* reactionForce = new ReactionForceWindow();
@@ -127,10 +127,22 @@ private:
 	void ShowTowerWindow();
 	void ShowRopeWindow();
 
+	/* 初始化右键菜单 */
+	void Init_Action();
+
+	/* 重载右键函数 */
+	void contextMenuEvent(QContextMenuEvent* event) override;
 
 	void SetTreeWidget();
 	void SetRenderWidget();
 	void SetMenuWidget();
+
+	//右键菜单所需要的变量
+	QMenu* menu;
+	QMenu* pointSelectMenu;    //添加子菜单使用
+	QMenu* windowSelectMenu;    //添加子菜单使用
+	QAction* pointSelect, * elementSelect;      //换系统皮肤
+	QAction* close_system;  //关闭系统的动作
 
 
 	void onHandleItemClick(const QModelIndex& index);
