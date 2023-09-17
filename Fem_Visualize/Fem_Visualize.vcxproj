@@ -32,7 +32,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core;gui;uitools;widgets;charts</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
@@ -55,13 +55,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <ExternalIncludePath>D:\danpc\毕业论文\TW-me\eigen-3.4.0;D:\vtk\bin\include\vtk-8.2;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>D:\danpc\毕业论文\TW-me\eigen-3.4.0;D:\danpc\毕业论文\VTK_9.0\VTK\include\vtk-9.0;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>D:\vtk\bin\lib\*.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>D:\danpc\毕业论文\VTK_9.0\VTK\lib_debug\*.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -89,12 +89,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AreaPickerCellInteractor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="AreaPickerNodeInteractor.cpp" />
     <ClCompile Include="BridgeProperty.cpp" />
     <ClCompile Include="DeckWindow.cpp" />
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
+    <ClCompile Include="PointPickerCellInteractor.h" />
+    <ClCompile Include="PointPickerNodeInteractor.cpp" />
     <ClCompile Include="ReactionForceWindow.cpp" />
     <ClCompile Include="RopeWindow.cpp" />
     <ClCompile Include="SectionProperty.cpp" />
@@ -128,6 +134,10 @@
     <QtUic Include="TowerWindow.ui" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AreaPickerCellInteractor.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="AreaPickerNodeInteractor.h" />
     <ClInclude Include="Boundary.h" />
     <QtMoc Include="DeckWindow.h" />
     <ClInclude Include="BridgeProperty.h" />
@@ -143,6 +153,7 @@
     <ClInclude Include="NodeFem.h" />
     <QtMoc Include="ReactionForceWindow.h" />
     <QtMoc Include="RopeWindow.h" />
+    <ClInclude Include="PointPickerNodeInteractor.h" />
     <ClInclude Include="SectionProperty.h" />
     <ClInclude Include="Section_Base.h" />
     <ClInclude Include="Section_Beam3D.h" />

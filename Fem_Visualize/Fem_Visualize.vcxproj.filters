@@ -148,6 +148,18 @@
     <ClCompile Include="EntityBase.cpp">
       <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
+    <ClCompile Include="AreaPickerCellInteractor.cpp">
+      <Filter>Source Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="AreaPickerNodeInteractor.cpp">
+      <Filter>Source Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="PointPickerCellInteractor.h">
+      <Filter>Header Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="PointPickerNodeInteractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -215,6 +227,15 @@
     </ClInclude>
     <ClInclude Include="Section_Base.h">
       <Filter>Header Files\Section</Filter>
+    </ClInclude>
+    <ClInclude Include="AreaPickerCellInteractor.h">
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="AreaPickerNodeInteractor.h">
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="PointPickerNodeInteractor.h">
+      <Filter>Header Files\Visualize</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

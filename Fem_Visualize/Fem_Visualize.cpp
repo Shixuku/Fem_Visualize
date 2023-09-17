@@ -27,6 +27,11 @@
 #include <vtkLine.h>
 #include <vtkMergePoints.h>
 #include <vtkCellArray.h>
+#include <vtkAreaPicker.h>
+#include "AreaPickerCellInteractor.h"
+#include "AreaPickerNodeInteractor.h"
+#include "PointPickerCellInteractor.h"
+#include "PointPickerNodeInteractor.h"
 #include "Boundary.h"
 #include "LinkElement_Beam3D.h"
 #include "Section_Beam3D.h"
@@ -54,14 +59,14 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
 	renderer->SetBackground(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
 
-	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
-	renderWindow->AddRenderer(renderer);
+	vtkSmartPointer<vtkRenderWindow> GetRenderWindow = ui.widget->renderWindow();;
+	GetRenderWindow->AddRenderer(renderer);
 
 	//EntityBase::Set_Structure(m_structure);
 	//m_structure->Input_datas("../data9.txt");
 	//m_structure->Analyse();
 
-	ui.widget->GetRenderWindow()->AddRenderer(renderer);
+	ui.widget->renderWindow()->AddRenderer(renderer);
 
 	connect(ui.pushButtonShow, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
 	connect(ui.pushButtonDis, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement);
@@ -82,6 +87,9 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	connect(deckWindow, &DeckWindow::SignalShowDeckModel, this, &Fem_Visualize::onShowDeckModel);
 	connect(towerWindow, &TowerWindow::SignalShowTowerModel, this, &Fem_Visualize::onShowTowerModel);
 	connect(ropeWindow, &RopeWindow::SignalShowRopeModel, this, &Fem_Visualize::onShowRopeModel);
+
+	connect(ui.pushButtonCell, &QPushButton::clicked, this, &Fem_Visualize::onIsShowCellNum);
+	connect(ui.pushButtonPoint, &QPushButton::clicked, this, &Fem_Visualize::onIsShowNodeNum);
 	//VisualizeWindow* window = new VisualizeWindow(ss);
 	//ShowDisplacement();
 	//ShowAxialForces();
@@ -99,8 +107,8 @@ void Fem_Visualize::SetRenderWindow()
 	InitElement();
 	std::cout << "Number of actors after create: " << renderer->GetActors()->GetNumberOfItems() << std::endl;
 
-	ui.widget->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
-	ui.widget->GetRenderWindow()->Render();
+	ui.widget->renderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
+	ui.widget->renderWindow()->Render();
 }
 
 void Fem_Visualize::InitActors()
@@ -330,6 +338,18 @@ void Fem_Visualize::InitElement()
 	polyData->SetPoints(points);
 	polyData->SetLines(cellArray);
 
+	vtkNew<vtkIdFilter> idFilter;
+	idFilter->SetInputData(polyData);
+
+	idFilter->SetCellIdsArrayName("OriginalIds");
+	idFilter->SetPointIdsArrayName("OriginalIds");
+
+	vtkNew<vtkDataSetSurfaceFilter> surfaceFilter;
+	surfaceFilter->SetInputConnection(idFilter->GetOutputPort());
+	surfaceFilter->Update();
+
+	linePolyData->DeepCopy(surfaceFilter->GetOutput());
+
 	vtkNew<vtkDataSetMapper> soildMapper;
 	if (soildAppendFilter->GetOutput()->GetNumberOfPoints() != 0)
 	{
@@ -365,8 +385,8 @@ void Fem_Visualize::InitElement()
 	scalarBar->SetTextPositionToPrecedeScalarBar();
 
 	lineActor->SetMapper(lineMapper);
-	lineActor->GetProperty()->SetLineWidth(3);
-	lineActor->GetProperty()->SetColor(0, 0, 1);
+	lineActor->GetProperty()->SetLineWidth(2);
+	lineActor->GetProperty()->SetColor(0, 0, 0);
 	linkActor->SetMapper(linkMapper);
 
 	renderer->AddActor(scalarBar);
@@ -468,7 +488,7 @@ void Fem_Visualize::InitElements()
 	renderer->AddActor(actor);
 	renderer->AddActor(vertexActor);
 	renderer->AddActor(elementLableActor);
-	this->ui.widget->GetRenderWindow()->Render();
+	this->ui.widget->renderWindow()->Render();
 }
 
 void Fem_Visualize::GennerateBeamElement(vtkMergePoints *mergePoints, vtkPoints *points, int &elementId)
@@ -631,12 +651,17 @@ void Fem_Visualize::Init_Action()
 	windowSelectMenu = new QMenu(this);  //添加窗选子菜单
 
 	//添加动作
-	pointSelect = new QAction(this);
-	elementSelect = new QAction(this); 
+	areaPickerNode = new QAction(this);
+	areaPickerCell = new QAction(this); 
+	pointPickerNode = new QAction(this); 
+	pointPickerCell = new QAction(this);
 	close_system = new QAction(this);;
 
-	pointSelect->setText("节点");
-	elementSelect->setText("单元");
+	areaPickerNode->setText("节点");
+	areaPickerCell->setText("单元");
+
+	pointPickerNode->setText("节点");
+	pointPickerCell->setText("单元");
 	close_system->setText("退出");
 
 	//添加菜单
@@ -644,11 +669,17 @@ void Fem_Visualize::Init_Action()
 	menu->addSeparator();//添加分割线
 	windowSelectMenu = menu->addMenu("窗选");
 
-	pointSelectMenu->addAction(pointSelect);
-	pointSelectMenu->addAction(elementSelect);
 
-	windowSelectMenu->addAction(pointSelect);
-	windowSelectMenu->addAction(elementSelect);
+	pointSelectMenu->addAction(pointPickerNode);
+	pointSelectMenu->addAction(pointPickerCell);
+
+	windowSelectMenu->addAction(areaPickerNode);
+	windowSelectMenu->addAction(areaPickerCell);
+
+	connect(areaPickerCell, &QAction::triggered, this, &Fem_Visualize::onAreaPickerCell);
+	connect(areaPickerNode, &QAction::triggered, this, &Fem_Visualize::onAreaPickerNode);
+	connect(pointPickerCell, &QAction::triggered, this, &Fem_Visualize::onPointPickerCell);
+	connect(pointPickerNode, &QAction::triggered, this, &Fem_Visualize::onPointPickerNode);
 
 	menu->addSeparator();//添加分割线
 	menu->addAction(close_system);  //添加换皮肤动作
@@ -779,7 +810,7 @@ void Fem_Visualize::onIsShowSection()
 		renderer->RemoveAllViewProps();
 		renderer->AddActor(lineActor);
 		renderer->AddActor(elementLableActor);
-		ui.widget->GetRenderWindow()->Render();
+		ui.widget->renderWindow()->Render();
 		showFlag = 1;
 		return;
 	}
@@ -789,7 +820,7 @@ void Fem_Visualize::onIsShowSection()
 		renderer->AddActor(linkActor);
 		renderer->AddActor(elementLableActor);
 		renderer->ResetCamera();
-		ui.widget->GetRenderWindow()->Render();
+		ui.widget->renderWindow()->Render();
 		showFlag = 0;
 		return;
 	}
@@ -873,7 +904,7 @@ void Fem_Visualize::onShowDisplacement()
 
 	renderer->AddActor(newActor);
 	renderer->AddActor(scalarBar);
-	ui.widget->GetRenderWindow()->Render();
+	ui.widget->renderWindow()->Render();
 }
 
 void Fem_Visualize::onShowAxialForces()
@@ -948,7 +979,7 @@ void Fem_Visualize::onShowAxialForces()
 
 	renderer->AddActor(newActor);
 	renderer->AddActor(scalarBar);
-	ui.widget->GetRenderWindow()->Render();
+	ui.widget->renderWindow()->Render();
 }
 
 void Fem_Visualize::onShowReactionForces()
@@ -1154,8 +1185,8 @@ void Fem_Visualize::onShowDeckModel()
 	renderer->AddActor(bridge->deckLineDisplay->GetActor());
 
 	//cout << "numbers of cells" << bridge->deckLineDisplay->GetActor()->GetMapper()->GetOutputPort()->.
-	ui.widget->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
-	ui.widget->GetRenderWindow()->Render();
+	ui.widget->renderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera();
+	ui.widget->renderWindow()->Render();
 }
 
 void Fem_Visualize::onShowTowerModel()
@@ -1164,9 +1195,9 @@ void Fem_Visualize::onShowTowerModel()
 	renderer->AddActor(bridge->deckLineDisplay->GetActor());
 	renderer->AddActor(bridge->towerLineDisplay->GetActor());
 
-	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
-	renderWindow->AddRenderer(renderer);
-	renderWindow->Render();
+	vtkSmartPointer<vtkRenderWindow> GetRenderWindow = ui.widget->renderWindow();
+	GetRenderWindow->AddRenderer(renderer);
+	GetRenderWindow->Render();
 
 	ui.widget->update();
 }
@@ -1179,9 +1210,9 @@ void Fem_Visualize::onShowRopeModel()
 	renderer->AddActor(ropeWindow->ropeActor);
 	renderer->AddActor(bridge->towerLineDisplay->GetActor());
 
-	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
-	renderWindow->AddRenderer(renderer);
-	renderWindow->Render();
+	vtkSmartPointer<vtkRenderWindow> GetRenderWindow = ui.widget->renderWindow();
+	GetRenderWindow->AddRenderer(renderer);
+	GetRenderWindow->Render();
 	m_structure = new StructureFem();
 	Element_Base::Set_Structure(m_structure);
 	InitNodes();
@@ -1213,9 +1244,9 @@ void Fem_Visualize::onHiddenOrShowModel()
 		renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
 		renderer->SetBackground(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
 
-		vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
-		renderWindow->AddRenderer(renderer);
-		renderWindow->Render();
+		vtkSmartPointer<vtkRenderWindow> GetRenderWindow = ui.widget->renderWindow();;
+		GetRenderWindow->AddRenderer(renderer);
+		GetRenderWindow->Render();
 
 		ui.widget->update();
 	}
@@ -1243,6 +1274,100 @@ void Fem_Visualize::onSelectFile()
 		// 用户取消了操作
 		qDebug() << "用户取消了选择操作";
 	}
+}
+
+
+
+void Fem_Visualize::onIsShowNodeNum()
+{
+	if (showFlag == 0)
+	{
+		renderer->AddActor(nodeLabelActor);
+		ui.widget->renderWindow()->Render();
+		showFlag = 1;
+		return;
+	}
+	if (showFlag == 1);
+	{
+		renderer->RemoveActor(nodeLabelActor);
+		ui.widget->renderWindow()->Render();
+		showFlag = 0;
+		return;
+	}
+}
+
+void Fem_Visualize::onIsShowCellNum()
+{
+	if (showFlag == 0)
+	{
+		renderer->AddActor(elementLableActor);
+		ui.widget->renderWindow()->Render();
+		showFlag = 1;
+		return;
+	}
+	if (showFlag == 1);
+	{
+		renderer->RemoveActor(elementLableActor);
+		ui.widget->renderWindow()->Render();
+		showFlag = 0;
+		return;
+	}
+}
+
+void Fem_Visualize::onAreaPickerCell()
+{
+	vtkRenderWindowInteractor* interactor = ui.widget->interactor();
+	vtkNew<vtkAreaPicker> areaPicker;
+
+	interactor->SetPicker(areaPicker);
+	interactor->SetRenderWindow(ui.widget->renderWindow());
+
+	vtkNew<AreaPickerCellInteractor> style;
+	style->SetPoints(linePolyData);
+	interactor->SetInteractorStyle(style);
+}
+
+void Fem_Visualize::onAreaPickerNode()
+{
+	vtkRenderWindowInteractor* interactor = ui.widget->interactor();
+
+	vtkNew<vtkAreaPicker> areaPicker;
+	interactor->SetPicker(areaPicker);
+	interactor->SetRenderWindow(ui.widget->renderWindow());
+
+	vtkNew<AreaPickerNodeInteractor> style;
+	style->SetPoints(linePolyData);
+	interactor->SetInteractorStyle(style);
+}
+
+void Fem_Visualize::onPointPickerCell()
+{
+	vtkRenderWindowInteractor* interactor = ui.widget->interactor();
+
+	vtkNew<vtkCellPicker> cellPicker;
+	cellPicker->SetTolerance(0.005);
+	interactor->SetPicker(cellPicker);
+	interactor->SetRenderWindow(ui.widget->renderWindow());
+
+	vtkNew<PointPickerCellInteractor> style;
+	style->SetDefaultRenderer(renderer);
+	style->Data = linePolyData;
+	interactor->SetInteractorStyle(style);
+}
+
+void Fem_Visualize::onPointPickerNode()
+{
+	vtkRenderWindowInteractor* interactor = ui.widget->interactor();
+
+	vtkNew<vtkCellPicker> cellPicker;
+	cellPicker->SetTolerance(0.005);
+	interactor->SetPicker(cellPicker);
+	interactor->SetRenderWindow(ui.widget->renderWindow());
+
+	vtkNew<PointPickerNodeInteractor> style;
+	style->SetDefaultRenderer(renderer);
+	style->Data = linePolyData;
+	interactor->SetInteractorStyle(style);
 }
 
 void Fem_Visualize::ShowDeckWindow()
@@ -1300,8 +1425,8 @@ void Fem_Visualize::SetRenderWidget()
 	renderer->SetBackground2(40.0 / 255.0, 110.0 / 255.0, 170.0 / 255.0);
 	renderer->SetBackground(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0);
 
-	vtkSmartPointer<vtkRenderWindow> renderWindow = ui.widget->GetRenderWindow();
-	renderWindow->AddRenderer(renderer);
+	vtkSmartPointer<vtkRenderWindow> GetRenderWindow = ui.widget->renderWindow();;
+	GetRenderWindow->AddRenderer(renderer);
 }
 
 void Fem_Visualize::SetMenuWidget()

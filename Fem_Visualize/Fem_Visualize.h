@@ -79,6 +79,10 @@ public:
 
 	bool showFlag = 0;
 
+	bool showNodeFlag = 0;
+
+	bool showCellFlag = 0;
+
 private slots:
 
 	/* 根据选择的不同Radio显示对应的支座反力FXYZ */
@@ -92,6 +96,9 @@ private:
 	// A renderer and render window
 	vtkNew<vtkRenderer> renderer;
 	vtkNew<vtkActor> lineActor;
+	vtkNew<vtkPolyData> linePolyData;
+
+
 	vtkNew<vtkActor> linkActor;
 	vtkNew<vtkActor> soildActor;
 	vtkNew<vtkActor2D> labelActor;
@@ -122,6 +129,21 @@ private slots:
 	void onHiddenOrShowModel();
 	void onSelectFile();
 
+	void onIsShowNodeNum();
+
+	void onIsShowCellNum();
+
+	/* 窗选单元 */
+	void onAreaPickerCell();
+
+	/* 窗选节点 */
+	void onAreaPickerNode();
+
+	/* 点选单元 */
+	void onPointPickerCell();
+
+	/* 点选节点*/
+	void onPointPickerNode();
 private:
 	void ShowDeckWindow();
 	void ShowTowerWindow();
@@ -141,7 +163,8 @@ private:
 	QMenu* menu;
 	QMenu* pointSelectMenu;    //添加子菜单使用
 	QMenu* windowSelectMenu;    //添加子菜单使用
-	QAction* pointSelect, * elementSelect;      //换系统皮肤
+	QAction* areaPickerNode, * areaPickerCell;        //窗选
+	QAction* pointPickerNode, * pointPickerCell;      //点选
 	QAction* close_system;  //关闭系统的动作
 
 
