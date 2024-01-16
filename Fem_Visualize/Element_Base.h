@@ -1,7 +1,13 @@
 #pragma once
 #include "EntityBase.h"
 #include <Eigen/Dense>
+#include <list>
+#include <Eigen/Sparse>
+#include <fstream>
 
+
+typedef Eigen::Triplet<double> Tri;//重说明三元组
+typedef std::list<Tri> ListTri;//三元组链表
 
 class Element_Base : public EntityBase
 {
@@ -47,6 +53,11 @@ public:
 
 	// 计算所需的所有参数
 	virtual void calculate_all() = 0;
+
+	// 得到单元各节点的自由度编号
+	void Get_DOFs(std::vector<int>& DOFs);
+
+	void Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22);
 
 	Element_Base();
 };

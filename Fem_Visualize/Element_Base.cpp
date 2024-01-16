@@ -39,6 +39,63 @@ void Element_Base::Input_Data(std::ifstream& fin)
 	}
 }
 
+void Element_Base::Get_DOFs(std::vector<int>& DOFs)
+{
+	//得到单元各节点的自由度编号
+	StructureFem* pStructure = Get_Structure();
+
+	int nDOF = Get_DOF_Node();//单元类型确定的节点自由度个数
+	auto nNode = m_idNode.size();//节点个数
+	auto nDOF_Element = nDOF * nNode;//单元的自由度个数
+	DOFs.resize(nDOF_Element);
+
+	int k = 0;
+	for (auto& idNode : m_idNode)
+	{//对节点编号循环
+		NodeFem* pNode = pStructure->Find_Node(idNode);//找节点
+		for (int j = 0; j < nDOF; ++j)
+		{//对节点自由度循环
+			DOFs[k++] = pNode->m_DOF[j];
+		}
+	}
+}
+
+void Element_Base::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
+{
+	StructureFem* pStructure = Get_Structure();
+	int nFixed = pStructure->m_nFixed;
+
+	MatrixXd ke = m_ke;
+	cout << ke << "\n";
+	std::vector<int> DOFs;
+	Get_DOFs(DOFs);
+	auto nDOF = DOFs.size();//单元的自由度个数
+	for (int i = 0; i < nDOF; ++i)
+	{//对单元刚度矩阵的行循环
+		int ii = DOFs[i];//每一行的整体自由度编号
+		for (int j = 0; j < nDOF; ++j)
+		{//对单元刚度矩阵的列循环
+			int jj = DOFs[j];//每一列的整体自由度编号
+			double& kij = ke(i, j);//单元刚度矩阵元素
+			if (ii < nFixed && jj < nFixed)
+			{
+				L11.push_back(Tri(ii, jj, kij));
+				cout << "ii:" << ii << " jj:" << jj << " kij:" << kij << "\n";
+			}
+			else if (ii >= nFixed && jj < nFixed)
+			{
+				L21.push_back(Tri(ii - nFixed, jj, kij));
+				cout << "ii:" << ii - nFixed << " jj:" << jj << " kij:" << kij << "\n";
+			}
+			else if (ii >= nFixed && jj >= nFixed)
+			{
+				L22.push_back(Tri(ii - nFixed, jj - nFixed, kij));
+				cout << "ii:" << ii - nFixed << " jj:" << jj - nFixed << " kij:" << kij << "\n";
+			}
+		}
+	}
+}
+
 void Element_Base::Assemble_ke(std::list<Tri>& K11, std::list<Tri>& K21, std::list<Tri>& K22)
 {
 	Eigen::MatrixXd ke = calculate_Ke();

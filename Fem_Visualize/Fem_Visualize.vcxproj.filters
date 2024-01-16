@@ -163,6 +163,9 @@
     <ClCompile Include="LoadWindow.cpp">
       <Filter>Source Files\Window</Filter>
     </ClCompile>
+    <ClCompile Include="inVar.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -239,6 +242,9 @@
     </ClInclude>
     <ClInclude Include="PointPickerNodeInteractor.h">
       <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="inVar.h">
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

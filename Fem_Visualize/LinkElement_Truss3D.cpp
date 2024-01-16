@@ -3,6 +3,8 @@
 #include "NodeFem.h"
 #include "ForceNode.h"
 #include "Section_Truss3D.h"
+#include "Material.h"
+#include "inVar.h"
 
 #include <iostream>
 using namespace std;
@@ -209,6 +211,80 @@ void LinkElement_Truss3D::Equivalent_Force()
 void LinkElement_Truss3D::calculate_all()
 {
 	calculate_T();
-	calculate_ke();
+	//calculate_ke();
+	Get_ke();
+	cout << "ke:\n" << m_ke << endl;
 	Equivalent_Force();
+}
+
+double LinkElement_Truss3D::Get_Lcs(double& c, double& s) const
+{
+	StructureFem* pStructure = Get_Structure();
+	NodeFem* pNode0 = pStructure->Find_Node(m_idNode[0]);
+	NodeFem* pNode1 = pStructure->Find_Node(m_idNode[1]);
+	double dx = pNode1->m_x - pNode0->m_x;
+	double dy = pNode1->m_y - pNode0->m_y;
+	double L = sqrt(dx * dx + dy * dy);
+	c = dx / L;
+	s = dy / L;
+	return L;
+}
+
+void LinkElement_Truss3D::Get_EA(double& E, double& A) const
+{
+	StructureFem* pStructure = Get_Structure();
+	Section_Base* pSection = pStructure->Find_Section(m_idSection);
+	Section_Truss3D* pSectionTruss = dynamic_cast<Section_Truss3D*>(pSection);
+	A = pSectionTruss->m_Area;
+	Material* pMaterial = pStructure->Find_Material(pSection->m_idMaterial);
+	E = pMaterial->m_E;
+}
+
+void LinkElement_Truss3D::Get_N(double& N, double& Stress)
+{
+	double L, c, s, E, A;
+	L = Get_Lcs(c, s);
+	Get_EA(E, A);
+
+	StructureFem* pStructure = Get_Structure();
+
+	NodeFem* pNode0 = pStructure->Find_Node(m_idNode[0]);
+	double ui = pStructure->Get_Sol(pNode0->m_DOF[0]);
+	double vi = pStructure->Get_Sol(pNode0->m_DOF[1]);
+
+	NodeFem* pNode1 = pStructure->Find_Node(m_idNode[1]);
+	double uj = pStructure->Get_Sol(pNode1->m_DOF[0]);
+	double vj = pStructure->Get_Sol(pNode1->m_DOF[1]);
+
+	double dL = (uj - ui) * c + (vj - vi) * s;//伸长量
+	for (auto& a : pStructure->m_InVar)
+	{
+		InVar* pInVar = a.second;
+		if (pInVar->m_idElement == m_id)
+		{//是本单元的内变量
+			dL += pInVar->m_Value;//计算应力引起的伸长量
+		}
+	}
+	double Strain = dL / L;//弹性应变
+
+	Stress = E * Strain;
+	N = Stress * A;
+}
+
+void LinkElement_Truss3D::Get_ke()
+{
+	double L, c, s, E, A;
+	L = Get_Lcs(c, s);
+	Get_EA(E, A);
+	double a = E * A / L;
+
+	double b[] = { -c,-s,c,s };
+	m_ke.resize(4, 4);
+	for (int i = 0; i < 4; ++i)
+	{//行循环
+		for (int j = 0; j < 4; ++j)
+		{//列循环
+			m_ke(i, j) = a * b[i] * b[j];
+		}
+	}
 }

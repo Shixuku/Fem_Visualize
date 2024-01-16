@@ -7,7 +7,7 @@ public:
 	LinkElement_Truss3D(int id, int idNode1, int idNode2);
 
 	Eigen::MatrixXd m_R;
-	virtual int Get_DOF_Node() override { return 3; }
+	virtual int Get_DOF_Node() override { return 2; }
 
 	void calculate_ke() override;
 	void calculate_me() override;
@@ -17,5 +17,13 @@ public:
 	void Equivalent_Force();
 	
 	void calculate_all();
+
+	double Get_Lcs(double& c, double& s) const;
+
+	void Get_EA(double& E, double& A) const;
+
+	void Get_N(double& N, double& Stress);//得到内力
+
+	void Get_ke();//计算单元单元刚度矩阵
 };
 

@@ -569,7 +569,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 0;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
@@ -579,7 +579,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 41;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
@@ -589,7 +589,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 43;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
@@ -599,7 +599,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 55;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
@@ -609,7 +609,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 10;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));
@@ -619,7 +619,7 @@ void Fem_Visualize::InitBoundarys()
 	{
 		Boundary* pBoundary = new Boundary();
 		pBoundary->m_id = m_structure->m_Boundary.size() + 1;
-		pBoundary->m_ixyz = i;
+		pBoundary->m_direction = i;
 		pBoundary->m_idNode = 32;
 		pBoundary->m_value = 0;
 		m_structure->m_Boundary.insert(make_pair(pBoundary->m_id, pBoundary));

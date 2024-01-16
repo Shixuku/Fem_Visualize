@@ -6,7 +6,7 @@ class Boundary;
 class ForceNode;
 class Material;
 class Section_Base;
-
+class InVar;
 
 #include <map>
 #include <list>
@@ -35,10 +35,13 @@ public:
 
 	std::vector<NodeFem*> m_ReationForce;
 
-	VectorXd m_x1, m_x2;
+	VectorXd m_x1, m_x2, m_F1, m_F2, m_R1;
+
+	SpMat m_K11, m_K21, m_K22;
 
 	int m_nFixed;  //约束自由度个数
-	int m_nTotal;  //总自由度个数
+	int m_nTotv;  //总自由度个数
+	std::map<int, InVar*> m_InVar;//保存内变量信息
 
 	NodeFem* Find_Node(int idNode);            //找节点
 	Material* Find_Material(int idMaterial);   //找材料
@@ -59,6 +62,17 @@ public:
 
 	void Analyse();       //分析计算
 
+	void Create_Ks();//生成分块稀疏矩阵
+
+	void Treat_Fixed();//处理约束条件
+
+	void Assemble_Force();//组装荷载
+
+	void Solve();//解方程
+
+	void Show_Solution();//显示结果
+	
+	double Get_Sol(int itotv);//根据自由度编号，得到求解结果
 	~StructureFem();
 
 };

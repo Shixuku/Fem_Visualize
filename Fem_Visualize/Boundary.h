@@ -4,7 +4,7 @@ class Boundary : public EntityBase
 {
 public:
 	int m_idNode;
-	int m_ixyz;               //0:x,1,y,2:z
+	int m_direction;               //0:x,1,y,2:z
 	double m_value = 0;
 
 	Boundary();

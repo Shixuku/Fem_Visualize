@@ -11,6 +11,6 @@ public:
 
 	void Disp();
 
-	void Assemble_F1_F2(VectorXd& F1, VectorXd& F2);
+	void Set_F1F2(VectorXd& F1, VectorXd& F2);
 };
 

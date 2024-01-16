@@ -97,6 +97,7 @@
     <ClCompile Include="DeckWindow.cpp" />
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
+    <ClCompile Include="inVar.cpp" />
     <ClCompile Include="LoadWindow.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
@@ -146,6 +147,7 @@
     <ClInclude Include="Dependant.h" />
     <QtMoc Include="DisplacementWindow.h" />
     <ClInclude Include="Element_Base.h" />
+    <ClInclude Include="inVar.h" />
     <ClInclude Include="LinkElement_Base.h" />
     <ClInclude Include="LinkElement_Beam3D.h" />
     <ClInclude Include="LinkElement_Truss3D.h" />
