@@ -97,6 +97,7 @@
     <ClCompile Include="DeckWindow.cpp" />
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
+    <ClCompile Include="LoadWindow.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
     <ClCompile Include="PointPickerCellInteractor.h" />
@@ -129,6 +130,7 @@
     <ClCompile Include="Fem_Visualize.cpp" />
     <ClCompile Include="ForceNode.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="LoadWindow.ui" />
     <QtUic Include="ReactionForceWindow.ui" />
     <QtUic Include="RopeWindow.ui" />
     <QtUic Include="TowerWindow.ui" />
@@ -149,6 +151,7 @@
     <ClInclude Include="LinkElement_Truss3D.h" />
     <ClInclude Include="EntityBase.h" />
     <ClInclude Include="ForceNode.h" />
+    <QtMoc Include="LoadWindow.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="NodeFem.h" />
     <QtMoc Include="ReactionForceWindow.h" />

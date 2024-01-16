@@ -73,6 +73,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonLoad">
+        <property name="text">
+         <string>添加荷载</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QTreeView" name="treeView"/>
       </item>
      </layout>

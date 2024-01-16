@@ -26,7 +26,6 @@ class StructureFem
 {
 public:
 	std::map<int, NodeFem*> m_Nodes;
-	std::map<int, LinkElement_Base*> m_Element;
 	std::map<int, Element_Base*> m_Elements;
 	std::map<int, Boundary*> m_Boundary;
 	std::map<int, ForceNode*> m_ForceNode;

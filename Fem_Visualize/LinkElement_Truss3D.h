@@ -15,7 +15,7 @@ public:
 	void calculate_internal_force(Eigen::VectorXd disp) override;
 
 	void Equivalent_Force();
-
+	
 	void calculate_all();
 };
 

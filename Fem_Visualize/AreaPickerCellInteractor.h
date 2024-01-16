@@ -83,7 +83,7 @@ namespace {
 				selected->GetCellData()->GetArray("OriginalIds"));
 			for (vtkIdType i = 0; i < ids->GetNumberOfTuples(); i++)
 			{
-				std::cout << "Id " << i << " : " << ids->GetValue(i) << std::endl;
+				std::cout << "Id " << i << " : " << ids->GetValue(i) + 1 << std::endl;
 			}
 
 			this->SelectedActor->GetProperty()->SetColor(

@@ -785,16 +785,8 @@ void StructureFem::Analyse()
 	Assemble_K(K11, K21, K22);//组装总纲矩阵
 	MatrixXd M11 = K11; MatrixXd M21 = K21; MatrixXd M22 = K22;
 
-	//std::cout << "M11(K11)：" << "\n" << M11 << "\n";
-	//std::cout << "M21(K21)：" << "\n" << M21 << "\n";
-	//std::cout << "M22(K22)：" << "\n" << M22 << "\n";
-
 	VectorXd x1, F1, F2;
-	Assemble_xF(x1, F1, F2);
-
-	std::cout << "\nF1=\n" << F1 << "\n";
-	std::cout << "\nF2=\n" << F2 << "\n";
-	
+	Assemble_xF(x1, F1, F2);//组装外力矩阵
 	
 	SimplicialLDLT<SparseMatrix<double>> solver;
 	solver.analyzePattern(K22); //分析非零元素结构

@@ -19,6 +19,7 @@
 #include "TowerWindow.h"
 #include "RopeWindow.h"
 #include "BridgeProperty.h"
+#include "LoadWindow.h"
 
 
 class Fem_Visualize : public QWidget
@@ -121,6 +122,7 @@ private:
 	DeckWindow* deckWindow = new DeckWindow(bridge, this);
 	TowerWindow* towerWindow = new TowerWindow(bridge, this);
 	RopeWindow* ropeWindow = new RopeWindow(bridge, this);
+	LoadWindow* loadWindow = new LoadWindow();
 
 private slots:
 	void onShowDeckModel();
@@ -128,7 +130,7 @@ private slots:
 	void onShowRopeModel();
 	void onHiddenOrShowModel();
 	void onSelectFile();
-
+	void onLoadWindow();
 	void onIsShowNodeNum();
 
 	void onIsShowCellNum();

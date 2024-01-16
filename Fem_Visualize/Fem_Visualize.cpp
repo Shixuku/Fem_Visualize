@@ -73,6 +73,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	connect(ui.pushButtonForce, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
 	connect(ui.pushButtonRea, &QPushButton::clicked, this, &Fem_Visualize::onShowReactionForces);
 	connect(ui.pushButtonSelFile, &QPushButton::clicked, this, &Fem_Visualize::onSelectFile);
+	connect(ui.pushButtonLoad, &QPushButton::clicked, this, &Fem_Visualize::onLoadWindow);
 
 	connect(reactionForce, &ReactionForceWindow::signalSendForceType, 
 		this, &Fem_Visualize::onSendForceType);
@@ -325,7 +326,7 @@ void Fem_Visualize::InitElement()
 		double nodePoint[3];
 		NodeFem* node = m_structure->Find_Node(i + 1);
 		nodePoint[0] = node->m_x;
-		nodePoint[1] = node->m_y + 0.1;
+		nodePoint[1] = node->m_y + 0.01;
 		nodePoint[2] = node->m_z;
 		nodePoints->InsertNextPoint(nodePoint);
 		nodeLabel->InsertNextValue(std::to_string(node->m_id));
@@ -1277,6 +1278,10 @@ void Fem_Visualize::onSelectFile()
 }
 
 
+void Fem_Visualize::onLoadWindow()
+{
+	loadWindow->exec();
+}
 
 void Fem_Visualize::onIsShowNodeNum()
 {

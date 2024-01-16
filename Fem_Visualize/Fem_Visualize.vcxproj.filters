@@ -160,6 +160,9 @@
     <ClCompile Include="PointPickerNodeInteractor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoadWindow.cpp">
+      <Filter>Source Files\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -254,6 +257,9 @@
     <QtUic Include="TowerWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="LoadWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="DisplacementWindow.h">
@@ -272,6 +278,9 @@
       <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="ReactionForceWindow.h">
+      <Filter>Header Files\Window</Filter>
+    </QtMoc>
+    <QtMoc Include="LoadWindow.h">
       <Filter>Header Files\Window</Filter>
     </QtMoc>
   </ItemGroup>
