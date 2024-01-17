@@ -229,6 +229,23 @@ double LinkElement_Truss3D::Get_Lcs(double& c, double& s) const
 	return L;
 }
 
+
+
+double LinkElement_Truss3D::Get_Lcst(double& c, double& s, double& t) const
+{
+	StructureFem* pStructure = Get_Structure();
+	NodeFem* pNode0 = pStructure->Find_Node(m_idNode[0]);
+	NodeFem* pNode1 = pStructure->Find_Node(m_idNode[1]);
+	double dx = pNode1->m_x - pNode0->m_x;
+	double dy = pNode1->m_y - pNode0->m_y;
+	double dz = pNode1->m_z - pNode0->m_z;
+	double L = sqrt(dx * dx + dy * dy + dz * dz);
+	c = dx / L;
+	s = dy / L;
+	t = dz / L;
+	return L;
+}
+
 void LinkElement_Truss3D::Get_EA(double& E, double& A) const
 {
 	StructureFem* pStructure = Get_Structure();

@@ -169,6 +169,9 @@
     <ClCompile Include="PointPickerNodeInteractor.cpp">
       <Filter>Source Files\Visualize</Filter>
     </ClCompile>
+    <ClCompile Include="InVar_Truss3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h">
@@ -249,8 +252,11 @@
     <ClInclude Include="inVar.h">
       <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
+    <ClInclude Include="InVar_Truss3D.h">
+      <Filter>Header Files\Fem_Base</Filter>
+    </ClInclude>
     <ClInclude Include="InVar_Truss2D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

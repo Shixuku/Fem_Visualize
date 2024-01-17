@@ -19,6 +19,7 @@ public:
 	void calculate_all();
 
 	double Get_Lcs(double& c, double& s) const;
+	double Get_Lcst(double& c, double& s, double &t) const;
 
 	void Get_EA(double& E, double& A) const;
 
