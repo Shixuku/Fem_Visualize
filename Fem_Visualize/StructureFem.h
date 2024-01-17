@@ -32,6 +32,7 @@ public:
 	std::map<int, Material*> m_Material;
 	std::map<int, Section_Base*> m_Section;
 	std::map<int, Dependant*> m_Dependant;
+	std::map<int, InVar*> m_InVar;//保存内变量信息
 
 	std::vector<NodeFem*> m_ReationForce;
 
@@ -41,7 +42,6 @@ public:
 
 	int m_nFixed;  //约束自由度个数
 	int m_nTotv;  //总自由度个数
-	std::map<int, InVar*> m_InVar;//保存内变量信息
 
 	NodeFem* Find_Node(int idNode);            //找节点
 	Material* Find_Material(int idMaterial);   //找材料

@@ -80,17 +80,14 @@ void Element_Base::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
 			if (ii < nFixed && jj < nFixed)
 			{
 				L11.push_back(Tri(ii, jj, kij));
-				cout << "ii:" << ii << " jj:" << jj << " kij:" << kij << "\n";
 			}
 			else if (ii >= nFixed && jj < nFixed)
 			{
 				L21.push_back(Tri(ii - nFixed, jj, kij));
-				cout << "ii:" << ii - nFixed << " jj:" << jj << " kij:" << kij << "\n";
 			}
 			else if (ii >= nFixed && jj >= nFixed)
 			{
 				L22.push_back(Tri(ii - nFixed, jj - nFixed, kij));
-				cout << "ii:" << ii - nFixed << " jj:" << jj - nFixed << " kij:" << kij << "\n";
 			}
 		}
 	}

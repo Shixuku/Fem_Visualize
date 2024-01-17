@@ -14,6 +14,7 @@
 #include "SoildSection_Base.h"
 #include "Dependant.h"
 #include "inVar.h"
+#include "InVar_Truss2D.h"
 
 #include <fstream>
 #include <iostream>
@@ -21,6 +22,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 
+# pragma execution_character_set("utf-8")
 # pragma execution_character_set("utf-8")
 
 NodeFem* StructureFem::Find_Node(int idNode)
@@ -589,6 +591,42 @@ bool StructureFem::Input_datas(const QString& FileName)
 			}
 		}
 
+		else if (list_str[0].compare("*Internal_Variable", Qt::CaseInsensitive) == 0)
+		{//读取到截面指派
+			Q_ASSERT(list_str.size() == 2);
+			int nSec = list_str[1].toInt();//得到截面指派个数，可控制后续循环次数
+			qDebug() << "\n内变量数: " << nSec;
+			for (int i = 0; i < nSec; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error: 内变量数据不够";
+					exit(1);
+				}
+				QStringList strlist_sec = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_sec.size() == 5);
+
+				InVar_Truss2D* pVar = new InVar_Truss2D();
+				pVar->m_id = strlist_sec[0].toInt();
+				pVar->m_idElement = strlist_sec[1].toInt();
+				pVar->m_Type = strlist_sec[2].toInt();
+				pVar->m_bFixedValue = strlist_sec[3].toInt();
+
+				if (pVar->m_bFixedValue > 0)
+				{
+					pVar->m_bFixedValue = true;
+					pVar->m_Value = strlist_sec[4].toDouble();
+				}
+				else
+				{
+					pVar->m_bFixedValue = false;
+					pVar->m_Force = strlist_sec[4].toDouble();
+				}
+				pStructure->m_InVar.insert({ pVar->m_id, pVar });
+			}
+		}
+
 		else if (list_str[0].compare("*Constraint", Qt::CaseInsensitive) == 0)
 		{//读取到约束
 			Q_ASSERT(list_str.size() == 2);
@@ -686,6 +724,14 @@ void StructureFem::Init_DOFs()
 		++iStart;
 	}
 
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (pInvar->m_bFixedValue)
+		{//指定了内变量，按约束处理，在约束自由度中分配编号
+			pInvar->m_Itotv = iStart++;
+		}
+	}
 	m_nFixed = iStart;//约束自由度个数
 	std::cout << "\nm_nFixed=" << m_nFixed << "\n";
 
@@ -702,6 +748,15 @@ void StructureFem::Init_DOFs()
 		for (auto& dof : pNode->m_DOF)
 		{
 			if (dof == -1) dof = iStart++;
+		}
+	}
+
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (!pInvar->m_bFixedValue)
+		{//指定的是内力（应力），按无约束自由度处理，在自由的自由度中分配编号
+			pInvar->m_Itotv = iStart++;
 		}
 	}
 	m_nTotv = iStart;//总自由度个数
@@ -960,11 +1015,18 @@ void StructureFem::Assemble_Force()
 	m_F2.resize(nFree);
 	m_F2.setZero();
 
+	cout << "\n F1= \n" << m_F1 << "\n";
+	cout << "\n F2= \n" << m_F2 << "\n";
+
 	for (auto& a : m_ForceNode)
 	{
 		ForceNode* pForce = a.second;
 		pForce->Set_F1F2(m_F1, m_F2);
 	}
+
+
+	cout << "\n F1= \n" << m_F1 << "\n";
+	cout << "\n F2= \n" << m_F2 << "\n";
 	for (auto& a : m_InVar)
 	{//对内变量循环
 		InVar* pInVar = a.second;
@@ -1007,7 +1069,7 @@ void StructureFem::Solve()
 void StructureFem::Show_Solution()
 {
 	//显示结果
-	cout << "\n节点解:\n";
+	qDebug() << "\n节点解:";
 	for (auto& a : m_Nodes)
 	{
 		NodeFem* pNode = a.second;
@@ -1022,7 +1084,7 @@ void StructureFem::Show_Solution()
 		cout << "\n";
 	}
 
-	cout << "\n节点约束反力:\n";
+	qDebug() << "\n节点约束反力:";
 	for (auto& a : m_Boundary)
 	{
 		Boundary* pBoundary = a.second;
@@ -1033,14 +1095,14 @@ void StructureFem::Show_Solution()
 		double Ri = m_R1[it];
 		cout << idNode << " " << iDirection << " " << Ri << "\n";
 	}
-	cout << "\n内变量的解:\n";
+	qDebug() << "\n内变量的解:";
 	for (auto& a : m_InVar)
 	{
 		InVar* pInVar = a.second;
 		pInVar->Disp();//显示结果
 	}
 
-	cout << "\n桁架单元轴力、应力:\n";
+	qDebug() << "\n桁架单元轴力、应力:";
 	for (auto& a : m_Elements)
 	{
 		LinkElement_Truss3D* pTruss = dynamic_cast<LinkElement_Truss3D*>(a.second);

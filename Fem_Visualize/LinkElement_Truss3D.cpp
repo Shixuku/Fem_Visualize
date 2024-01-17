@@ -213,8 +213,7 @@ void LinkElement_Truss3D::calculate_all()
 	calculate_T();
 	//calculate_ke();
 	Get_ke();
-	cout << "ke:\n" << m_ke << endl;
-	Equivalent_Force();
+	//Equivalent_Force();
 }
 
 double LinkElement_Truss3D::Get_Lcs(double& c, double& s) const

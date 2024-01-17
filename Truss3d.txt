@@ -29,6 +29,8 @@
 5 1
 6 1
 
+*Internal_Variable 1
+1 4 1 0 3600
 
 *Constraint,3
 1 1 0 0.0

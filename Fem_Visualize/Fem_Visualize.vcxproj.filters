@@ -157,14 +157,17 @@
     <ClCompile Include="PointPickerCellInteractor.h">
       <Filter>Header Files\Visualize</Filter>
     </ClCompile>
-    <ClCompile Include="PointPickerNodeInteractor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LoadWindow.cpp">
       <Filter>Source Files\Window</Filter>
     </ClCompile>
     <ClCompile Include="inVar.cpp">
       <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="InVar_Truss2D.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="PointPickerNodeInteractor.cpp">
+      <Filter>Source Files\Visualize</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -245,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="inVar.h">
       <Filter>Header Files\Fem_Base</Filter>
+    </ClInclude>
+    <ClInclude Include="InVar_Truss2D.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
