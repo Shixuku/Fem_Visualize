@@ -170,7 +170,13 @@
       <Filter>Source Files\Visualize</Filter>
     </ClCompile>
     <ClCompile Include="InVar_Truss3D.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Fem_Base</Filter>
+    </ClCompile>
+    <ClCompile Include="InVarWindow.cpp">
+      <Filter>Header Files\Element</Filter>
+    </ClCompile>
+    <ClCompile Include="InVarWindow.cpp">
+      <Filter>Source Files\Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -278,6 +284,12 @@
     <QtUic Include="LoadWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="InVarWindow.ui">
+      <Filter>Header Files\Element</Filter>
+    </QtUic>
+    <QtUic Include="InVarWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="DisplacementWindow.h">
@@ -299,6 +311,9 @@
       <Filter>Header Files\Window</Filter>
     </QtMoc>
     <QtMoc Include="LoadWindow.h">
+      <Filter>Header Files\Window</Filter>
+    </QtMoc>
+    <QtMoc Include="InVarWindow.h">
       <Filter>Header Files\Window</Filter>
     </QtMoc>
   </ItemGroup>

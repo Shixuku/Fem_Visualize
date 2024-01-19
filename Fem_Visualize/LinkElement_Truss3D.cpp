@@ -12,6 +12,7 @@ using namespace std;
 LinkElement_Truss3D::LinkElement_Truss3D()
 {
 	m_idNode.resize(2);
+	m_type = "Truss";
 }
 
 LinkElement_Truss3D::LinkElement_Truss3D(int id, int idNode1, int idNode2)
@@ -212,7 +213,9 @@ void LinkElement_Truss3D::calculate_all()
 {
 	calculate_T();
 	//calculate_ke();
+	//std::cout << m_ke << std::endl;
 	Get_ke();
+	//m_ke = m_T.transpose() * m_ke * m_T;
 	//Equivalent_Force();
 }
 

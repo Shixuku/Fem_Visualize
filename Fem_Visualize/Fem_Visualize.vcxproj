@@ -98,6 +98,7 @@
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
     <ClCompile Include="inVar.cpp" />
+    <ClCompile Include="InVarWindow.cpp" />
     <ClCompile Include="InVar_Truss3D.cpp" />
     <ClCompile Include="InVar_Truss2D.cpp" />
     <ClCompile Include="LoadWindow.cpp" />
@@ -133,6 +134,7 @@
     <ClCompile Include="Fem_Visualize.cpp" />
     <ClCompile Include="ForceNode.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="InVarWindow.ui" />
     <QtUic Include="LoadWindow.ui" />
     <QtUic Include="ReactionForceWindow.ui" />
     <QtUic Include="RopeWindow.ui" />
@@ -150,6 +152,7 @@
     <QtMoc Include="DisplacementWindow.h" />
     <ClInclude Include="Element_Base.h" />
     <ClInclude Include="inVar.h" />
+    <QtMoc Include="InVarWindow.h" />
     <ClInclude Include="InVar_Truss3D.h" />
     <ClInclude Include="InVar_Truss2D.h" />
     <ClInclude Include="LinkElement_Base.h" />

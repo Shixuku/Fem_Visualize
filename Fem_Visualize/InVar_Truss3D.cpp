@@ -15,8 +15,8 @@ void InVar_Truss3D::Calculate_ke()
 	m_ke[0] = -c * a;
 	m_ke[1] = -s * a;
 	m_ke[2] = -t * a;
-	m_ke[3] = s * a;
-	m_ke[4] = c * a;
+	m_ke[3] = c * a;
+	m_ke[4] = s * a;
 	m_ke[5] = t * a;
 	m_ke[6] = a;
 }

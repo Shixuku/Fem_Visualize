@@ -608,7 +608,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				QStringList strlist_sec = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
 				Q_ASSERT(strlist_sec.size() == 5);
 
-				InVar_Truss3D* pVar = new InVar_Truss3D();
+				InVar_Truss2D* pVar = new InVar_Truss2D();
 				pVar->m_id = strlist_sec[0].toInt();
 				pVar->m_idElement = strlist_sec[1].toInt();
 				pVar->m_Type = strlist_sec[2].toInt();
@@ -1016,18 +1016,12 @@ void StructureFem::Assemble_Force()
 	m_F2.resize(nFree);
 	m_F2.setZero();
 
-	cout << "\n F1= \n" << m_F1 << "\n";
-	cout << "\n F2= \n" << m_F2 << "\n";
-
 	for (auto& a : m_ForceNode)
 	{
 		ForceNode* pForce = a.second;
 		pForce->Set_F1F2(m_F1, m_F2);
 	}
 
-
-	cout << "\n F1= \n" << m_F1 << "\n";
-	cout << "\n F2= \n" << m_F2 << "\n";
 	for (auto& a : m_InVar)
 	{//对内变量循环
 		InVar* pInVar = a.second;
@@ -1036,6 +1030,11 @@ void StructureFem::Assemble_Force()
 			m_F2[pInVar->m_Itotv - m_nFixed] += pInVar->m_Force;
 		}
 	}
+
+	cout << "\n";
+	cout << "K11:\n" << MatrixXd(m_K11) << "\n\n";
+	cout << "K21:\n" << MatrixXd(m_K21) << "\n\n";
+	cout << "K22:\n" << MatrixXd(m_K22) << "\n\n";
 
 	cout << "\n F1= \n" << m_F1 << "\n";
 	cout << "\n F2= \n" << m_F2 << "\n";

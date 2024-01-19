@@ -74,6 +74,8 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	connect(ui.pushButtonRea, &QPushButton::clicked, this, &Fem_Visualize::onShowReactionForces);
 	connect(ui.pushButtonSelFile, &QPushButton::clicked, this, &Fem_Visualize::onSelectFile);
 	connect(ui.pushButtonLoad, &QPushButton::clicked, this, &Fem_Visualize::onLoadWindow);
+	connect(ui.pushButton, &QPushButton::clicked, this, &Fem_Visualize::onAnalyse);
+	connect(ui.pushButtonInVar, &QPushButton::clicked, this, &Fem_Visualize::onShowInVarWindow);
 
 	connect(reactionForce, &ReactionForceWindow::signalSendForceType, 
 		this, &Fem_Visualize::onSendForceType);
@@ -237,7 +239,7 @@ void Fem_Visualize::InitElement()
 
 	for (auto element : m_structure->m_Elements)
 	{
-		if (element.second->m_type == "Beam")
+		if (element.second->m_type == "Beam" || element.second->m_type == "Truss")
 		{
 			startNodeIndex = element.second->m_idNode.at(0);
 			endNodeIndex = element.second->m_idNode.at(1);
@@ -370,7 +372,11 @@ void Fem_Visualize::InitElement()
 		//mapper->SetInputData(polyData);
 		linkMapper->SetInputConnection(linkAppendFilter->GetOutputPort());
 		linkMapper->SetScalarRange(0, 90);
-		linkMapper->SetScalarModeToUsePointData();
+		//linkMapper->SetScalarModeToUsePointData();
+		linkActor->GetProperty()->SetEdgeColor(0, 0, 0);
+		linkActor->GetProperty()->SetColor(0.8, 1, 1); // 淡蓝色
+		linkActor->GetProperty()->EdgeVisibilityOn();
+		linkActor->GetProperty()->SetLineWidth(1);
 		renderer->AddActor(linkActor);
 	}
 
@@ -777,28 +783,28 @@ void Fem_Visualize::CreateRecSection(double length, double width, double startPo
 	extrusion->SetVector(endPoint[0] - startPoint[0], endPoint[1] - startPoint[1], endPoint[2] - startPoint[2]);
 	extrusion->Update();
 
-	double nextValue = vtkMath::Random(0, 90);
-	double thirdValue = vtkMath::Random(0, 90);
-	double fouthValue = vtkMath::Random(0, 90);
+	//double nextValue = vtkMath::Random(0, 90);
+	//double thirdValue = vtkMath::Random(0, 90);
+	//double fouthValue = vtkMath::Random(0, 90);
 
-	int pointNum = extrusion->GetOutput()->GetNumberOfPoints();
-	for (int i = 0; i < pointNum / 4; i++)
-	{
-		stress->InsertNextValue(value);
-	}
-	for (int i = 0; i < pointNum / 4; i++)
-	{
-		stress->InsertNextValue(nextValue);
-	}
-	for (int i = 0; i < pointNum / 4; i++)
-	{
-		stress->InsertNextValue(thirdValue);
-	}
-	for (int i = 0; i < pointNum / 4; i++)
-	{
-		stress->InsertNextValue(fouthValue);
-	}
-	extrusion->GetOutput()->GetPointData()->SetScalars(stress);
+	//int pointNum = extrusion->GetOutput()->GetNumberOfPoints();
+	//for (int i = 0; i < pointNum / 4; i++)
+	//{
+	//	stress->InsertNextValue(value);
+	//}
+	//for (int i = 0; i < pointNum / 4; i++)
+	//{
+	//	stress->InsertNextValue(nextValue);
+	//}
+	//for (int i = 0; i < pointNum / 4; i++)
+	//{
+	//	stress->InsertNextValue(thirdValue);
+	//}
+	//for (int i = 0; i < pointNum / 4; i++)
+	//{
+	//	stress->InsertNextValue(fouthValue);
+	//}
+	//extrusion->GetOutput()->GetPointData()->SetScalars(stress);
 
 	linkAppendFilter->AddInputConnection(extrusion->GetOutputPort());
 	linkAppendFilter->Update();
@@ -1268,13 +1274,13 @@ void Fem_Visualize::onSelectFile()
 		m_structure = new StructureFem();
 		EntityBase::Set_Structure(m_structure);
 		m_structure->Input_datas(fileName);
-		m_structure->Analyse();
 		SetRenderWindow();
 	}
 	else {
 		// 用户取消了操作
 		qDebug() << "用户取消了选择操作";
 	}
+	inVarWindow = new InVarWindow(this, m_structure);
 }
 
 
@@ -1299,6 +1305,16 @@ void Fem_Visualize::onIsShowNodeNum()
 		showFlag = 0;
 		return;
 	}
+}
+
+void Fem_Visualize::onAnalyse()
+{
+	m_structure->Analyse();
+}
+
+void Fem_Visualize::onShowInVarWindow()
+{
+	inVarWindow->show();
 }
 
 void Fem_Visualize::onIsShowCellNum()
