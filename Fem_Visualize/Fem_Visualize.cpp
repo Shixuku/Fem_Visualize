@@ -375,7 +375,7 @@ void Fem_Visualize::InitElement()
 		//linkMapper->SetScalarModeToUsePointData();
 		linkActor->GetProperty()->SetEdgeColor(0, 0, 0);
 		linkActor->GetProperty()->SetColor(0.8, 1, 1); // µ­À¶É«
-		linkActor->GetProperty()->EdgeVisibilityOn();
+		//linkActor->GetProperty()->EdgeVisibilityOn();
 		linkActor->GetProperty()->SetLineWidth(1);
 		renderer->AddActor(linkActor);
 	}

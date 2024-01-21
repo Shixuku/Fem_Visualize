@@ -608,7 +608,7 @@ bool StructureFem::Input_datas(const QString& FileName)
 				QStringList strlist_sec = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
 				Q_ASSERT(strlist_sec.size() == 5);
 
-				InVar_Truss2D* pVar = new InVar_Truss2D();
+				InVar_Truss3D* pVar = new InVar_Truss3D();
 				pVar->m_id = strlist_sec[0].toInt();
 				pVar->m_idElement = strlist_sec[1].toInt();
 				pVar->m_Type = strlist_sec[2].toInt();

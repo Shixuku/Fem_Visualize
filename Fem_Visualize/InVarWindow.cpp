@@ -30,7 +30,7 @@ void InVarWindow::onSureAddInvar()
 	// 新元素的key值是最后一个元素的key值+1
 	int newKey = inVarId + 1;
 
-	InVar_Truss2D* inVar = new InVar_Truss2D();
+	InVar_Truss3D* inVar = new InVar_Truss3D();
 	inVar->m_id = newKey;
 	inVar->m_idElement = ui.lineEditElement->text().toInt();
 	inVar->m_Type = 1;

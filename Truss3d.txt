@@ -29,13 +29,15 @@
 5 1
 6 1
 
-*Internal_Variable 1
-1 4 1 0 3600
-
-*Constraint,3
+*Constraint,7
 1 1 0 0.0
 2 1 1 0.0
 3 2 1 0.0
-
+4 1 2 0.0
+5 2	2 0.0
+6 3	2 0.0
+7 4	2 0.0
+	
+	
 *Force_Node_Function,1
 1 4 0 10e3

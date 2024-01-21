@@ -211,10 +211,43 @@ void LinkElement_Truss3D::Equivalent_Force()
 
 void LinkElement_Truss3D::calculate_all()
 {
-	calculate_T();
-	//calculate_ke();
-	//std::cout << m_ke << std::endl;
-	Get_ke();
+	//calculate_T();
+
+	StructureFem* pSt = Get_Structure();
+
+	Section_Base* pSection = pSt->Find_Section(m_idSection);
+	Section_Truss3D* pSectionTruss = dynamic_cast<Section_Truss3D*>(pSection);
+	assert(pSectionTruss != nullptr);
+
+	NodeFem* pNode0 = pSt->Find_Node(m_idNode[0]);
+	NodeFem* pNode1 = pSt->Find_Node(m_idNode[1]);
+
+	double dx = pNode1->m_x - pNode0->m_x;
+	double dy = pNode1->m_y - pNode0->m_y;
+	double dz = pNode1->m_z - pNode0->m_z;
+
+	double L = sqrt(dx * dx + dy * dy + dz * dz);
+
+	double lx = (dx) / L;
+	double mx = (dy) / L;
+	double nx = (dz) / L;
+
+	double E = pSection->Get_E();
+	double A = pSectionTruss->m_Area;
+	double a = E * A / L;
+
+	double b[] = { -lx,-mx,-nx,lx,mx,nx };
+	m_ke.resize(6, 6);
+	for (int i = 0; i < 6; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			m_ke(i, j) = a * b[i] * b[j];
+		}
+	}
+	std::cout << m_ke << std::endl;
+    //calculate_ke();
+	//Get_ke();
 	//m_ke = m_T.transpose() * m_ke * m_T;
 	//Equivalent_Force();
 }
