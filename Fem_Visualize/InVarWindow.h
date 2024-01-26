@@ -1,4 +1,5 @@
 #pragma once
+#pragma execution_character_set("utf-8")//防止出现中文乱码
 
 #include <QDialog>
 #include "ui_InVarWindow.h"
@@ -6,6 +7,9 @@
 #include "inVar.h"
 #include "InVar_Truss3D.h"
 #include "InVar_Truss2D.h"
+//#include "AreaPickerCellInteractor.h"
+
+
 
 class InVarWindow : public QDialog
 {

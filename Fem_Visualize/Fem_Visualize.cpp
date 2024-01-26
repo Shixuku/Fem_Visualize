@@ -30,8 +30,8 @@
 #include <vtkAreaPicker.h>
 #include "AreaPickerCellInteractor.h"
 #include "AreaPickerNodeInteractor.h"
-#include "PointPickerCellInteractor.h"
 #include "PointPickerNodeInteractor.h"
+#include "PointPickerCellInteractor.h"
 #include "Boundary.h"
 #include "LinkElement_Beam3D.h"
 #include "Section_Beam3D.h"
@@ -1314,6 +1314,8 @@ void Fem_Visualize::onAnalyse()
 
 void Fem_Visualize::onShowInVarWindow()
 {
+	inVarWindow->setWindowFlags(inVarWindow->windowFlags() | Qt::WindowStaysOnTopHint);
+	//inVarWindow->setModal(true);
 	inVarWindow->show();
 }
 
@@ -1370,6 +1372,8 @@ void Fem_Visualize::onPointPickerCell()
 	interactor->SetPicker(cellPicker);
 	interactor->SetRenderWindow(ui.widget->renderWindow());
 
+	// 注册 Observer 的回调函数
+	//interactor.registerCallback(std::bind(&Observer::onCellNumChanged, &observer, std::placeholders::_1));
 	vtkNew<PointPickerCellInteractor> style;
 	style->SetDefaultRenderer(renderer);
 	style->Data = linePolyData;

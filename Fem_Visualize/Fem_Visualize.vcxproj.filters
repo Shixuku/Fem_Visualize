@@ -154,9 +154,6 @@
     <ClCompile Include="AreaPickerNodeInteractor.cpp">
       <Filter>Source Files\Visualize</Filter>
     </ClCompile>
-    <ClCompile Include="PointPickerCellInteractor.h">
-      <Filter>Header Files\Visualize</Filter>
-    </ClCompile>
     <ClCompile Include="LoadWindow.cpp">
       <Filter>Source Files\Window</Filter>
     </ClCompile>
@@ -173,10 +170,16 @@
       <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
     <ClCompile Include="InVarWindow.cpp">
-      <Filter>Header Files\Element</Filter>
+      <Filter>Source Files\Window</Filter>
     </ClCompile>
     <ClCompile Include="InVarWindow.cpp">
       <Filter>Source Files\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="PointPicker.cpp">
+      <Filter>Header Files\Visualize</Filter>
+    </ClCompile>
+    <ClCompile Include="PointPicker.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +267,12 @@
     <ClInclude Include="InVar_Truss2D.h">
       <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
+    <ClInclude Include="PointPickerCellInteractor1.h">
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
+    <ClInclude Include="PointPicker.h">
+      <Filter>Header Files\Visualize</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReactionForceWindow.ui">
@@ -285,7 +294,7 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="InVarWindow.ui">
-      <Filter>Header Files\Element</Filter>
+      <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="InVarWindow.ui">
       <Filter>Form Files</Filter>

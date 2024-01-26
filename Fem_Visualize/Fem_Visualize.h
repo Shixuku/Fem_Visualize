@@ -85,6 +85,12 @@ public:
 
 	bool showCellFlag = 0;
 
+	// 在窗选的类中定义信号
+
+signals:
+	void cellSelected(int cellNumber);
+
+
 private slots:
 
 	/* 根据选择的不同Radio显示对应的支座反力FXYZ */
