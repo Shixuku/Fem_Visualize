@@ -175,10 +175,22 @@
     <ClCompile Include="InVarWindow.cpp">
       <Filter>Source Files\Window</Filter>
     </ClCompile>
-    <ClCompile Include="PointPicker.cpp">
-      <Filter>Header Files\Visualize</Filter>
+    <ClCompile Include="TowerTest.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PointPicker.cpp">
+    <ClCompile Include="H_Tower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="A_Tower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HUA_Tower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Y_Tower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="I_Tower.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -270,8 +282,8 @@
     <ClInclude Include="PointPickerCellInteractor1.h">
       <Filter>Header Files\Visualize</Filter>
     </ClInclude>
-    <ClInclude Include="PointPicker.h">
-      <Filter>Header Files\Visualize</Filter>
+    <ClInclude Include="PointPickerCellInteractor.h">
+      <Filter>Header Files\Window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -299,6 +311,24 @@
     <QtUic Include="InVarWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="TowerTest.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="H_Tower.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="A_Tower.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="HUA_Tower.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Y_Tower.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="I_Tower.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="DisplacementWindow.h">
@@ -324,6 +354,24 @@
     </QtMoc>
     <QtMoc Include="InVarWindow.h">
       <Filter>Header Files\Window</Filter>
+    </QtMoc>
+    <QtMoc Include="TowerTest.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="H_Tower.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="A_Tower.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="HUA_Tower.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Y_Tower.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="I_Tower.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

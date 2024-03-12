@@ -1,4 +1,9 @@
 <RCC>
-    <qresource prefix="Fem_Visualize">
+    <qresource prefix="/Fem_Visualize">
+        <file alias="H">C:/Users/Administrator/Desktop/thesis/插入图片/H型桥塔.png</file>
+        <file alias="A">C:/Users/Administrator/Desktop/thesis/插入图片/A型索塔.png</file>
+        <file alias="Y">C:/Users/Administrator/Desktop/thesis/插入图片/倒Y.png</file>
+        <file alias="I">C:/Users/Administrator/Desktop/thesis/插入图片/单塔.png</file>
+        <file alias="HUA">C:/Users/Administrator/Desktop/thesis/插入图片/花瓶索塔11.png</file>
     </qresource>
 </RCC>

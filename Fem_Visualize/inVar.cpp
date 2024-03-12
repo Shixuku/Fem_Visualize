@@ -55,7 +55,7 @@ void InVar::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
 				L21.push_back(Tri(itElement - nFixed, m_Itotv, ki));
 			}
 		}
-		L11.push_back(Tri(m_Itotv, m_Itotv, ke[nDOF]));//组装对角线元素
+		L11.push_back(Tri(m_Itotv, m_Itotv, ke[nDOF]));//组装对角线`元素
 	}
 	else
 	{//内变量自由度没有指定，指定的是内力

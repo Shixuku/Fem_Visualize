@@ -58,17 +58,14 @@ namespace {
 		virtual void OnLeftButtonUp() override
 		{
 			vtkNew<vtkNamedColors> colors;
+			vtkInteractorStyleRubberBandPick::OnLeftButtonUp();  // 执行默认左键操作
 
-			// Forward events
-			vtkInteractorStyleRubberBandPick::OnLeftButtonUp();
-
-			vtkPlanes* frustum =
-				static_cast<vtkAreaPicker*>(this->GetInteractor()->GetPicker())
-				->GetFrustum();
+			vtkPlanes* frustum =static_cast<vtkAreaPicker*>
+				(this->GetInteractor()->GetPicker())->GetFrustum();  // 创建视椎体  
 
 			vtkNew<vtkExtractPolyDataGeometry> extractGeometry;
 			extractGeometry->SetImplicitFunction(frustum);
-			extractGeometry->SetInputData(this->Points);
+			extractGeometry->SetInputData(this->CellData);           // 将视椎体中的数据存储到过滤器中
 			extractGeometry->Update();
 
 			vtkPolyData* selected = extractGeometry->GetOutput();
@@ -80,15 +77,15 @@ namespace {
 			vtkNew<vtkActor> actor;
 
 			vtkIdTypeArray* ids = dynamic_cast<vtkIdTypeArray*>(
-				selected->GetCellData()->GetArray("OriginalIds"));
+				selected->GetCellData()->GetArray("OriginalIds"));   // 获取被选取到的单元的编号
 			for (vtkIdType i = 0; i < ids->GetNumberOfTuples(); i++)
 			{
 				std::cout << "Id " << i << " : " << ids->GetValue(i) + 1 << std::endl;
 			}
 
 			this->SelectedActor->GetProperty()->SetColor(
-				colors->GetColor3d("Red").GetData());
-			//this->SelectedActor->GetProperty()->SetPointSize(5);
+				colors->GetColor3d("Red").GetData());           // 将选中的单元标红
+
 			this->SelectedActor->GetProperty()->SetLineWidth(3);
 			this->CurrentRenderer->AddActor(SelectedActor);
 			this->GetInteractor()->GetRenderWindow()->Render();
@@ -97,11 +94,11 @@ namespace {
 
 		void SetPoints(vtkSmartPointer<vtkPolyData> points)
 		{
-			this->Points = points;
+			this->CellData = points;
 		}
 
 	private:
-		vtkSmartPointer<vtkPolyData> Points;
+		vtkSmartPointer<vtkPolyData> CellData;
 		vtkSmartPointer<vtkActor> SelectedActor;
 		vtkSmartPointer<vtkDataSetMapper> SelectedMapper;
 	};
