@@ -1,5 +1,6 @@
 #include "InVarWindow.h"
 #include "qdebug.h"
+#include <QMessageBox>
 
 InVarWindow::InVarWindow(QWidget *parent)
 	: QDialog(parent)
@@ -14,6 +15,12 @@ InVarWindow::InVarWindow(QWidget* parent /*= nullptr*/, StructureFem* structure 
 	m_structure = structure;
 
 	connect(ui.pushButtonSure, &QPushButton::clicked, this, &InVarWindow::onSureAddInvar);
+	// 将LineEdit的editingFinished信号连接到槽函数
+	connect(ui.lineEditForce, &QLineEdit::dragEnabled, this, [=]() {
+		// 在编辑完成时设置Label的文本
+		ui.lineEditForce->setText("checked");
+		});
+	
 }
 
 InVarWindow::~InVarWindow()
@@ -22,6 +29,21 @@ InVarWindow::~InVarWindow()
 void InVarWindow::onSureAddInvar()
 {
 	int inVarId = 0;
+
+	if (ui.lineEditForce->text().isEmpty() && ui.lineEditInVar->text().isEmpty())
+	{
+		// 弹出错误窗口
+		QMessageBox::critical(this, "Error", "缺少参数", QMessageBox::Ok);
+		return;
+	}
+
+	if (ui.radioButtonISel->isChecked() && ui.lineEditElement->text().isEmpty() || 
+		(!ui.radioButtonISel->isChecked() && !ui.radioButtonAll->isChecked()))
+	{
+		// 弹出错误窗口
+		QMessageBox::critical(this, "Error", "请输入单元号", QMessageBox::Ok);
+		return;
+	}
 
 	if (!m_structure->m_InVar.empty()) {
 		int inVarId = m_structure->m_InVar.rbegin()->second->m_id;

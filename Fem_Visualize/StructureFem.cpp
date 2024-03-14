@@ -978,6 +978,14 @@ void StructureFem::Create_Ks()
 	m_K11.setFromTriplets(L11.begin(), L11.end());
 	m_K21.setFromTriplets(L21.begin(), L21.end());
 	m_K22.setFromTriplets(L22.begin(), L22.end());
+<<<<<<< HEAD
+=======
+
+	//cout << "\n";
+	//cout << "K11:\n" << MatrixXd(m_K11) << "\n\n";
+	//cout << "K21:\n" << MatrixXd(m_K21) << "\n\n";
+	//cout << "K22:\n" << MatrixXd(m_K22) << "\n\n";
+>>>>>>> dcee9b41c5b691b700c9aa0e49505c4a37f4880a
 }
 
 void StructureFem::Treat_Fixed()
