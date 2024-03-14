@@ -42,6 +42,7 @@
 #include <vtkVertexGlyphFilter.h>
 #include <QStandardItemModel>
 #include <QFileDialog>
+#include <limits> // 用于设置初始的最小和最大值
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <map>
@@ -549,6 +550,11 @@ void Fem_Visualize::InitMaterial()
 
 	Material* pMaiterial = new Material(id, E, possion, density);
 	m_structure->m_Material.insert(make_pair(id, pMaiterial));
+
+	double density1 = 0;
+	double E1 = 0;
+	Material* pMaiterial1 = new Material(id, E, possion, density);
+	m_structure->m_Material.insert(make_pair(2, pMaiterial1));
 }
 
 void Fem_Visualize::InitSections()
@@ -561,7 +567,7 @@ void Fem_Visualize::InitSections()
 	double Iz = 7.853982e-5;
 
 	Section_Beam3D *pSection = new Section_Beam3D(sectionId, materialId, area, Iy, Iz);
-	Section_Truss3D* pSection2 = new Section_Truss3D(2, 1, area);
+	Section_Truss3D* pSection2 = new Section_Truss3D(1, 2, area);
 
 	m_structure->m_Section.insert(make_pair(sectionId, pSection));
 	m_structure->m_Section.insert(make_pair(2, pSection2));
@@ -842,28 +848,120 @@ void Fem_Visualize::onShowDisplacement()
 	vtkNew<vtkDoubleArray> dis;
 	double displacement = 0;
 	double pointNum = 0;
-	double point[3];
-	double maxDis = 0;
-	double minDis = 0;
-	for (auto a : m_structure->m_Nodes)
+
+	// 初始化最小和最大坐标值
+	double minX = std::numeric_limits<double>::max();
+	double maxX = std::numeric_limits<double>::lowest();
+	double minY = minX;
+	double maxY = std::numeric_limits<double>::lowest();
+	double minZ = minX;
+	double maxZ = std::numeric_limits<double>::lowest();
+
+	double maxDistanceX;
+	double maxDistanceY;
+	double maxDistanceZ;
+
+	// 遍历所有节点
+	for (const auto& nodePair : m_structure->m_Nodes) {
+		NodeFem* pNode = nodePair.second;
+
+		// 假设有一个方法来获取节点的XYZ坐标
+		double x = pNode->m_x;
+		double y = pNode->m_y;
+		double z = pNode->m_z;
+
+		// 更新XYZ方向上的最小和最大坐标值
+		if (x < minX) minX = x;
+		if (x > maxX) maxX = x;
+		if (y < minY) minY = y;
+		if (y > maxY) maxY = y;
+		if (z < minZ) minZ = z;
+		if (z > maxZ) maxZ = z;
+
+		// 计算每个方向上的最大距离
+		maxDistanceX = maxX - minX;
+		maxDistanceY = maxY - minY;
+		maxDistanceZ = maxZ - minZ;
+	}
+
+	// 初始化位移的最大值和最小值
+	double maxXDisplacement = std::numeric_limits<double>::lowest(), minXDisplacement = std::numeric_limits<double>::max();
+	double maxYDisplacement = std::numeric_limits<double>::lowest(), minYDisplacement = std::numeric_limits<double>::max();
+	double maxZDisplacement = std::numeric_limits<double>::lowest(), minZDisplacement = std::numeric_limits<double>::max();
+
+	double disX = 0, disY = 0, disZ = 0; // XYZ方向上位移绝对值的最大值
+
+	for (auto& nodePair : m_structure->m_Nodes) {
+		NodeFem* pNode = nodePair.second;
+		double displacements[3] = { 0, 0, 0 }; // X, Y, Z方向的位移
+
+		for (int i = 0; i < 3; i++) { // 遍历X, Y, Z方向
+			int dofNum = pNode->m_DOF[i];
+			if (dofNum < m_structure->m_nFixed) {
+				displacements[i] = m_structure->m_x1[dofNum];
+			}
+			else {
+				displacements[i] = m_structure->m_x2[dofNum - m_structure->m_nFixed];
+			}
+
+			// 更新最大和最小位移
+			if (i == 0) { // X方向
+				maxXDisplacement = std::max(maxXDisplacement, displacements[i]);
+				minXDisplacement = std::min(minXDisplacement, displacements[i]);
+				disX = std::max(disX, std::abs(displacements[i]));
+			}
+			else if (i == 1) { // Y方向
+				maxYDisplacement = std::max(maxYDisplacement, displacements[i]);
+				minYDisplacement = std::min(minYDisplacement, displacements[i]);
+				disY = std::max(disY, std::abs(displacements[i]));
+			}
+			else if (i == 2) { // Z方向
+				maxZDisplacement = std::max(maxZDisplacement, displacements[i]);
+				minZDisplacement = std::min(minZDisplacement, displacements[i]);
+				disZ = std::max(disZ, std::abs(displacements[i]));
+			}
+		}
+	}
+
+	double targetDisplacementRatio = 0.1; // 目标位移为模型最大尺寸的10%
+	double defaultScaleFactor = 1.0; // 默认缩放因子，用于处理最大位移为0的情况
+
+	// 确保不会除以零，并计算缩放因子
+	double scaleFactorX = disX > 0 ? (maxDistanceX * 0.05) / disX : defaultScaleFactor;
+	double scaleFactorY = disY > 0 ? (maxDistanceY * targetDisplacementRatio) / disY : defaultScaleFactor;
+	double scaleFactorZ = disZ > 0 ? (maxDistanceZ * 0.05) / disZ : defaultScaleFactor;
+
+	for (auto& nodePair : m_structure->m_Nodes)
 	{
-		NodeFem* pNode = a.second;
-		int dofNum = pNode->m_DOF[1];
-		if (dofNum < m_structure->m_nFixed)
-		{
-			displacement = m_structure->m_x1[dofNum];
+		NodeFem* pNode = nodePair.second;
+		double point[3];
+
+		double displacements[3];
+
+		for (int i = 0; i < 3; i++) { // 遍历X, Y, Z方向
+			int dofNum = pNode->m_DOF[i];
+			if (dofNum < m_structure->m_nFixed) {
+				displacements[i] = m_structure->m_x1[dofNum];
+			}
+			else {
+				displacements[i] = m_structure->m_x2[dofNum - m_structure->m_nFixed];
+			}
 		}
-		else
-		{
-			displacement = m_structure->m_x2[dofNum - m_structure->m_nFixed];
-		}
-		newPoints->GetPoint(pointNum, point);
-		point[1] += displacement * 800;
-		newPoints->SetPoint(pointNum, point);
-		dis->InsertNextValue(displacement);
+		point[0] = displacements[0] * scaleFactorX + pNode->m_x;
+		point[1] = displacements[1] * scaleFactorY + pNode->m_y;
+		point[2] = displacements[2] * scaleFactorZ + pNode->m_z;
+
+		newPoints->SetPoint(pointNum, point); // 更新点的位置
+		// 打印出更新后的点的坐标
+		std::cout << "Point " << pointNum << ": ("
+			<< point[0] << ", "
+			<< point[1] << ", "
+			<< point[2] << ")" << std::endl;
+
+		dis->InsertNextValue(displacements[1]); // 插入位移向量的模
+
 		pointNum++;
-		if (displacement > maxDis) maxDis = displacement;
-		if (displacement < minDis) minDis = displacement;
+
 	}
 
 	vtkNew<vtkLookupTable> lut;
@@ -900,7 +998,7 @@ void Fem_Visualize::onShowDisplacement()
 
 	vtkNew<vtkPolyDataMapper> mapper;
 	mapper->SetInputData(polyData);
-	mapper->SetScalarRange(minDis, maxDis);
+	mapper->SetScalarRange(minYDisplacement, maxYDisplacement);
 	mapper->SetLookupTable(lut);
 
 	scalarBar->SetLookupTable(lut);

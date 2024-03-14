@@ -154,59 +154,64 @@ void LinkElement_Truss3D::Equivalent_Force()
 	double dz = startNode->m_z - endNode->m_z;
 	double L = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-	double q = -9.8 * pSection->m_density * pSectionBeam->m_Area;
+	double q = -9.8 * 7800 * pSectionBeam->m_Area;
+	double halfQ = 0.5 * q * L; // 假设荷载均匀分布，则每个节点承担一半的总荷载
 
-	VectorXd qVector(3);
-	qVector.setZero();
-	qVector(1) = q;
+	//VectorXd qVector(3);
+	//qVector.setZero();
+	//qVector(1) = q;
 
-	qVector = m_Lambda * qVector;
+	//qVector = m_Lambda * qVector;
 
-	VectorXd x1(3);
-	VectorXd x2(3);
-	x1.setZero();
-	x2.setZero();
+	VectorXd x1(1);
+	//VectorXd x2(3);
+	//x1.setZero();
+	//x2.setZero();
+
+	ForceNode* pForceNode = new ForceNode();
+	pForceNode->m_idNode = startNode->m_id;
+	pForceNode->m_id = pSt->m_ForceNode.size() + 1;
+	pForceNode->m_value = halfQ;
+	pForceNode->m_ixyz = 1;
+	pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+
+	ForceNode* pForceNode2 = new ForceNode();
+	pForceNode2->m_idNode = endNode->m_id;
+	pForceNode2->m_id = pSt->m_ForceNode.size() + 1;
+	pForceNode2->m_value = halfQ;
+	pForceNode2->m_ixyz = 1;
+	pSt->m_ForceNode.insert({ pForceNode2->m_id, pForceNode2 });
+
+	//VectorXd equialentForce(2);
+	//equialentForce << x1, x2;  // 组合等效外力矩阵
+
+	//m_EqForce = equialentForce;
+
+	//equialentForce = m_R.transpose() * equialentForce;
+	//cout << "等效荷载" << equialentForce << "\n";
 
 
-	x1(0) = 0.5 * qVector(0) * L;
-	x2(0) = 0.5 * qVector(0) * L;
-
-	x1(1) = 0.5 * qVector(1) * L;
-	x2(1) = 0.5 * qVector(1) * L;
-
-	x1(2) = 0.5 * qVector(2) * L;
-	x2(2) = 0.5 * qVector(2) * L;
-;
-
-	VectorXd equialentForce(6);
-	equialentForce << x1, x2;  // 组合等效外力矩阵
-
-	m_EqForce = equialentForce;
-
-	equialentForce = m_R.transpose() * equialentForce;
-
-
-	for (int i = 0; i < 3; i++)
-	{
-		if (equialentForce[i] != 0)
-		{
-			ForceNode* pForceNode = new ForceNode();
-			pForceNode->m_idNode = startNode->m_id;
-			pForceNode->m_ixyz = i;
-			pForceNode->m_id = pSt->m_ForceNode.size() + 1;
-			pForceNode->m_value = equialentForce[i];
-			pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
-		}
-		if (equialentForce[i + 3] != 0)
-		{
-			ForceNode* pForceNode = new ForceNode();
-			pForceNode->m_idNode = endNode->m_id;
-			pForceNode->m_ixyz = i;
-			pForceNode->m_id = pSt->m_ForceNode.size() + 1;
-			pForceNode->m_value = equialentForce[i + 3];
-			pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
-		}
-	}
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	if (equialentForce[i] != 0)
+	//	{
+	//		ForceNode* pForceNode = new ForceNode();
+	//		pForceNode->m_idNode = startNode->m_id;
+	//		pForceNode->m_ixyz = i;
+	//		pForceNode->m_id = pSt->m_ForceNode.size() + 1;
+	//		pForceNode->m_value = equialentForce[i];
+	//		pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+	//	}
+	//	if (equialentForce[i + 3] != 0)
+	//	{
+	//		ForceNode* pForceNode = new ForceNode();
+	//		pForceNode->m_idNode = endNode->m_id;
+	//		pForceNode->m_ixyz = i;
+	//		pForceNode->m_id = pSt->m_ForceNode.size() + 1;
+	//		pForceNode->m_value = equialentForce[i + 3];
+	//		pSt->m_ForceNode.insert({ pForceNode->m_id, pForceNode });
+	//	}
+	//}
 }
 
 void LinkElement_Truss3D::calculate_all()
@@ -236,20 +241,24 @@ void LinkElement_Truss3D::calculate_all()
 	double A = pSectionTruss->m_Area;
 	double a = E * A / L;
 
-	double b[] = { -lx,-mx,-nx,lx,mx,nx };
-	m_ke.resize(6, 6);
-	for (int i = 0; i < 6; i++)
-	{
-		for (int j = 0; j < 6; j++)
-		{
-			m_ke(i, j) = a * b[i] * b[j];
-		}
-	}
-	std::cout << m_ke << std::endl;
+	//double b[] = { -lx,-mx,-nx,lx,mx,nx };
+	//m_ke.resize(6, 6);
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	for (int j = 0; j < 6; j++)
+	//	{
+	//		m_ke(i, j) = a * b[i] * b[j];
+	//	}
+	//}
+	calculate_ke();
+	calculate_T();
+	m_ke = m_T.transpose() * m_ke * m_T;
+
+	//std::cout << m_ke << std::endl;
     //calculate_ke();
 	//Get_ke();
 	//m_ke = m_T.transpose() * m_ke * m_T;
-	//Equivalent_Force();
+	Equivalent_Force();
 }
 
 double LinkElement_Truss3D::Get_Lcs(double& c, double& s) const

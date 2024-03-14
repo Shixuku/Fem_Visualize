@@ -62,21 +62,42 @@ void Element_Base::Get_DOFs(std::vector<int>& DOFs)
 
 void Element_Base::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
 {
-	StructureFem* pStructure = Get_Structure();
-	int nFixed = pStructure->m_nFixed;
+	Eigen::MatrixXd ke;
+	if (m_type == "Beam")
+	{
+		ke = calculate_Ke();
+	}
+	else if (m_type == "Truss")
+	{
+		ke = m_ke;
+	}
 
-	MatrixXd ke = m_ke;
-	cout << ke << "\n";
-	std::vector<int> DOFs;
-	Get_DOFs(DOFs);
-	auto nDOF = DOFs.size();//单元的自由度个数
-	for (int i = 0; i < nDOF; ++i)
-	{//对单元刚度矩阵的行循环
-		int ii = DOFs[i];//每一行的整体自由度编号
-		for (int j = 0; j < nDOF; ++j)
-		{//对单元刚度矩阵的列循环
-			int jj = DOFs[j];//每一列的整体自由度编号
-			double& kij = ke(i, j);//单元刚度矩阵元素
+	int nFixed = Get_Structure()->m_nFixed;
+	int nNode = m_idNode.size();
+	int nDOF_Node = Get_DOF_Node();
+	int nDOF_Element = nNode * nDOF_Node;
+
+
+	std::vector<int> EI;//单元的全部节点的整体自由度编号
+	EI.resize(nDOF_Element);
+	int k = 0;
+	for (int i = 0; i < nNode; i++)
+	{
+		NodeFem* pNode = Get_Structure()->Find_Node(m_idNode[i]);
+		for (int j = 0; j < nDOF_Node; j++)
+		{
+			EI[k] = pNode->m_DOF[j];
+			++k;
+		}
+	}
+
+	for (int i = 0; i < nDOF_Element; i++)
+	{//行循环
+		int ii = EI[i];//行自由度的整体自由度编号
+		for (int j = 0; j < nDOF_Element; ++j)
+		{//对列循环
+			int jj = EI[j];//列自由度的整体自由度编号
+			double kij = ke(i, j);
 			if (ii < nFixed && jj < nFixed)
 			{
 				L11.push_back(Tri(ii, jj, kij));

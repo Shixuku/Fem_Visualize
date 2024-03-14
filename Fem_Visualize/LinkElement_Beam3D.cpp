@@ -280,7 +280,6 @@ void LinkElement_Beam3D::Equivalent_Force()
 	m_EqForce = equialentForce;
 
 	equialentForce = m_T.transpose() * equialentForce;
-
 	for (int i = 0; i < 6; i++)
 	{
 		if (equialentForce[i] != 0)

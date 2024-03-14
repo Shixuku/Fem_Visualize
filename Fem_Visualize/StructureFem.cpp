@@ -978,11 +978,6 @@ void StructureFem::Create_Ks()
 	m_K11.setFromTriplets(L11.begin(), L11.end());
 	m_K21.setFromTriplets(L21.begin(), L21.end());
 	m_K22.setFromTriplets(L22.begin(), L22.end());
-
-	cout << "\n";
-	cout << "K11:\n" << MatrixXd(m_K11) << "\n\n";
-	cout << "K21:\n" << MatrixXd(m_K21) << "\n\n";
-	cout << "K22:\n" << MatrixXd(m_K22) << "\n\n";
 }
 
 void StructureFem::Treat_Fixed()
@@ -1030,11 +1025,6 @@ void StructureFem::Assemble_Force()
 			m_F2[pInVar->m_Itotv - m_nFixed] += pInVar->m_Force;
 		}
 	}
-
-	cout << "\n";
-	cout << "K11:\n" << MatrixXd(m_K11) << "\n\n";
-	cout << "K21:\n" << MatrixXd(m_K21) << "\n\n";
-	cout << "K22:\n" << MatrixXd(m_K22) << "\n\n";
 
 	cout << "\n F1= \n" << m_F1 << "\n";
 	cout << "\n F2= \n" << m_F2 << "\n";
