@@ -16,7 +16,9 @@
 #include "inVar.h"
 #include "InVar_Truss2D.h"
 #include "InVar_Truss3D.h"
-
+#include "Optimisation.h"
+#include "Manage_L.h"
+#include "AssmebleSparse.h"
 #include <fstream>
 #include <iostream>
 #include <qfile.h>
@@ -655,6 +657,32 @@ bool StructureFem::Input_datas(const QString& FileName)
 			}
 		}
 
+		else if (list_str[0].compare("*Optimisation", Qt::CaseInsensitive) == 0)
+		{//读取到约束
+			Q_ASSERT(list_str.size() == 2);
+			int nConstraint = list_str[1].toInt();//得到约束个数，可控制后续循环次数
+			qDebug() << "\n优化约束度个数: " << nConstraint;
+			for (int i = 0; i < nConstraint; ++i)
+			{
+				//继续读一行有效数据
+				if (!ReadLine(ssin, strdata))
+				{//没有读取到有效数据，退出
+					qDebug() << "Error:优化约束度数据不够";
+					exit(1);
+				}
+				QStringList strlist_Constraint = strdata.split(QRegularExpression("[\t, ]"), Qt::SkipEmptyParts);//利用空格,分解字符串
+				Q_ASSERT(strlist_Constraint.size() == 3);
+				int id = strlist_Constraint[0].toInt();
+				int idNode = strlist_Constraint[1].toInt();
+				int direction = strlist_Constraint[2].toInt();
+				qDebug() << id << "  " << idNode << "  " << "  " << direction;//输出，以便检查
+				//保存到模型数据库
+				pStructure->m_Optims.insert(make_pair(id, new Optimisation(id, idNode, direction)));
+				NodeFem* pNode = Find_Node(idNode);
+				pNode->boundaryFlag = true;
+			}
+		}
+
 		else if (list_str[0].compare("*Force_Node_Function", Qt::CaseInsensitive) == 0)
 		{//读取到节点荷载
 			Q_ASSERT(list_str.size() == 2);
@@ -777,9 +805,100 @@ void StructureFem::Init_DOFs()
 
 }
 
+void StructureFem::Init_DOFs2()
+{
+	//分配节点自由度
+	for (auto& a : m_Elements)
+	{//设置每个节点的自由度个数
+		Element_Base* pElement = a.second;
+		pElement->Set_NodeDOF();
+	}
+	for (auto& a : m_Nodes)
+	{//对节点循环
+		NodeFem* pNode = a.second;
+		for (auto& dof : pNode->m_DOF)
+		{//对每个自由度循环
+			dof = -1; //初始化每个节点的自由度编号均为-1
+		}
+	}
+
+	// 处理约束
+	auto iStart = 0;
+	for (auto& a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		NodeFem* pNode = Find_Node(pBoundary->m_idNode);
+		int it = pBoundary->m_direction;    //约束的自由度的序号，0：x，1：y
+		pNode->m_DOF[it] = iStart;
+		++iStart;
+	}
+
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (pInvar->m_bFixedValue)
+		{//指定了内变量，按约束处理，在约束自由度中分配编号
+			pInvar->m_Itotv = iStart++;
+		}
+	}
+	m_nFixed = iStart;//约束自由度个数
+	std::cout << "\nm_nFixed=" << m_nFixed << "\n";
+
+	// 处理优化自由度
+	for (auto& a : m_Optims)
+	{
+		Optimisation* pOptimis = a.second;
+		NodeFem* pNode = Find_Node(pOptimis->m_idNode);
+		int it = pOptimis->m_direction;    //约束的自由度的序号，0：x，1：y
+		pNode->m_DOF[it] = iStart;
+		++iStart;
+	}
+	m_nOptimis = iStart;
+
+	// 处理主从节点
+	for (auto& a : m_Dependant)
+	{//处理主从信息
+		Dependant* pDependant = a.second;
+		pDependant->Set_DOF(iStart);
+	}
+
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		for (auto& dof : pNode->m_DOF)
+		{
+			if (dof == -1) dof = iStart++;
+		}
+	}
+
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (!pInvar->m_bFixedValue)
+		{//指定的是内力（应力），按无约束自由度处理，在自由的自由度中分配编号
+			pInvar->m_Itotv = iStart++;
+		}
+	}
+	m_nTotv = iStart;//总自由度个数
+
+	std::cout << "\nnode DOF:\n";
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		std::cout << pNode->m_id << " ";
+		for (auto& dof : pNode->m_DOF)
+		{
+			std::cout << dof << " ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+}
+
 void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 {
-	int nFree = m_nTotv - m_nFixed;
+	int nOptims = m_nOptimis - m_nFixed;
+	int nFree = m_nTotv - m_nOptimis;
 
 	K11.resize(m_nFixed, m_nFixed);
 	K21.resize(nFree, m_nFixed);
@@ -847,108 +966,24 @@ void StructureFem::Analyse()
 	Solve();//解方程
 
 	Show_Solution();//显示结果
+}
 
-	//SpMat K11, K21, K22;
-	//Assemble_K(K11, K21, K22);//组装总纲矩阵
-	//MatrixXd M11 = K11; MatrixXd M21 = K21; MatrixXd M22 = K22;
+void StructureFem::Analyse2()
+{
+	Init_DOFs2();//分配节点自由度
 
-	//VectorXd x1, F1, F2;
-	//Assemble_xF(x1, F1, F2);//组装外力矩阵
-	//
-	//SimplicialLDLT<SparseMatrix<double>> solver;
-	//solver.analyzePattern(K22); //分析非零元素结构
-	//solver.factorize(K22);      //分解
-	//
-	//VectorXd x2 = solver.solve(F2 - K21 * x1);
-	//VectorXd R1 = K11 * x1 + K21.transpose() * x2 - F1;
+	Create_Kss();//生成分块稀疏矩阵
+	//Create_Ks();//生成分块稀疏矩阵
 
+	Treat_Fixed();//处理约束条件
 
-	//VectorXd R2 = K11 * x1 + K21.transpose() * x2;
+	//Assemble_Force();//组装荷载
+	Assemble_Force2();//组装荷载
 
-	//// 将支座反力赋值给对应的点约束处
-	//for (auto &a : m_Boundary)
-	//{
-	//	Boundary* pBoundary = a.second;
-	//	NodeFem* NodeFem = Find_Node(pBoundary->m_idNode);
-	//	NodeFem->m_ReactionForce[pBoundary->m_ixyz] = R1(pBoundary->m_id - 1);
-	//}
+	//Solve();//解方程
+	Solve2();//解方程
 
-	//for (auto& a : m_Nodes)
-	//{
-	//	if (a.second->boundaryFlag)
-	//	{
-	//		m_ReationForce.push_back(a.second);
-	//	}
-	//}
-
-	//m_x1 = x1;
-	//m_x2 = x2;
-
-	//std::cout << "\nx1=\n" << m_x1 << "\n";
-	//std::cout << "\nx2=\n" << m_x2 << "\n";
-	//std::cout << "\nR1=\n" << R1 << "\n"<<"\n";
-
-	//for (auto& a : m_Nodes)
-	//{
-	//	NodeFem* pNode = a.second;
-	//	double dis = 0;
-	//	int i = 0;
-	//	std::cout << "\n";
-	//	std::cout << "node" << pNode->m_id  << ":\n";
-	//	for (auto& dof : pNode->m_DOF)
-	//	{
-	//		if (dof < m_nFixed)
-	//		{
-	//			dis = x1[dof];
-	//			std::cout << x1[dof] << " ";
-	//		}
-	//		else
-	//		{
-	//			dis = x2[dof - m_nFixed];
-	//			std::cout << x2[dof - m_nFixed] << " ";
-	//		}
-	//		pNode->m_Displacement[i] = dis;
-	//		i++;
-	//		std::cout << "\n";
-	//	}
-	//}
-
-	//for (auto& a : m_Elements)
-	//{
-	//	Element_Base* element = a.second;
-	//	Eigen::VectorXd combinedDisp;
-	//	int dofPerNode = element->Get_DOF_Node(); // Assuming this returns the DOF per node
-	//	int dofNum = element->m_idNode.size() * dofPerNode;
-	//	combinedDisp.resize(dofNum);
-
-	//	SoildElement_Base* soildElement = dynamic_cast<SoildElement_Base*>(element);
-	//	LinkElement_Beam3D* beamElement = dynamic_cast<LinkElement_Beam3D*>(element);
-	//	LinkElement_Truss3D* trussElement = dynamic_cast<LinkElement_Truss3D*>(element);
-
-	//	if (soildElement) 
-	//	{
-	//		soildElement->calculate_Stress(combinedDisp);
-	//	}
-	//	else if (beamElement)
-	//	{
-	//		for (int i = 0; i < a.second->m_idNode.size(); i++)
-	//		{
-	//			NodeFem* node = Find_Node(a.second->m_idNode[i]);
-	//			combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement;
-	//		}
-	//		beamElement->calculate_internal_force(combinedDisp);
-	//	}
-	//	else if (trussElement)
-	//	{
-	//		for (int i = 0; i < a.second->m_idNode.size(); i++)
-	//		{
-	//			NodeFem* node = Find_Node(a.second->m_idNode[i]);
-	//			combinedDisp.segment(i * dofPerNode, dofPerNode) = node->m_Displacement.head(3);
-	//		}
-	//		trussElement->calculate_internal_force(combinedDisp);
-	//	}
-	//		
-	//}
+	Show_Solution2();//显示结果
 }
 
 void StructureFem::Create_Ks()
@@ -978,6 +1013,78 @@ void StructureFem::Create_Ks()
 	m_K11.setFromTriplets(L11.begin(), L11.end());
 	m_K21.setFromTriplets(L21.begin(), L21.end());
 	m_K22.setFromTriplets(L22.begin(), L22.end());
+
+	//MatrixXd Ks(m_nTotv, m_nTotv);
+	//Ks.setZero();
+	//Ks.block(0, 0, m_nFixed, m_nFixed) = MatrixXd(m_K11);
+	//Ks.block(m_nFixed, 0, nFree, m_nFixed) = MatrixXd(m_K21);
+	//Ks.block(0, m_nFixed, m_nFixed, nFree) = MatrixXd(m_K21).transpose();
+	//Ks.block(m_nFixed, m_nFixed, nFree, nFree) = MatrixXd(m_K22);
+	//cout << "\nKs:\n" << Ks << "\n\n";
+
+	//AssmebleSparse as({ 12,12,48,24 });
+
+	//for (auto& a : m_Elements)
+	//{
+	//	Element_Base* pElement = a.second;
+	//	std::vector<int> DOFs;
+	//	pElement->Get_DOFs(DOFs);//取得自由度编号
+	//	MatrixXd ke = pElement->m_ke;//计算单元刚度矩阵
+	//	as.Assemble(DOFs, ke);//装配单元刚度矩阵
+	//}
+	//cout << "\n";
+	//Manage_L<SpMat> Kij;
+	//as.GetSparse(Kij);
+	//int nRows = Kij.Rows();
+	//for (int i = 0; i < nRows; ++i)
+	//{
+	//	for (int j = 0; j <= i; ++j)
+	//	{
+	//		const SpMat& k = Kij(i, j);
+	//		cout << "K(" << i + 1 << "," << j + 1 << "):\n";
+	//		cout << MatrixXd(k) << "\n";
+	//	}
+	//}
+}
+
+void StructureFem::Create_Kss()
+{
+	//生成分块稀疏矩阵
+	cout << "m_nTotv = " << m_nTotv << "\n";
+	cout << "m_nFixed = " << m_nFixed << "\n";
+	cout << "m_nOptimis = " << m_nOptimis - m_nFixed << "\n";
+	cout << "m_nFree = " << m_nTotv - m_nOptimis << "\n";
+	int nFree = m_nTotv - m_nOptimis;
+	int nOptims = m_nOptimis - m_nFixed;
+
+
+	m_K11.resize(m_nFixed, m_nFixed);
+	m_K21.resize(nOptims, m_nFixed);
+	m_K22.resize(nOptims, nOptims);
+	m_K31.resize(nFree, m_nFixed);
+	m_K32.resize(nFree, nOptims);
+	m_K33.resize(nFree, nFree);
+
+	std::list<Tri> L11, L21, L22, L31, L32, L33;
+	for (auto& a : m_Elements)
+	{
+		Element_Base* pElement = a.second;
+		pElement->calculate_all();
+		pElement->Assemble_L2(L11, L21, L22, L31, L32, L33);
+	}
+
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInvar = a.second;
+		pInvar->Assemble_L(L11, L21, L22);
+	}
+
+	m_K11.setFromTriplets(L11.begin(), L11.end());
+	m_K21.setFromTriplets(L21.begin(), L21.end());
+	m_K22.setFromTriplets(L22.begin(), L22.end());
+	m_K31.setFromTriplets(L31.begin(), L31.end());
+	m_K32.setFromTriplets(L32.begin(), L32.end());
+	m_K33.setFromTriplets(L33.begin(), L33.end());
 }
 
 void StructureFem::Treat_Fixed()
@@ -1030,6 +1137,44 @@ void StructureFem::Assemble_Force()
 	cout << "\n F2= \n" << m_F2 << "\n";
 }
 
+void StructureFem::Assemble_Force2()
+{
+	//组装荷载
+	int nOptimis = m_nOptimis - m_nFixed;
+	int nFree = m_nTotv - m_nOptimis;
+
+	// 为固定自由度的外力向量分配空间并初始化为零
+	m_F1.resize(m_nFixed);
+	m_F1.setZero();
+
+	// 为待优化自由度的外力向量分配空间并初始化为零
+	m_F2.resize(nOptimis);
+	m_F2.setZero();
+
+	// 为自由自由度的外力向量分配空间并初始化为零
+	m_F3.resize(nFree);
+	m_F3.setZero();
+
+	for (auto& a : m_ForceNode)
+	{
+		ForceNode* pForce = a.second;
+		pForce->Set_F1F2F3(m_F1, m_F2, m_F3);
+	}
+
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInVar = a.second;
+		if (!pInVar->m_bFixedValue)
+		{//指定了内力（应力），组装荷载项
+			m_F2[pInVar->m_Itotv - m_nFixed] += pInVar->m_Force;
+		}
+	}
+
+	cout << "\n F1= \n" << m_F1 << "\n";
+	cout << "\n F2= \n" << m_F2 << "\n";
+	cout << "\n F3= \n" << m_F3 << "\n";
+}
+
 void StructureFem::Solve()
 {
 	//解方程
@@ -1038,6 +1183,95 @@ void StructureFem::Solve()
 	solver.factorize(m_K22); //分解
 	m_x2 = solver.solve(m_F2 - m_K21 * m_x1);
 	m_R1 = m_K11 * m_x1 + m_K21.transpose() * m_x2 - m_F1;
+	cout << "\n x2= \n" << m_x2 << "\n";
+	cout << "\n R1= \n" << m_R1 << "\n";
+
+	//设置内变量的计算结果
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInVar = a.second;
+		if (pInVar->m_bFixedValue)
+		{//指定了内变量，求得的是内力（应力）
+			pInVar->m_Force = m_R1[pInVar->m_Itotv];
+		}
+		else
+		{//指定的是内力（应力）,求得的是内变量
+			pInVar->m_Value = m_x2[pInVar->m_Itotv - m_nFixed];
+		}
+	}
+}
+
+void StructureFem::Solve2()
+{
+	int dim = m_nTotv; // 假设每个子块是3x3的，整个大矩阵是9x9的
+	Eigen::MatrixXd bigMatrix(m_nTotv, m_nTotv);
+
+	int nFixed = m_nFixed;
+	int nOptimis = m_nOptimis - m_nFixed;
+	int nFree = m_nTotv - m_nOptimis;
+
+	//bigMatrix.topLeftCorner(m_nFixed, m_nFixed) = m_K11;
+	//bigMatrix.block(0, m_nFixed, m_nFixed, m_nOptimis - m_nFixed) = m_K21.transpose();
+	//bigMatrix.block(0, m_nOptimis, m_nFixed, nFree) = m_K31.transpose();
+
+	//bigMatrix.block(m_nFixed, 0, m_nOptimis - m_nFixed, m_nFixed) = m_K21;
+	//bigMatrix.block(m_nFixed, m_nFixed, m_nOptimis - m_nFixed, m_nOptimis - m_nFixed) = m_K22;
+	//bigMatrix.block(m_nFixed, m_nOptimis, m_nOptimis - m_nFixed, nFree) = m_K32.transpose();
+
+	//bigMatrix.block(m_nOptimis, 0, nFree, m_nFixed) = m_K31;
+	//bigMatrix.block(m_nOptimis, m_nFixed, nFree, m_nOptimis - m_nFixed) = m_K32;
+	//bigMatrix.block(m_nOptimis, m_nOptimis, nFree, nFree) = m_K33;
+
+		// 将稀疏矩阵转化为稠密矩阵
+	MatrixXd K22_dense = MatrixXd(m_K22);
+	MatrixXd K23_dense = MatrixXd(m_K32.transpose());
+	MatrixXd K32_dense = MatrixXd(m_K32);
+	MatrixXd K33_dense = MatrixXd(m_K33);
+
+	// 使用稠密矩阵求解器来求解K22的逆
+	MatrixXd K22_inv = K22_dense.inverse();
+
+	// 计算系数矩阵A和右侧向量B
+	MatrixXd A = K33_dense - K32_dense * K22_inv * K23_dense;
+	VectorXd B = m_F3 - K32_dense * K22_inv * m_F2;
+
+	// 求解X3
+	m_x3 = A.colPivHouseholderQr().solve(B);
+
+	std::cout << "X3:\n" << m_x3 << std::endl;
+
+	//解方程
+	SimplicialLDLT<SpMat> solver;
+	solver.analyzePattern(m_K22); //分析非零元素结构
+	solver.factorize(m_K22); //分解
+	m_x2 = solver.solve(m_F2 - m_K21 * m_x1 - m_K32.transpose() * m_x3);
+
+	std::cout << "X2:\n" << m_x2 << std::endl;
+
+	//Eigen::VectorXd F(m_nTotv); // 假设m_nTotv是总的自由度数
+
+	//// 填充F
+	//// 假设F1, F2, F3是已经定义好的向量部分，对应于不同的自由度分组
+	//F.head(m_nFixed) = m_F1;
+	//F.segment(m_nFixed, m_nOptimis - m_nFixed) = m_F2;
+	//F.tail(nFree) = m_F3;
+
+	//Eigen::VectorXd x = bigMatrix.colPivHouseholderQr().solve(F);
+
+	//m_x1 = x.head(m_nFixed);
+	//m_x2 = x.segment(m_nFixed, m_nOptimis - m_nFixed);
+	//m_x3 = x.tail(nFree);
+
+	std::cout << "x1 (Fixed):\n" << m_x1 << "\n\n";
+	std::cout << "x2 (Optimis):\n" << m_x2 << "\n\n";
+	std::cout << "x3 (Free):\n" << m_x3 << "\n";
+	////解方程
+	//SimplicialLDLT<SpMat> solver;
+	//solver.analyzePattern(m_K22); //分析非零元素结构
+	//solver.factorize(m_K22); //分解
+	//m_x2 = solver.solve(m_F2 - m_K21 * m_x1);
+	
+	m_R1 = m_K11 * m_x1 + m_K21.transpose() * m_x2 + m_K31.transpose() * m_x3 - m_F1;
 	cout << "\n x2= \n" << m_x2 << "\n";
 	cout << "\n R1= \n" << m_R1 << "\n";
 
@@ -1105,6 +1339,55 @@ void StructureFem::Show_Solution()
 	}
 }
 
+void StructureFem::Show_Solution2()
+{
+	//显示结果
+	qDebug() << "\n节点解:";
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		cout << pNode->m_id;
+		auto nDOF = pNode->m_DOF.size();
+		for (int i = 0; i < nDOF; ++i)
+		{
+			int it = pNode->m_DOF[i];
+			double sol = Get_Sol2(it);//根据自由度编号，得到求解结果
+			cout << "  " << sol;
+		}
+		cout << "\n";
+	}
+
+	qDebug() << "\n节点约束反力:";
+	for (auto& a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		int idNode = pBoundary->m_idNode;
+		NodeFem* pNode = Find_Node(idNode);
+		int iDirection = pBoundary->m_direction;
+		int it = pNode->m_DOF[iDirection];
+		double Ri = m_R1[it];
+		cout << idNode << " " << iDirection << " " << Ri << "\n";
+	}
+	qDebug() << "\n内变量的解:";
+	for (auto& a : m_InVar)
+	{
+		InVar* pInVar = a.second;
+		pInVar->Disp();//显示结果
+	}
+
+	//qDebug() << "\n桁架单元轴力、应力:";
+	//for (auto& a : m_Elements)
+	//{
+	//	LinkElement_Truss3D* pTruss = dynamic_cast<LinkElement_Truss3D*>(a.second);
+	//	if (pTruss != nullptr)
+	//	{
+	//		double N, Stress;
+	//		pTruss->Get_N(N, Stress);
+	//		cout << pTruss->m_id << " " << N << " " << Stress << "\n";
+	//	}
+	//}
+}
+
 double StructureFem::Get_Sol(int itotv)
 {
 	//根据自由度编号，得到求解结果
@@ -1114,6 +1397,28 @@ double StructureFem::Get_Sol(int itotv)
 	{
 		itotv -= m_nFixed;
 		return m_x2[itotv];
+	}
+}
+
+double StructureFem::Get_Sol2(int itotv)
+{
+	// 根据自由度编号，得到求解结果
+	if (itotv < m_nFixed)
+	{
+		// itotv 属于固定自由度组
+		return m_x1[itotv];
+	}
+	else if (itotv < m_nOptimis)
+	{
+		// itotv 属于优化自由度组
+		itotv -= m_nFixed; // 调整索引到 m_x2 的起点
+		return m_x2[itotv];
+	}
+	else
+	{
+		// itotv 属于自由自由度组
+		itotv -= m_nOptimis; // 调整索引到 m_x3 的起点
+		return m_x3[itotv];
 	}
 }
 

@@ -35,3 +35,23 @@ void ForceNode::Set_F1F2(VectorXd& F1, VectorXd& F2)
 		F2[it - nFixed] += m_value;
 	}
 }
+
+void ForceNode::Set_F1F2F3(VectorXd& F1, VectorXd& F2, VectorXd& F3)
+{
+	NodeFem* pNode = Get_Structure()->Find_Node(m_idNode);
+	int it = pNode->m_DOF[m_ixyz];
+	int& nFixed = Get_Structure()->m_nFixed;
+	int& nOptims = Get_Structure()->m_nOptimis;
+	if (it < nFixed)
+	{
+		F1[it] += m_value;
+	}
+	else if (it >= nFixed && it < nOptims) 
+	{
+		F2[it - nFixed] += m_value;
+	}
+	else
+	{
+		F3[it - nOptims] += m_value;
+	}
+}

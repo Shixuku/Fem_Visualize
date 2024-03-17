@@ -59,6 +59,8 @@ public:
 
 	void Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22);
 
+	void Assemble_L2(ListTri& L11, ListTri& L21, ListTri& L22, ListTri& L31, ListTri& L32, ListTri& L33);
+
 	Element_Base();
 };
 

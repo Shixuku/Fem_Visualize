@@ -25,5 +25,4 @@ void Boundary::Set_x1(VectorXd& x1)
 	NodeFem* pNode = Get_Structure()->Find_Node(m_idNode);
 	int it = pNode->m_DOF[m_direction];
 	x1[it] = m_value;
-
 }

@@ -60,6 +60,72 @@ void Element_Base::Get_DOFs(std::vector<int>& DOFs)
 	}
 }
 
+void Element_Base::Assemble_L2(ListTri& L11, ListTri& L21, ListTri& L22, ListTri& L31, ListTri& L32, ListTri& L33)
+{
+	Eigen::MatrixXd ke;
+	if (m_type == "Beam")
+	{
+		ke = calculate_Ke();
+	}
+	else if (m_type == "Truss")
+	{
+		ke = m_ke;
+	}
+
+	int nFixed = Get_Structure()->m_nFixed;
+	int nOptimis = Get_Structure()->m_nOptimis - Get_Structure()->m_nFixed;
+	int nNode = m_idNode.size();
+	int nDOF_Node = Get_DOF_Node();
+	int nDOF_Element = nNode * nDOF_Node;
+
+
+	std::vector<int> EI;//单元的全部节点的整体自由度编号
+	EI.resize(nDOF_Element);
+	int k = 0;
+	for (int i = 0; i < nNode; i++)
+	{
+		NodeFem* pNode = Get_Structure()->Find_Node(m_idNode[i]);
+		for (int j = 0; j < nDOF_Node; j++)
+		{
+			EI[k] = pNode->m_DOF[j];
+			++k;
+		}
+	}
+
+	for (int i = 0; i < nDOF_Element; i++) { //行循环
+		int ii = EI[i]; //行自由度的整体自由度编号
+		for (int j = 0; j < nDOF_Element; ++j) { //列循环
+			int jj = EI[j]; //列自由度的整体自由度编号
+			double kij = ke(i, j);
+
+			// L11: 固定的-固定的
+			if (ii < nFixed && jj < nFixed) {
+				L11.push_back(Tri(ii, jj, kij));
+			}
+			// L21: 待优化的-固定的
+			else if (ii >= nFixed && ii < (nFixed + nOptimis) && jj < nFixed) {
+				L21.push_back(Tri(ii - nFixed, jj, kij));
+			}
+			// L31: 自由的-固定的
+			else if (ii >= (nFixed + nOptimis) && jj < nFixed) {
+				L31.push_back(Tri(ii - (nFixed + nOptimis), jj, kij));
+			}
+			// L22: 待优化的-待优化的
+			else if (ii >= nFixed && ii < (nFixed + nOptimis) && jj >= nFixed && jj < (nFixed + nOptimis)) {
+				L22.push_back(Tri(ii - nFixed, jj - nFixed, kij));
+			}
+			// L32: 自由的-待优化的
+			else if (ii >= (nFixed + nOptimis) && jj >= nFixed && jj < (nFixed + nOptimis)) {
+				L32.push_back(Tri(ii - (nFixed + nOptimis), jj - nFixed, kij));
+			}
+			// L33: 自由的-自由的
+			else if (ii >= (nFixed + nOptimis) && jj >= (nFixed + nOptimis)) {
+				L33.push_back(Tri(ii - (nFixed + nOptimis), jj - (nFixed + nOptimis), kij));
+			}
+		}
+	}
+}
+
 void Element_Base::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
 {
 	Eigen::MatrixXd ke;
@@ -73,6 +139,7 @@ void Element_Base::Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22)
 	}
 
 	int nFixed = Get_Structure()->m_nFixed;
+	int nOptimis = Get_Structure()->m_nOptimis - Get_Structure()->m_nFixed;
 	int nNode = m_idNode.size();
 	int nDOF_Node = Get_DOF_Node();
 	int nDOF_Element = nNode * nDOF_Node;

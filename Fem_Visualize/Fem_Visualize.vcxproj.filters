@@ -176,10 +176,16 @@
       <Filter>Source Files\Window</Filter>
     </ClCompile>
     <ClCompile Include="PointPicker.cpp">
-      <Filter>Header Files\Visualize</Filter>
-    </ClCompile>
-    <ClCompile Include="PointPicker.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AssmebleSparse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manage_L.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Optimisation.cpp">
+      <Filter>Source Files\Fem_Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -270,8 +276,17 @@
     <ClInclude Include="PointPickerCellInteractor1.h">
       <Filter>Header Files\Visualize</Filter>
     </ClInclude>
-    <ClInclude Include="PointPicker.h">
-      <Filter>Header Files\Visualize</Filter>
+    <ClInclude Include="AssmebleSparse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manage_L.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PointPickerCellInteractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Optimisation.h">
+      <Filter>Header Files\Fem_Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
