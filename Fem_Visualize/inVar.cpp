@@ -96,14 +96,6 @@ void InVar::Assemble_L3(ListTri& L11, ListTri& L21, ListTri& L22, ListTri& L31, 
 	Element_Base* pElement = pStructure->Find_Element(m_idElement);
 	std::vector<double> ke;
 	Get_ke(ke);//计算内变量相关的刚度系数
-	std::cout << "invar: [";
-	for (size_t i = 0; i < ke.size(); ++i) {
-		std::cout << ke[i];
-		if (i < ke.size() - 1) {
-			std::cout << ", ";
-		}
-	}
-	std::cout << "]" << std::endl;
 
 	std::vector<int> DOFs_Element;
 	pElement->Get_DOFs(DOFs_Element);

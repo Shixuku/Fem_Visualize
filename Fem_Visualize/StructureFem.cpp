@@ -1564,6 +1564,17 @@ void StructureFem::Solve3()
 	K[3][2] = m_K43.toDense(); // 对应K43
 	K[3][3] = m_K44.toDense(); // 对应K44
 
+	//cout << "\nK11:\n" << K[0][0];
+	//cout << "\nK21:\n" << K[1][0];
+	//cout << "\nK22:\n" << K[1][1];
+	//cout << "\nK31:\n" << K[2][0];
+	//cout << "\nK32:\n" << K[2][1];
+	//cout << "\nK33:\n" << K[2][2];
+	//cout << "\nK41:\n" << K[3][0];
+	//cout << "\nK42:\n" << K[3][1];
+	//cout << "\nK43:\n" << K[3][2];
+	//cout << "\nK44:\n" << K[3][3];
+
 	// 计算考虑x1, x2的影响后的调整后外力向量
 	VectorXd adjusted_F3 = m_F3 - K[2][0] * m_x1 - K[2][1] * m_x2;
 	VectorXd adjusted_F4 = m_F4 - K[3][0] * m_x1 - K[3][1] * m_x2;
@@ -1597,8 +1608,8 @@ void StructureFem::Solve3()
 	Eigen::MatrixXd A_ = -K33_.inverse() * K32_;
 	Eigen::VectorXd d3_ = K33_.inverse() * F3_;
 
-	Eigen::VectorXd d3(4);
-	d3 << m_x3 / 2;
+	Eigen::VectorXd d3(m_nOptimis - m_nShousuo);
+	d3.setZero();
 	Clp_minAbs mabs2(A_, d3, d3_);
 	mabs2.Change_Method(2);
 	Vtr new_x;
@@ -1847,9 +1858,6 @@ double StructureFem::Get_Sol2(int itotv)
 
 void StructureFem::Get_Sol3(NodeFem *node)
 {
-	cout << "\nx2:" << m_x2 << endl;
-	cout << "\nx3:" << m_x3 << endl;
-	cout << "\nx4:" << m_x4 << endl;
 	for (size_t i = 0; i < node->m_DOF.size(); ++i) {
 		int dof = node->m_DOF[i];
 		if (dof < m_nFixed) {
@@ -1871,9 +1879,7 @@ void StructureFem::Get_Sol3(NodeFem *node)
 			dof -= m_nOptimis;
 			node->m_Disp[i] = m_x4[dof];
 		}
-		cout << " " << node->m_Disp[i];
 	}
-	cout << "\n";
 }
 
 StructureFem::~StructureFem()
