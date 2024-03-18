@@ -70,7 +70,7 @@ Fem_Visualize::Fem_Visualize(QWidget *parent)
 	ui.widget->renderWindow()->AddRenderer(renderer);
 
 	connect(ui.pushButtonShow, &QPushButton::clicked, this, &Fem_Visualize::onIsShowSection);
-	connect(ui.pushButtonDis, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement2);
+	connect(ui.pushButtonDis, &QPushButton::clicked, this, &Fem_Visualize::onShowDisplacement3);
 	connect(ui.pushButtonForce, &QPushButton::clicked, this, &Fem_Visualize::onShowAxialForces);
 	connect(ui.pushButtonRea, &QPushButton::clicked, this, &Fem_Visualize::onShowReactionForces);
 	connect(ui.pushButtonSelFile, &QPushButton::clicked, this, &Fem_Visualize::onSelectFile);
@@ -1204,6 +1204,167 @@ void Fem_Visualize::onShowDisplacement2()
 	}
 
 
+	void Fem_Visualize::onShowDisplacement3()
+	{
+		displacement->show();
+
+		vtkNew<vtkPoints> newPoints;
+		newPoints->DeepCopy(points);
+		vtkNew<vtkDoubleArray> dis;
+		double displacement = 0;
+		double pointNum = 0;
+
+		// 初始化最小和最大坐标值
+		double minX = std::numeric_limits<double>::max();
+		double maxX = std::numeric_limits<double>::lowest();
+		double minY = minX;
+		double maxY = std::numeric_limits<double>::lowest();
+		double minZ = minX;
+		double maxZ = std::numeric_limits<double>::lowest();
+
+		double maxDistanceX;
+		double maxDistanceY;
+		double maxDistanceZ;
+
+		// 遍历所有节点
+		for (const auto& nodePair : m_structure->m_Nodes) {
+			NodeFem* pNode = nodePair.second;
+
+			// 假设有一个方法来获取节点的XYZ坐标
+			double x = pNode->m_x;
+			double y = pNode->m_y;
+			double z = pNode->m_z;
+
+			// 更新XYZ方向上的最小和最大坐标值
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
+
+			// 计算每个方向上的最大距离
+			maxDistanceX = maxX - minX;
+			maxDistanceY = maxY - minY;
+			maxDistanceZ = maxZ - minZ;
+		}
+
+		// 初始化位移的最大值和最小值
+		double maxXDisplacement = std::numeric_limits<double>::lowest(), minXDisplacement = std::numeric_limits<double>::max();
+		double maxYDisplacement = std::numeric_limits<double>::lowest(), minYDisplacement = std::numeric_limits<double>::max();
+		double maxZDisplacement = std::numeric_limits<double>::lowest(), minZDisplacement = std::numeric_limits<double>::max();
+
+		double disX = 0, disY = 0, disZ = 0; // XYZ方向上位移绝对值的最大值
+
+		for (auto& nodePair : m_structure->m_Nodes) {
+			NodeFem* pNode = nodePair.second;
+			double displacements[3] = { 0, 0, 0 }; // X, Y, Z方向的位移
+
+			for (int i = 0; i < 3; i++) { // 遍历X, Y, Z方向
+				displacements[i] = pNode->m_Disp[i];
+
+				// 更新最大和最小位移
+				if (i == 0) { // X方向
+					maxXDisplacement = std::max(maxXDisplacement, displacements[i]);
+					minXDisplacement = std::min(minXDisplacement, displacements[i]);
+					disX = std::max(disX, std::abs(displacements[i]));
+				}
+				else if (i == 1) { // Y方向
+					maxYDisplacement = std::max(maxYDisplacement, displacements[i]);
+					minYDisplacement = std::min(minYDisplacement, displacements[i]);
+					disY = std::max(disY, std::abs(displacements[i]));
+				}
+				else if (i == 2) { // Z方向
+					maxZDisplacement = std::max(maxZDisplacement, displacements[i]);
+					minZDisplacement = std::min(minZDisplacement, displacements[i]);
+					disZ = std::max(disZ, std::abs(displacements[i]));
+				}
+			}
+		}
+
+		double targetDisplacementRatio = 0.1; // 目标位移为模型最大尺寸的10%
+		double defaultScaleFactor = 1.0; // 默认缩放因子，用于处理最大位移为0的情况
+
+		// 确保不会除以零，并计算缩放因子
+		double scaleFactorX = disX > 0 ? (maxDistanceX * 0.05) / disX : defaultScaleFactor;
+		double scaleFactorY = disY > 0 ? (maxDistanceY * targetDisplacementRatio) / disY : defaultScaleFactor;
+		double scaleFactorZ = disZ > 0 ? (maxDistanceZ * 0.05) / disZ : defaultScaleFactor;
+
+		for (auto& nodePair : m_structure->m_Nodes)
+		{
+			NodeFem* pNode = nodePair.second;
+			double point[3];
+
+			double displacements[3];
+
+			for (int i = 0; i < 3; i++) { // 遍历X, Y, Z方向
+				displacements[i] = pNode->m_Disp[i];
+			}
+			point[0] = displacements[0] * scaleFactorX + pNode->m_x;
+			point[1] = displacements[1] * scaleFactorY + pNode->m_y;
+			point[2] = displacements[2] * scaleFactorZ + pNode->m_z;
+
+			newPoints->SetPoint(pointNum, point); // 更新点的位置
+			// 打印出更新后的点的坐标
+			std::cout << "Point " << pointNum << ": ("
+				<< point[0] << ", "
+				<< point[1] << ", "
+				<< point[2] << ")" << std::endl;
+
+			dis->InsertNextValue(displacements[1]); // 插入位移向量的模
+
+			pointNum++;
+
+		}
+
+		vtkNew<vtkLookupTable> lut;
+		//lut->SetValueRange(minDis, maxDis);
+		lut->SetHueRange(0.667, 0.0); // 设置颜色范围从蓝色到红色（对应色相范围从240到0）
+
+		renderer->RemoveAllViewProps();
+
+		// 输出原始的点坐标
+		for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i++)
+		{
+			double* point = points->GetPoint(i);
+		}
+
+		// 输出修改后的点坐标
+		for (vtkIdType i = 0; i < newPoints->GetNumberOfPoints(); i++)
+		{
+			double* point = newPoints->GetPoint(i);
+		}
+
+		vtkNew <vtkCellArray> cellArray;
+		for (auto element : m_structure->m_Elements)
+		{
+			vtkNew<vtkLine> line;
+			line->GetPointIds()->SetId(0, element.second->m_idNode.at(0) - 1);
+			line->GetPointIds()->SetId(1, element.second->m_idNode.at(1) - 1);
+			cellArray->InsertNextCell(line);
+		}
+
+		vtkNew<vtkPolyData> polyData;
+		polyData->SetPoints(newPoints);
+		polyData->SetLines(cellArray);
+		polyData->GetPointData()->SetScalars(dis);
+
+		vtkNew<vtkPolyDataMapper> mapper;
+		mapper->SetInputData(polyData);
+		mapper->SetScalarRange(minYDisplacement, maxYDisplacement);
+		mapper->SetLookupTable(lut);
+
+		scalarBar->SetLookupTable(lut);
+
+		vtkNew<vtkActor> newActor;
+		newActor->SetMapper(mapper);
+		newActor->GetProperty()->SetLineWidth(2);
+
+		renderer->AddActor(newActor);
+		renderer->AddActor(scalarBar);
+		ui.widget->renderWindow()->Render();
+	}
+
 void Fem_Visualize::onShowAxialForces()
 {
 	renderer->RemoveAllViewProps();
@@ -1599,7 +1760,7 @@ void Fem_Visualize::onIsShowNodeNum()
 
 void Fem_Visualize::onAnalyse()
 {
-	m_structure->Analyse2();
+	m_structure->Analyse3();
 }
 
 void Fem_Visualize::onShowInVarWindow()

@@ -19,6 +19,7 @@
 #include "Optimisation.h"
 #include "Manage_L.h"
 #include "AssmebleSparse.h"
+#include "Clp_minAbs.h"
 #include <fstream>
 #include <iostream>
 #include <qfile.h>
@@ -895,6 +896,106 @@ void StructureFem::Init_DOFs2()
 	std::cout << "\n";
 }
 
+void StructureFem::Init_DOFs3()
+{
+	//分配节点自由度
+	for (auto& a : m_Elements)
+	{//设置每个节点的自由度个数
+		Element_Base* pElement = a.second;
+		pElement->Set_NodeDOF();
+	}
+	for (auto& a : m_Nodes)
+	{//对节点循环
+		NodeFem* pNode = a.second;
+		for (auto& dof : pNode->m_DOF)
+		{//对每个自由度循环
+			dof = -1; //初始化每个节点的自由度编号均为-1
+		}
+	}
+
+	// 处理约束
+	auto iStart = 0;
+	for (auto& a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		NodeFem* pNode = Find_Node(pBoundary->m_idNode);
+		int it = pBoundary->m_direction;    //约束的自由度的序号，0：x，1：y
+		pNode->m_DOF[it] = iStart;
+		++iStart;
+	}
+
+	m_nFixed = iStart;//约束自由度个数
+	std::cout << "\nm_nFixed=" << m_nFixed << "\n";
+
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (pInvar->m_bFixedValue)
+		{//指定了内变量，按约束处理，在约束自由度中分配编号
+			pInvar->m_Itotv = iStart++;
+		}
+	}
+	m_nShousuo = iStart;//约束自由度个数
+	std::cout << "\nm_nShousuo=" << m_nShousuo - m_nFixed << "\n";
+
+	// 处理优化自由度
+	for (auto& a : m_Optims)
+	{
+		Optimisation* pOptimis = a.second;
+		NodeFem* pNode = Find_Node(pOptimis->m_idNode);
+		int it = pOptimis->m_direction;    //约束的自由度的序号，0：x，1：y
+		pNode->m_DOF[it] = iStart;
+		++iStart;
+	}
+	m_nOptimis = iStart;
+
+	// 处理主从节点
+	for (auto& a : m_Dependant)
+	{//处理主从信息
+		Dependant* pDependant = a.second;
+		pDependant->Set_DOF(iStart);
+	}
+
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		for (auto& dof : pNode->m_DOF)
+		{
+			if (dof == -1) dof = iStart++;
+		}
+	}
+
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		if (!pInvar->m_bFixedValue)
+		{//指定的是内力（应力），按无约束自由度处理，在自由的自由度中分配编号
+			pInvar->m_Itotv = iStart++;
+		}
+	}
+	m_nTotv = iStart;//总自由度个数
+
+	std::cout << "\nnode DOF:\n";
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		std::cout << pNode->m_id << " ";
+		for (auto& dof : pNode->m_DOF)
+		{
+			std::cout << dof << " ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+
+	cout << "\n内变量自由度编号：\n";
+	for (auto& a : m_InVar)
+	{
+		InVar* pInvar = a.second;
+		cout << pInvar->m_id << "  " << pInvar->m_Itotv << "\n";
+	}
+}
+
 void StructureFem::Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22)
 {
 	int nOptims = m_nOptimis - m_nFixed;
@@ -972,7 +1073,7 @@ void StructureFem::Analyse2()
 {
 	Init_DOFs2();//分配节点自由度
 
-	Create_Kss();//生成分块稀疏矩阵
+	Create_Ks2();//生成分块稀疏矩阵
 	//Create_Ks();//生成分块稀疏矩阵
 
 	Treat_Fixed();//处理约束条件
@@ -984,6 +1085,24 @@ void StructureFem::Analyse2()
 	Solve2();//解方程
 
 	Show_Solution2();//显示结果
+}
+
+void StructureFem::Analyse3()
+{
+	Init_DOFs3();//分配节点自由度
+
+	Create_Ks3();//生成分块稀疏矩阵
+	//Create_Ks();//生成分块稀疏矩阵
+
+	Treat_Fixed3();//处理约束条件
+
+	//Assemble_Force();//组装荷载
+	Assemble_Force3();//组装荷载
+
+	//Solve();//解方程
+	Solve3();//解方程
+
+	Show_Solution3();//显示结果
 }
 
 void StructureFem::Create_Ks()
@@ -1047,7 +1166,7 @@ void StructureFem::Create_Ks()
 	//}
 }
 
-void StructureFem::Create_Kss()
+void StructureFem::Create_Ks2()
 {
 	//生成分块稀疏矩阵
 	cout << "m_nTotv = " << m_nTotv << "\n";
@@ -1087,6 +1206,61 @@ void StructureFem::Create_Kss()
 	m_K33.setFromTriplets(L33.begin(), L33.end());
 }
 
+void StructureFem::Create_Ks3()
+{
+	//生成分块稀疏矩阵
+	cout << "m_nTotv = " << m_nTotv << "\n";
+	cout << "m_nFixed = " << m_nFixed << "\n";
+	cout << "m_nShousuo = " << m_nShousuo - m_nFixed << "\n";
+	cout << "m_nOptimis = " << m_nOptimis - m_nShousuo << "\n";
+	cout << "m_nFree = " << m_nTotv - m_nOptimis << "\n";
+	int nFree = m_nTotv - m_nOptimis;
+	int nOptimis = m_nOptimis - m_nShousuo;
+	int nShousuo = m_nShousuo - m_nFixed;
+	int nFixed = m_nFixed;
+
+	m_K11.resize(nFixed, nFixed);
+
+
+	m_K21.resize(nShousuo, nFixed);
+	m_K22.resize(nShousuo, nShousuo);
+
+
+	m_K31.resize(nOptimis, nFixed);
+	m_K32.resize(nOptimis, nShousuo);
+	m_K33.resize(nOptimis, nOptimis);
+
+	m_K41.resize(nFree, nFixed);
+	m_K42.resize(nFree, nShousuo);
+	m_K43.resize(nFree, nOptimis);
+	m_K44.resize(nFree, nFree);
+
+	std::list<Tri> L11, L21, L22, L31, L32, L33, L41, L42, L43, L44;
+	for (auto& a : m_Elements)
+	{
+		Element_Base* pElement = a.second;
+		pElement->calculate_all();
+		pElement->Assemble_L3(L11, L21, L22, L31, L32, L33, L41, L42, L43, L44);
+	}
+
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInvar = a.second;
+		pInvar->Assemble_L3(L11, L21, L22, L31, L32, L33, L41, L42, L43, L44);
+	}
+
+	m_K11.setFromTriplets(L11.begin(), L11.end());
+	m_K21.setFromTriplets(L21.begin(), L21.end());
+	m_K22.setFromTriplets(L22.begin(), L22.end());
+	m_K31.setFromTriplets(L31.begin(), L31.end());
+	m_K32.setFromTriplets(L32.begin(), L32.end());
+	m_K33.setFromTriplets(L33.begin(), L33.end());
+	m_K41.setFromTriplets(L41.begin(), L41.end());
+	m_K42.setFromTriplets(L42.begin(), L42.end());
+	m_K43.setFromTriplets(L43.begin(), L43.end());
+	m_K44.setFromTriplets(L44.begin(), L44.end());
+}
+
 void StructureFem::Treat_Fixed()
 {
 	//处理约束条件
@@ -1106,6 +1280,36 @@ void StructureFem::Treat_Fixed()
 		}
 	}
 	cout << "\n x1= \n" << m_x1 << "\n";
+	//cout << "\n x2= \n" << m_x2 << "\n";
+}
+
+void StructureFem::Treat_Fixed3()
+{
+	int nFixed = m_nFixed; // 固定自由度数
+	int nShousuo = m_nShousuo - nFixed; // 非弹性收缩量自由度数
+	int nOptimis = m_nOptimis - m_nShousuo; // 待优化自由度数
+	int nFree = m_nTotv - m_nOptimis; // 自由自由度数
+
+	m_x1.resize(m_nFixed);
+	m_x2.resize(nShousuo);
+	m_x3.resize(nOptimis);
+	m_x4.resize(nFree);
+
+	for (auto& a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		pBoundary->Set_x1(m_x1);
+	}
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInVar = a.second;
+		if (pInVar->m_bFixedValue)
+		{//指定了内变量，设置约束值
+			m_x2[pInVar->m_Itotv - nFixed] = pInVar->m_Value;
+		}
+	}
+	cout << "\n x1= \n" << m_x1 << "\n";
+	cout << "\n x2= \n" << m_x2 << "\n";
 }
 
 void StructureFem::Assemble_Force()
@@ -1173,6 +1377,50 @@ void StructureFem::Assemble_Force2()
 	cout << "\n F1= \n" << m_F1 << "\n";
 	cout << "\n F2= \n" << m_F2 << "\n";
 	cout << "\n F3= \n" << m_F3 << "\n";
+}
+
+void StructureFem::Assemble_Force3()
+{
+	int nFixed = m_nFixed; // 固定自由度数
+	int nShousuo = m_nShousuo - nFixed; // 非弹性收缩量自由度数
+	int nOptimis = m_nOptimis - m_nShousuo; // 待优化自由度数
+	int nFree = m_nTotv - m_nOptimis; // 自由自由度数
+
+	// 为固定自由度的外力向量分配空间并初始化为零
+	m_F1.resize(m_nFixed);
+	m_F1.setZero();
+
+	// 为非弹性收缩量的外力向量分配空间并初始化为零
+	m_F2.resize(nShousuo);
+	m_F2.setZero();
+
+	// 为待优化自由度的外力向量分配空间并初始化为零
+	m_F3.resize(nOptimis);
+	m_F3.setZero();
+
+	// 为自由自由度的外力向量分配空间并初始化为零
+	m_F4.resize(nFree);
+	m_F4.setZero();
+
+	for (auto& a : m_ForceNode)
+	{
+		ForceNode* pForce = a.second;
+		pForce->Set_F1F2F3F4(m_F1, m_F2, m_F3, m_F4);
+	}
+
+	for (auto& a : m_InVar)
+	{//对内变量循环
+		InVar* pInVar = a.second;
+		if (!pInVar->m_bFixedValue)
+		{//指定了内力（应力），组装荷载项
+			m_F2[pInVar->m_Itotv - m_nFixed] += pInVar->m_Force;
+		}
+	}
+
+	cout << "\n F1= \n" << m_F1 << "\n";
+	cout << "\n F2= \n" << m_F2 << "\n";
+	cout << "\n F3= \n" << m_F3 << "\n";
+	cout << "\n F4= \n" << m_F4 << "\n";
 }
 
 void StructureFem::Solve()
@@ -1290,6 +1538,145 @@ void StructureFem::Solve2()
 	}
 }
 
+void StructureFem::Solve3()
+{
+	// 直接定义一个数组来存储所有转换后的稠密矩阵
+	Eigen::MatrixXd K[4][4];
+
+	// 转换并装入K数组
+	K[0][0] = m_K11.toDense(); // 对应K11
+	K[0][1] = m_K21.transpose().toDense(); // 对应K21的转置，因为我们需要填充上三角
+	K[0][2] = m_K31.transpose().toDense(); // 对应K31的转置
+	K[0][3] = m_K41.transpose().toDense(); // 对应K41的转置
+
+	K[1][0] = m_K21.toDense(); // 对应K21
+	K[1][1] = m_K22.toDense(); // 对应K22
+	K[1][2] = m_K32.transpose().toDense(); // 对应K32的转置
+	K[1][3] = m_K42.transpose().toDense(); // 对应K42的转置
+
+	K[2][0] = m_K31.toDense(); // 对应K31
+	K[2][1] = m_K32.toDense(); // 对应K32
+	K[2][2] = m_K33.toDense(); // 对应K33
+	K[2][3] = m_K43.transpose().toDense(); // 对应K43的转置
+
+	K[3][0] = m_K41.toDense(); // 对应K41
+	K[3][1] = m_K42.toDense(); // 对应K42
+	K[3][2] = m_K43.toDense(); // 对应K43
+	K[3][3] = m_K44.toDense(); // 对应K44
+
+	// 计算考虑x1, x2的影响后的调整后外力向量
+	VectorXd adjusted_F3 = m_F3 - K[2][0] * m_x1 - K[2][1] * m_x2;
+	VectorXd adjusted_F4 = m_F4 - K[3][0] * m_x1 - K[3][1] * m_x2;
+
+	// 构造线性方程组并求解x3, x4
+	int dim_x3_x4 = m_nTotv - m_nShousuo; // x3和x4的总自由度
+	MatrixXd A(dim_x3_x4, dim_x3_x4);
+	VectorXd b(dim_x3_x4);
+	A << K[2][2], K[2][3],
+		K[3][2], K[3][3];
+	b << adjusted_F3,
+		adjusted_F4;
+
+	// 使用Eigen求解Ax = b
+	VectorXd x = A.fullPivLu().solve(b);
+
+	// x 现在包含 x3 和 x4 的解
+	// 注意：这里我们假设x的前半部分是x3，后半部分是x4
+	m_x3 = x.head(m_nOptimis - m_nShousuo);
+	m_x4 = x.tail(m_nTotv - m_nOptimis);
+
+	m_R1 = m_K11 * m_x1 + m_K21.transpose() * m_x2 + m_K31.transpose() * m_x3 - m_K41.transpose() * m_x4  - m_F1;
+	cout << "\n R1= \n" << m_R1 << "\n";
+
+	Eigen::MatrixXd K44_1 = K[3][3].inverse();
+
+	Eigen::MatrixXd K33_ = K[2][2] - K[2][3] * K44_1 * K[3][2];
+	Eigen::MatrixXd K32_ = K[2][1] - K[2][3] * K44_1 * K[3][1];
+	Eigen::VectorXd F3_ = m_F3 - K[2][0] * m_x1 - K[2][3] * K44_1 * (m_F4 - K[3][0] * m_x1);
+	//Eigen::VectorXd d3 = K33_ * F3_ - K33_ * K32_ * X[1];
+	Eigen::MatrixXd A_ = -K33_.inverse() * K32_;
+	Eigen::VectorXd d3_ = K33_.inverse() * F3_;
+
+	Eigen::VectorXd d3(4);
+	d3 << m_x3 / 2;
+	Clp_minAbs mabs2(A_, d3, d3_);
+	mabs2.Change_Method(2);
+	Vtr new_x;
+	double fmin2 = mabs2.Solve(new_x);
+	std::cout << "new_x=\n" << new_x << "\n\n";
+	std::cout << "f=" << fmin2 << "\n";
+
+	Eigen::VectorXd d4(2);
+	d4 = K44_1 * (m_F4 - K[3][0] * m_x1 - K[3][1] * new_x - K[3][2] * d3);
+
+	Eigen::VectorXd R1(1);
+	R1 = K[0][0] * m_x1 + K[0][1] * new_x + K[0][2] * d3 + K[0][3] * d4 - m_F1;
+
+	Eigen::VectorXd T(3);
+	T = K[1][0] * m_x1 + K[1][1] * new_x + K[1][2] * d3 + K[1][3] * d4 - m_F2;
+
+	std::cout << R1 << std::endl;
+	std::cout << T << std::endl;
+
+	m_x2 = new_x;
+	m_x3 = d3;
+	m_x4 = d4;
+	m_R1 = R1;
+
+	// 初始化一个8行一列的向量
+	Eigen::VectorXd result(m_nTotv);
+
+	// 将子向量组装进result
+	result.segment(0, m_nFixed) = m_x1;
+	result.segment(m_nFixed, new_x.size()) = new_x; // 从索引m_nFixed开始，长度为new_x的长度
+	result.segment(m_nFixed + new_x.size(), d3.size()) = d3; // 紧接着new_x之后
+	result.segment(m_nFixed + new_x.size() + d3.size(), d4.size()) = d4; // 紧接着d3之后
+
+	int total_rows = m_K11.rows() + m_K21.rows() + m_K31.rows() + m_K41.rows();
+	//int total_cols = m_K11.cols() + m_K21.cols() + m_K31.cols() + m_K41.cols(); // 如果是方阵，行列相等
+
+	// 初始化大矩阵K_total
+	Eigen::MatrixXd K_total(total_rows, total_rows);
+
+	// 第一行
+	K_total.block(0, 0, K[0][0].rows(), K[0][0].cols()) = K[0][0];
+	K_total.block(0, K[0][0].cols(), K[0][1].rows(), K[0][1].cols()) = K[0][1];
+	K_total.block(0, K[0][0].cols() + K[0][1].cols(), K[0][2].rows(), K[0][2].cols()) = K[0][2];
+	K_total.block(0, K[0][0].cols() + K[0][1].cols() + K[0][2].cols(), K[0][3].rows(), K[0][3].cols()) = K[0][3];
+
+	// 第二行，假设K[1][0]的高度与K[0][0]相同
+	int startRow2 = K[0][0].rows();
+	K_total.block(startRow2, 0, K[1][0].rows(), K[1][0].cols()) = K[1][0];
+	K_total.block(startRow2, K[1][0].cols(), K[1][1].rows(), K[1][1].cols()) = K[1][1];
+	K_total.block(startRow2, K[1][0].cols() + K[1][1].cols(), K[1][2].rows(), K[1][2].cols()) = K[1][2];
+	K_total.block(startRow2, K[1][0].cols() + K[1][1].cols() + K[1][2].cols(), K[1][3].rows(), K[1][3].cols()) = K[1][3];
+
+	int startRow3 = startRow2 + K[1][0].rows();
+	// 填充第三行的代码
+	K_total.block(startRow3, 0, K[2][0].rows(), K[2][0].cols()) = K[2][0];
+	K_total.block(startRow3, K[2][0].cols(), K[2][1].rows(), K[2][1].cols()) = K[2][1];
+	K_total.block(startRow3, K[2][0].cols() + K[2][1].cols(), K[2][2].rows(), K[2][2].cols()) = K[2][2];
+	K_total.block(startRow3, K[2][0].cols() + K[2][1].cols() + K[2][2].cols(), K[2][3].rows(), K[2][3].cols()) = K[2][3];
+
+	// 计算第四行的起始行索引
+	int startRow4 = startRow3 + K[2][0].rows();
+	// 填充第四行的代码
+	K_total.block(startRow4, 0, K[3][0].rows(), K[3][0].cols()) = K[3][0];
+	K_total.block(startRow4, K[3][0].cols(), K[3][1].rows(), K[3][1].cols()) = K[3][1];
+	K_total.block(startRow4, K[3][0].cols() + K[3][1].cols(), K[3][2].rows(), K[3][2].cols()) = K[3][2];
+	K_total.block(startRow4, K[3][0].cols() + K[3][1].cols() + K[3][2].cols(), K[3][3].rows(), K[3][3].cols()) = K[3][3];
+
+
+	// 初始化一个8行一列的向量
+	Eigen::VectorXd result_F(m_nTotv);
+	result_F.segment(0, m_nFixed) = m_F1 + R1;
+	result_F.segment(m_nFixed, new_x.size()) = m_F2 + T; // 从索引m_nFixed开始，长度为new_x的长度
+	result_F.segment(m_nFixed + new_x.size(), d3.size()) = m_F3; // 紧接着new_x之后
+	result_F.segment(m_nFixed + new_x.size() + d3.size(), d4.size()) = m_F4;;// 紧接着d3之后
+
+	cout << "\nError:\n" << K_total * result - result_F << "\n";		   
+}
+
 void StructureFem::Show_Solution()
 {
 	//显示结果
@@ -1388,6 +1775,42 @@ void StructureFem::Show_Solution2()
 	//}
 }
 
+void StructureFem::Show_Solution3()
+{
+	//显示结果
+	for (auto& a : m_Nodes)
+	{
+		NodeFem* pNode = a.second;
+		cout << pNode->m_id;
+		Get_Sol3(pNode);//根据自由度编号，得到求解结果
+		cout << "\n";
+	}
+
+	// 显示结果
+	for (auto& a : m_Nodes) {
+		NodeFem* pNode = a.second;
+		pNode->PrintDis(); // 根据自由度编号，得到求解结果并打印
+	}
+
+	qDebug() << "\n节点约束反力:";
+	for (auto& a : m_Boundary)
+	{
+		Boundary* pBoundary = a.second;
+		int idNode = pBoundary->m_idNode;
+		NodeFem* pNode = Find_Node(idNode);
+		int iDirection = pBoundary->m_direction;
+		int it = pNode->m_DOF[iDirection];
+		double Ri = m_R1[it];
+		cout << idNode << " " << iDirection << " " << Ri << "\n";
+	}
+	qDebug() << "\n内变量的解:";
+	for (auto& a : m_InVar)
+	{
+		InVar* pInVar = a.second;
+		pInVar->Disp();//显示结果
+	}
+}
+
 double StructureFem::Get_Sol(int itotv)
 {
 	//根据自由度编号，得到求解结果
@@ -1420,6 +1843,37 @@ double StructureFem::Get_Sol2(int itotv)
 		itotv -= m_nOptimis; // 调整索引到 m_x3 的起点
 		return m_x3[itotv];
 	}
+}
+
+void StructureFem::Get_Sol3(NodeFem *node)
+{
+	cout << "\nx2:" << m_x2 << endl;
+	cout << "\nx3:" << m_x3 << endl;
+	cout << "\nx4:" << m_x4 << endl;
+	for (size_t i = 0; i < node->m_DOF.size(); ++i) {
+		int dof = node->m_DOF[i];
+		if (dof < m_nFixed) {
+			// 固定自由度组
+			node->m_Disp[i] = m_x1[dof];
+		}
+		else if (dof < m_nShousuo) {
+			// 非弹性自由度组
+			dof -= m_nFixed;
+			node->m_Disp[i] = m_x2[dof];
+		}
+		else if (dof < m_nOptimis) {
+			// 优化自由度组
+			dof -= m_nShousuo;
+			node->m_Disp[i] = m_x3[dof];
+		}
+		else if (dof < m_nTotv) {
+			// 自由自由度组
+			dof -= m_nOptimis;
+			node->m_Disp[i] = m_x4[dof];
+		}
+		cout << " " << node->m_Disp[i];
+	}
+	cout << "\n";
 }
 
 StructureFem::~StructureFem()

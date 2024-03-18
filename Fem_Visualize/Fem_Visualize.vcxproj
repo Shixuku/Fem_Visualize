@@ -95,6 +95,7 @@
     <ClCompile Include="AreaPickerNodeInteractor.cpp" />
     <ClCompile Include="AssmebleSparse.cpp" />
     <ClCompile Include="BridgeProperty.cpp" />
+    <ClCompile Include="Clp_minAbs.cpp" />
     <ClCompile Include="DeckWindow.cpp" />
     <ClCompile Include="DisplacementWindow.cpp" />
     <ClCompile Include="Element_Base.cpp" />
@@ -107,6 +108,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="NodeFem.cpp" />
     <ClInclude Include="AssmebleSparse.h" />
+    <ClInclude Include="Clp_minAbs.h" />
     <ClInclude Include="Manage_L.h" />
     <ClInclude Include="Optimisation.h" />
     <ClInclude Include="PointPickerCellInteractor.h" />

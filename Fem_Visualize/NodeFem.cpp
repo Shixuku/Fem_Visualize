@@ -20,6 +20,15 @@ NodeFem::NodeFem(int Id, double x, double y, double z)
 	m_z = z;
 }
 
+void NodeFem::PrintDis()
+{
+	std::cout << "Node " << m_id << " displacement: ";
+	for (auto& disp : m_Disp) {
+		std::cout << disp << " ";
+	}
+	std::cout << "\n";
+}
+
 NodeFem::~NodeFem()
 {
 	

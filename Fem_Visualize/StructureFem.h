@@ -38,9 +38,9 @@ public:
 
 	std::vector<NodeFem*> m_ReationForce;
 
-	VectorXd m_x1, m_x2, m_x3, m_F1, m_F2, m_F3, m_R1;
+	VectorXd m_x1, m_x2, m_x3, m_x4, m_F1, m_F2, m_F3, m_F4, m_R1;
 
-	SpMat m_K11, m_K21, m_K22, m_K31, m_K32, m_K33;
+	SpMat m_K11, m_K21, m_K22, m_K31, m_K32, m_K33, m_K41, m_K42, m_K43, m_K44;
 
 	int m_nFixed;  //约束自由度个数
 	int m_nShousuo; // 非弹性收缩量自由度个数
@@ -61,6 +61,7 @@ public:
 
 	void Init_DOFs();     //分配节点自由度
 	void Init_DOFs2();     //分配节点自由度
+	void Init_DOFs3();     //分配节点自由度
 
 	void Assemble_K(SpMat& K11, SpMat& K21, SpMat& K22);       //组装总纲矩阵
 
@@ -68,26 +69,33 @@ public:
 
 	void Analyse();       //分析计算
 	void Analyse2();       //分析计算
+	void Analyse3();       //分析计算
 
 	void Create_Ks();//生成分块稀疏矩阵
-
-	void Create_Kss();//生成分块稀疏矩阵
+	void Create_Ks2();//生成分块稀疏矩阵
+	void Create_Ks3();//生成分块稀疏矩阵
 
 
 	void Treat_Fixed();//处理约束条件
 
+	void Treat_Fixed3();//处理约束条件
+
 	void Assemble_Force();//组装荷载
 
 	void Assemble_Force2();//组装荷载
+	void Assemble_Force3();//组装荷载
 
 	void Solve();//解方程
 	void Solve2();//解方程
+	void Solve3();//解方程
 
 	void Show_Solution();//显示结果
 	void Show_Solution2();//显示结果
+	void Show_Solution3();//显示结果
 	
 	double Get_Sol(int itotv);//根据自由度编号，得到求解结果
 	double Get_Sol2(int itotv);//根据自由度编号，得到求解结果
+	void Get_Sol3(NodeFem *node);//根据自由度编号，得到求解结果
 	~StructureFem();
 
 };

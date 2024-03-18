@@ -28,6 +28,9 @@ public:
 	void Get_ke(std::vector<double>& ke);//得到刚度矩阵元素
 	void Assemble_L(ListTri& L11, ListTri& L21, ListTri& L22);
 
+	void Assemble_L3(ListTri& L11, ListTri& L21, ListTri& L22, ListTri& L31, ListTri& L32, ListTri& L33,
+		ListTri& L41, ListTri& L42, ListTri& L43, ListTri& L44);
+
 	void Disp() const;//显示结果
 
 };

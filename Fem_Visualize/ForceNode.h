@@ -13,5 +13,6 @@ public:
 
 	void Set_F1F2(VectorXd& F1, VectorXd& F2);
 	void Set_F1F2F3(VectorXd& F1, VectorXd& F2, VectorXd& F3);
+	void Set_F1F2F3F4(VectorXd& F1, VectorXd& F2, VectorXd& F3, VectorXd& F4);
 };
 

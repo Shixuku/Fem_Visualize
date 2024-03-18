@@ -62,6 +62,7 @@ public:
 	/* 显示位移*/
 	void onShowDisplacement();
 	void onShowDisplacement2();
+	void onShowDisplacement3();
 
 	/* 显示轴力 */
 	void onShowAxialForces();
